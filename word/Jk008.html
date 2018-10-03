@@ -1,0 +1,25 @@
+<HTML>
+<TITLE>グローバル変数</TITLE>
+<BODY bgcolor="#FFFFFF"><DIV ALIGN=CENTER><!--#geoguide--></DIV>
+<H2><font color="red">グローバル変数(global variable) </font></H2>
+<p>関数の外で定義され、どの関数からも参照できる変数のことをいう。同一コード内部ではもちろん、C言語などでは特定の予約語(extern)を使用することで、他のソースコードからでも使用できる。C言語などのプログラミング言語ではコンパイルの後にリンクという操作を行うが、このリンクの操作が大きく意味を持つ。externという予約語は、「どこか別のソースに定義されている(はずの)変数を、ここでも使いますよ」という曖昧な問題を解決するものである。以下に簡単な例を載せる。</p>
+<dl> 
+  <dt><b>&lt;file1.c&gt;</b> 
+  <dt> <font color="#0000FF">int</font> ex;<font color="#006666">//グローバル変数の定義(ここでは実際にメモリ領域を取得) 
+    </font>
+  <dt> <font color="#0000FF">int</font> main(){ 
+  <dd> ex = 1;<font color="#006666">//参照可能 </font>
+  <dt> } 
+  <dt> <font color="#0000FF">int</font> inc(){ 
+  <dd> ex += 1;<font color="#006666">//参照可能 </font>
+  <dt> } <br>
+  <dt> <b>&lt;file2.c&gt;</b> 
+  <dt> <font color="#0000FF">extern int</font> ex;<font color="#006666">//どこかで定義されているexを参照可能にするという意味。 
+    </font>
+  <dt> <font color="#0000FF">int</font> func2(){ 
+  <dd> ex += 2;<font color="#006666">//参照可能 </font>
+  <dt> }
+</dl>
+</BODY>
+</HTML>
+

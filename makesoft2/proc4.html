@@ -1,0 +1,264 @@
+<HTML>
+<HEAD>
+<TITLE>BitmapLoader〜第4週〜</TITLE>
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html;CHARSET=utf-8">
+<style type="text/css">
+  <!--
+		A:link { text-decoration:none;  color:#ff4500 }
+		A:visited { text-decoration:none;  color:#ff4500 }  
+		A:active { text-decoration:none;  color:#ff0000 }   
+		A:hover { color:#00008b }	
+	    -->
+</style>
+</HEAD>
+<BODY bgcolor="#FFFFFF"><DIV ALIGN=CENTER><!--#geoguide--></DIV>
+<I><font color="red" size="6">BitmapLoader〜Doc-View構造を理解しよう〜</font></I> 
+<HR>
+<p>SDIやMDIのアプリケーションの雛型がAppWizardによって作られると、ディフォルトでDocument-Viewアーキテクチャが作成されることはご存知だと思います。今回はDoc-View構造をどのように使用するべきかを解説し、ビットマップの読み込みを行います。</p>
+<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" WIDTH="100%">
+  <TR>
+    <TD WIDTH="100%" BGCOLOR="#000099"> <FONT COLOR="#ffffff" SIZE="+1">9.なぜDocument-View構造になっているのか?</FONT></TD> 
+  </TR>
+</TABLE>
+<p>MFCでは、データを管理するDocumentと、そのデータを表示するViewが対になって構成されています。今回作成されるSDIアプリケーションは、Document-View構造を利用しているため(AppWizardを利用した場合ディフォルトではDocument-View構造となる)、1つのフレームウィンドウがViewとDocumentを持っています。もしMDIアプリケーションを作成した場合は、1つ1つの子ウィンドウがViewとDocumentを持つので、1つのアプリで異なるデータを開き、表示することが出来るのです。<br>
+  <br>
+  Document-View構造についてMSDNには次のように記述されています。<br>
+  <b>ドキュメント</b><br>
+  　ユーザーが[ファイル] メニューの [開く] コマンドで開き、[ファイル] メニューの [上書き保存] コマンドで保存するデータ単位を表す。<br>
+  <b>ビュー</b><br>
+  　ドキュメントに割り当てられ、ドキュメントとユーザー間を仲介する。ドキュメントのイメージをスクリーン上に描画 し、ユーザーの入力をドキュメントに対する操作として解釈する。<br>
+  　つまりデータを管理する構造と、データを表示する構造を分離することで、プログラミングをよりスマートに分かりやすくしていると思えばいいのです。<br>
+  <br>
+  　ViewクラスとDocumentクラスは１対１もしくは複数対１で結びつけられることになっています。この結びつけは、今回作成しているアプリケーションでももちろん行われていて、BmpLoader.cppの中のCBmpLoaderApp::InitInstance()で行われています。</p>
+<table border="0" bgcolor="#FFFFFF" width="614" align="center">
+  <tr> 
+    <td width="608" valign="top" bgcolor="#000000"><font size="2" color="#FFFFFF">DocumentとViewの結び付けが行われているところ(BmpLoader.cpp内)</font></td>
+  </tr>
+  <tr> 
+    <td width="608" valign="top"> <font size="2" color="#006666">// アプリケーション用のドキュメント 
+      テンプレートを登録します。ドキュメント テンプレート<br>
+      // はドキュメント、フレーム ウィンドウとビューを結合するために機能します。</font><font size="2"><br>
+      <br>
+      CSingleDocTemplate* pDocTemplate;<br>
+      pDocTemplate = <font color="#0000FF">new</font> CSingleDocTemplate(<br>
+      IDR_MAINFRAME,<br>
+      RUNTIME_CLASS(CBmpLoaderDoc),<br>
+      RUNTIME_CLASS(CMainFrame), <font color="#006666">// メイン SDI フレーム ウィンドウ</font><br>
+      RUNTIME_CLASS(CBmpLoaderView));<br>
+      AddDocTemplate(pDocTemplate); </font></td>
+  </tr>
+</table>
+<p>　詳しくは述べませんが、DocumentとViewとMainFrameをグループにして、最後にこのグループを登録していると思ってくれればいいです。したがってこの操作を何回か繰り返すと1つのDocumentと複数のViewが結び付けられるのです。</p>
+<p>今回作成するBitmapLoaderは、以下のようにしてファイルを読み込むことにします。<br>
+  <br>
+  <font color="#FF0000">1.Documentクラスで、ファイルを開くダイアログからユーザに開くビットマップのファイル名を指定させる。<br>
+  2.Viewクラスで、上で指定されたファイル名を使って、ビットマップデータを構築しメモリDCに持たせる。</font><br>
+</p>
+<table border="0" cellspacing="0" cellpadding="0" width="100%">
+  <tr> 
+    <td width="100%" bgcolor="#000099"> <font color="#ffffff" size="+1">10.ビットマップファイルを選択する。</font></td>
+  </tr>
+</table>
+<p>　さきほど述べたようにDocumentクラスは、[ファイル] メニューの [開く] コマンドで開く操作を提供しているので、開くべきビットマップファイル名を選択させるプログラムを、Documentクラス内にコーディングします。<br>
+  <br>
+  <font color="#FF0000">1.[ファイル]-[開く]メニュー(ID_FILE_BMP_OPEN)をインプリメントする</font><br>
+  <font size="2">　ClassWizardを起動し、メッセージタブ内において、以下のように選択し、OKを押します。<br>
+  <b>クラス名</b> CBmpLoaderDoc<br>
+  <b>オブジェクトID</b> ID_FILE_BMP_OPEN<br>
+  <b>メッセージ</b> COMMAND</font><br>
+  <br>
+  2.CBmpLoaderDoc::OnFileBmpOpen()を以下のように編集する</p>
+<table border="0" bgcolor="#FFFFFF" width="565" align="center">
+  <tr> 
+    <td width="559" valign="top" bgcolor="#000000"><font size="2" color="#FFFFFF">OnFileBmpOpen()の編集(BmpLoaderDoc.cpp内)</font></td>
+  </tr>
+  <tr> 
+    <td width="559" valign="top"> <font size="2" color="#0000FF">void</font><font size="2"> 
+      CBmpLoaderDoc::OnFileBmpOpen() <br>
+      {<br>
+	  <blockquote> <font color="#006666">// ビューのポインタを取得する</font><br>
+        CBmpLoaderView* pView = ((CBmpLoaderView*)(((CFrameWnd*)(AfxGetApp()-&gt;m_pMainWnd))-&gt;GetActiveView()));<br>
+        <br>
+        <font color="#006666">// ファイルを開くダイアログを作成する</font><br>
+        CFileDialog cDlg(TRUE, &quot;bmp&quot;,&quot;*.bmp&quot;,<br>
+      OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,<br>
+        &quot;bitmap files(*.bmp)|*.bmp||&quot;,NULL );<br>
+        <br>
+        <font color="#006666">// ファイルを開くダイアログのタイトルを設定する</font><br>
+        cDlg.m_ofn.lpstrTitle = &quot;Open Bitmap File&quot;;<br>
+        <font color="#006666"><br>
+        // ダイアログを開く</font><br>
+        <font color="#0000FF">if</font>(cDlg.DoModal() != IDOK) <font color="#0000FF">return</font>;<br>
+        <br>
+        <font color="#006666">// ダイアログで指定されたファイル名を取得し、それをアプリケーションのタイトルに設定する</font><br>
+	  SetTitle(cDlg.GetFileName());</blockquote>
+      }</font></td>
+  </tr>
+</table>
+<p>解説<br>
+  <font size="2"><b>CBmpLoaderView* pView = ((CBmpLoaderView*)(((CFrameWnd*)(AfxGetApp()-&gt;m_pMainWnd))-&gt;GetActiveView()));</b><br>
+  ビューにアクセスするためのポインタを取得します。今は使用しませんが後で使用するのでとりあえず書いておきます。なお<font color="#FF0000">このソースを書くときに、#include 
+  &quot;BmpLoaderView.h&quot;をソースファイルの頭に書いて</font>おいてください。<br>
+  <br>
+  <b>CFileDialog cDlg(TRUE, &quot;bmp&quot;,&quot;*.bmp&quot;, OFN_HIDEREADONLY 
+  | OFN_OVERWRITEPROMPT,&quot;bitmap files(*.bmp)|*.bmp||&quot;,NULL);</b><br>
+  ファイルを開くダイアログを作成します。第一引数がtrueの時はファイルを開く、falseの時はファイルを保存になるので、trueを選択します。残りの引数は、開くことの出来るファイル構造をビットマップファイルだけにしています。<br>
+  <br>
+  <b>cDlg.m_ofn.lpstrTitle = &quot;Open Bitmap File&quot;;</b><br>
+  ダイアログのタイトルを設定します。別になくても結構です。<br>
+  <br>
+  <b>if(cDlg.DoModal() != IDOK) return;</b><br>
+  ダイアログを開きます。ファイルが指定されてOKボタンが押された時のみ、DoModalの戻り値がIDOKになるので、それ以外の場合はreturnで関数を抜けてしまいます。<br>
+  <br>
+  <b>SetTitle(cDlg.GetFileName());<br>
+  </b>指定したファイル名を取得し、ウィンドウのタイトルに設定します。</font><br>
+  <br>
+  実行し、[ファイル]-[開く]を押して、何かビットマップファイルを選択してください。選択されたファイル名がタイトルに表示されていたらOKです。まだビットマップを構築していないので、何も表示されません。次にビットマップを構築していきます。</p>
+<table border="0" cellspacing="0" cellpadding="0" width="100%">
+  <tr> 
+    <td width="100%" bgcolor="#000099"> <font color="#ffffff" size="+1">11.ビットマップを構築する。</font></td>
+  </tr>
+</table>
+<p>　先ほどのコーディングで、ビットマップファイルのファイル名を取得することが出来ましたが、ビットマップの情報を取得したわけではありません。したがってビットマップの情報を取得するコーディングをViewに記述する必要があります。記述の準備のためにメンバ関数を追加します。</p>
+<p><font color="#FF0000">1.ClassViewのCBmpLoaderViewクラスを右クリックし、メンバ関数の追加を押す。</font><br>
+  <br>
+  <font color="#FF0000">2.以下のように設定してOKを押す。<br>
+  </font><font size="2">この作業を通してvoid CBmpLoaderView::OpenBitmapFile(CString strFileName)関数が追加されているはずです。引数のstrFileNameは、ビットマップのファイル名となります。</font></p>
+<table border="0" bgcolor="#FFFFFF" width="431" align="center">
+  <tr> 
+    <td width="425" valign="top" bgcolor="#000000"><font size="2" color="#FFFFFF">メンバ関数の追加　OpenBitmapFile(CString 
+      strFileName)</font></td>
+  </tr>
+  <tr> 
+    <td width="425" valign="top"> <img src="fig4_1.jpg" width="426" height="187"></td>
+  </tr>
+</table>
+<p><font color="#FF0000">3.OpenBitmapFile関数をコーディングする。</font><br>
+</p>
+<table border="0" bgcolor="#FFFFFF" width="431" align="center">
+  <tr> 
+    <td width="425" valign="top" bgcolor="#000000"><font size="2" color="#FFFFFF">メンバ関数の追加　OpenBitmapFile(CString 
+      strFileName)</font></td>
+  </tr>
+  <tr> 
+    <td width="425" valign="top"><font size="2" color="#0000FF">void</font><font size="2"> 
+      CBmpLoaderView::OpenBitmapFile(CString strFileName)<br>
+      {<br>
+	  <blockquote> BITMAP bmp; <font color="#006666">// ビットマップ構造体</font><br>
+        HBITMAP hBmp; <font color="#006666">// ビットマップハンドル</font><br>
+        CRect cClient; <font color="#006666">// クライアント領域</font><br>
+        <br>
+        <font color="#006666">// クライアント領域を得る</font><br>
+        GetClientRect(&amp;cClient);<br>
+        <br>
+        <font color="#006666">// ビットマップのハンドル取得</font><br>
+      hBmp = (HBITMAP)LoadImage(AfxGetApp()-&gt;m_hInstance,strFileName,IMAGE_BITMAP,0,0,LR_LOADFROMFILE);<br>
+        <font color="#006666">// ハンドルのチェック</font><br>
+      if(hBmp == NULL)<br>
+      {<br><blockquote>
+      AfxMessageBox(_T(&quot;読み込みに失敗しました&quot;));<br>
+      return ;</blockquote>
+      }<br>
+        <br>
+        <font color="#006666">// メモリDCに割り当てられているビットマップを外す</font><br>
+        dcMem.SelectObject(pOldBitmap);<br>
+        <br>
+        <font color="#006666">// 先ほどまで割り当てられていたビットマップの情報を消去</font><br>
+        <font size="2">pBitmap-&gt;DeleteObject();</font> <br>
+        <br>
+        <font size="2" color="#006666">// ビットマップハンドルからCBitmapのポインタを取得</font><br>
+        pBitmap = (CBitmap*)CBitmap::FromHandle(hBmp);<font size="2"><font size="2"><br>
+        <font color="#006666"><br>
+        // <font size="2">ビットマップ</font>゜をメモリDCに割り当て</font></font></font> <br>
+        pOldBitmap = dcMem.SelectObject(pBitmap);<br>
+        <br>
+        <font color="#006666">//更新処理</font><br>
+      InvalidateRect(&amp;cClient);</blockquote>
+      } </font></td>
+  </tr>
+</table>
+<p> 解説<br>
+  <font size="2"><b>hBmp = (HBITMAP)LoadImage(AfxGetApp()-&gt;m_hInstance,strFileName,IMAGE_BITMAP,0,0,LR_LOADFROMFILE);</b><br>
+  LoadImage関数はイメージを読み込むWindowsAPI関数です。MFCにはファイルからイメージを読み込む関数がないため(私が知っているかぎりですが)、WindowsAPIを利用しています。戻り値はビットマップハンドル(ポインタみたいなオブジェクト操作子)です。<br>
+  (引数)<br>
+  <b>AfxGetApp()-&gt;m_hInstance</b>　アプリケーションのインスタンスのハンドル<br>
+  <b>strFileName</b>　イメージが入っているファイルの名前<br>
+  <b>IMAGE_BITMAP</b>　ロードするイメージのタイプ<br>
+  <b>0</b>　ビットマップ読み込みでは使用しないので0を指定しておきます。<br>
+  <b>0</b>　ビットマップ読み込みでは使用しないので0を指定しておきます。<br>
+  <b>LR_LOADFROMFILE</b>　ロードするイメージがファイルであることを指定するフラグ<br>
+  <br>
+  <b>if(hBmp == NULL)<br>
+  {<br>
+  AfxMessageBox(_T(&quot;読み込みに失敗しました&quot;));<br>
+  return ;<br>
+  }</b><br>
+  LoadImage関数によって得られたビットマップハンドルがNULLの場合、イメージのローディングに失敗したことなのでreturnします。<br>
+  <br>
+  <b>dcMem.SelectObject(pOldBitmap);</b><br>
+  ストックしておいたビットマップを再選択し、それまで指定されていたpBitmapを外しておきます。<br>
+  <br>
+  <b>pBitmap-&gt;DeleteObject();</b><br>
+  先ほどまで選択されたいたビットマップの情報を削除します。この関数を実行する前に必ずメモリDCからビットマップを外しておかなくてはいけないために、いったんストックしておいたビットマップを再選択しておいたのです。<br>
+  <br>
+  <b>pBitmap = (CBitmap*)CBitmap::FromHandle(hBmp);</b><br>
+  LoadImage関数で得たビットマップハンドルからCBitmapオブジェクトのポインタを取得します。MFCにてメモリDCにビットマップを選択させるには、HBITMAPからCBitmapオブジェクトに変換しなくてはならないからです。<br>
+  <br>
+  <b>pOldBitmap = dcMem.SelectObject(pBitmap);</b><br>
+  得られたビットマップオブジェクトへのポインタをメモリDCに選択させます。この時点でメモリDCにビットマップファイルの描画内容が書き込まれています。したがって後は転送することでビューに表示されます。<br>
+  </font><font size="2"><br>
+  <b>InvalidateRect(&amp;cClient);</b><br>
+  クライアント領域を更新します。更新するとOnDrawが呼ばれるので転送作業が行われます。</font></p>
+<p><font color="#FF0000">4.転送指示を出すコードを書く</font><br>
+  <font size="2">このままでは、CBmpLoaderView::OpenBitmapFile(CString strFileName)を呼び出すところはどこにもありません。この関数の引数は、ビットマップファイル名ですから、このファイル名が取得できた段階で呼び出されるのがベストです。したがってCBmpLoaderDoc::OnFileBmpOpen() 
+  に呼び出すコーディングを行えばよさそうですね。CBmpLoaderDoc::OnFileBmpOpen() の中で赤い行を追加します。先ほどビュークラスへのポインタを取得しましたが、これはビュークラスのOpenBitmapFile関数を実行するためなのです。</font></p>
+<table border="0" bgcolor="#FFFFFF" width="565" align="center">
+  <tr> 
+    <td width="559" valign="top" bgcolor="#000000" height="16"><font size="2" color="#FFFFFF">OnFileBmpOpen()の編集2(BmpLoaderDoc.cpp内)</font></td>
+  </tr>
+  <tr> 
+    <td width="559" valign="top"> <font size="2" color="#0000FF">void</font><font size="2"> 
+      CBmpLoaderDoc::OnFileBmpOpen() <br>
+      {<br>
+      </font>
+      <blockquote> <font color="#006666" size="2">// ビューのポインタを取得する</font><font size="2"><br>
+        CBmpLoaderView* pView = ((CBmpLoaderView*)(((CFrameWnd*)(AfxGetApp()-&gt;m_pMainWnd))-&gt;GetActiveView()));<br>
+        <br>
+        <font color="#006666">// ファイルを開くダイアログを作成する</font><br>
+        CFileDialog cDlg(TRUE, &quot;bmp&quot;,&quot;*.bmp&quot;,<br>
+        OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,<br>
+        &quot;bitmap files(*.bmp)|*.bmp||&quot;,NULL );<br>
+        <br>
+        <font color="#006666">// ファイルを開くダイアログのタイトルを設定する</font><br>
+        cDlg.m_ofn.lpstrTitle = &quot;Open Bitmap File&quot;;<br>
+        <font color="#006666"><br>
+        // ダイアログを開く</font><br>
+        <font color="#0000FF">if</font>(cDlg.DoModal() != IDOK) <font color="#0000FF">return</font>;<br>
+        <br>
+        <font color="#006666">// ダイアログで指定されたファイル名を取得し、それをアプリケーションのタイトルに設定する</font><br>
+        SetTitle(cDlg.GetFileName());<br>
+        <br>
+        <font color="#006666">// ビュークラスのOpenBitmapFile関数を実行する</font><br>
+        <font color="#FF0000">pView-&gt;OpenBitmapFile(cDlg.GetFileName());</font></font></blockquote>
+      <font size="2">}</font></td>
+  </tr>
+</table>
+<p>実行してみましょう。これでビットマップファイルが読み込めるはずです！再描画処理を行っているので、ウィンドウの移動・リサイズを行っても、ビットマップがしっかり表示されているでしょうね。</p>
+<table border="0" bgcolor="#FFFFFF" width="382" align="center">
+  <tr> 
+    <td width="376" valign="top" bgcolor="#000000" height="16"><font size="2" color="#FFFFFF">ここまでの実行例</font></td>
+  </tr>
+  <tr> 
+    <td width="376" valign="top" height="353"><img src="fig4_2.jpg" width="377" height="351"> 
+    </td>
+  </tr>
+</table>
+<p>さて次章では、ちょっとしたこと＆リリースビルドを行ってソフトウェアにしちゃいます。
+  <br>
+  <BR>
+  <A HREF="proc5.html">[Next]</A><BR>
+  <A HREF="proc3.html">[Previous]</A><BR>
+  <A HREF="../index.html">[Home]</A><BR>
+</p>
+</BODY>
+</HTML>

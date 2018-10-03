@@ -1,0 +1,15 @@
+<HTML>
+<TITLE>オーバーロード</TITLE>
+<BODY bgcolor="#FFFFFF"><DIV ALIGN=CENTER><!--#geoguide--></DIV>
+<H2><font color="red">オーバーロード(overload)</font></H2>
+<p>2つの整数の大きい方を返す関数max(int a,int b)を定義したとする。プログラムを組んでいるうちに3つの整数の中で一番大きいものを返す関数を定義したいなぁと思う時があるだろう。このときC言語ではmax(int 
+  a,int b,int c)などと定義すると、先に定義したmax(int a,int b)と衝突してしまうので、コンパイルエラーとなる。したがって、max3(int 
+  a,int b,int c)などと関数名を変えて定義したことが誰しもあると思う。</p>
+<p>オーバーロードとは、同じ関数名で異なる引数の関数を定義することを指す。ただしC言語では使用できないが、C++では使用できる。したがって、<br>
+  max(int a,int b);<br>
+  max(int a,int b);<br>
+  max(double x,double y);<br>
+  などと定義することができる。C++では演算子もオーバーロードできることができる。</p>
+</BODY>
+</HTML>
+

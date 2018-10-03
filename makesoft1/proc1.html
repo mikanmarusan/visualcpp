@@ -1,0 +1,113 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=shift_jis">
+<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<title>HTMLエディタを作ろう [第1章]</title>
+<style type="text/css">
+  <!--
+		A:link { text-decoration:none;  color:#ff4500 }
+		A:visited { text-decoration:none;  color:#ff4500 }  
+		A:active { text-decoration:none;  color:#ff0000 }   
+		A:hover { color:#00008b }	
+	    -->
+</style>
+<!-- <link rel="stylesheet" href="../../tool/style.css" type="Text/css" media="screen"> -->
+</head>
+
+<body bgcolor="#FFFFFF" text="#000000"><DIV ALIGN=CENTER><!--#geoguide--></DIV>
+<I><FONT COLOR="red" SIZE="6">HTMLエディタ〜作成するソフトを設計仕様 〜</FONT></I><HR>
+<!--
+<div id="title">
+  <h2 align="left"><font color="#008000">making of HTML editor --HTML editorを作ろう-- 
+  第1週</font></h2>
+</div>
+<blockquote>
+  <p>　いまあなたがブラウザで見ているものは，HTML( Hyper 
+  Text Markup Language )という言語で記述されたテキストです．本セクションでは，HTMLエディタを作成することにより，MFCにおける本格的なアプリケーションの製作の基礎を学んでいこうと思います．具体的には以下のことを学ぶことができると思います．</p>
+  <ul>
+    <li>CEditViewクラス ， CHtmlViewクラス　， CMainFrameクラス</li>
+    <li>HTML ( HyperText Markup Language)　について</li>
+    <li>文字列の操作</li>
+    <li>クリップボードの操作</li>
+    <li>コモンダイアログの操作（カラーダイアログ，フォルダ選択ダイアログ）</li>
+    <li>絶対/相対パス変換</li>
+    <li>各種コントロール（ラジオボタン，スピンコントロール，チェックボックス）</li>
+    <li>ツールバー</li>
+  </ul>
+  <p>なお，このセクションは，</p>
+  <blockquote>
+    <p><a href="../text/text.html">Making of Text Editor 〜メモ帳〜　</a></p>
+  </blockquote>
+  <p>にて，MFCの基礎を学習されていることを前提としています．</p>
+</blockquote>
+<h4>■　アプリケーションの設計</h4>
+<blockquote>
+  <p>　アプリケーションを作る際には，必ず設計をしなくてはなりません．いくら腕のよい大工さんでも，設計図がなければいい家が建てられないと同様に，腕のよいシステムエンジニアでさえも，設計が悪いとあまりふさわしくないアプリケーションができてしまいます．逆に少しぐらい腕がなくても，設計がしっかりしていればそれなりのアプリケーションを作ることが可能なのです．</p>
+  <p>　しかし，あまりソフトウェアの開発の経験が無い人にとっては，「設計」自体が非常に困難になります．そこで，ここでの設計は，アプリケーションの機能と制限についてだけをまとめておくことにしましょう．「機能を重視すると，実現は難しくなる」，「実現を簡単にすれば，機能は少なくなる」ので，機能と制限は相反関係（トレードオフ）であることが分かるでしょう．</p>
+  <div id="point">
+    制限事項
+    <ul>
+      <li>WYSIWYG形式ではなく，タグ挿入型のHTMLエディタとする．<br>
+        <font size="2">(飾りたい文字列をマウスでハイライトした後，飾りたい機能のボタンを押すことでタグ挿入を実現)</font></li>
+      <li>扱うことのできるファイルは，*.html / *.htm 
+        のみとする．</li>
+      <li>SDI(Single Document Interface;単一ウィンドウ)形式にする．</li>
+    </ul>
+    <p>機能</p>
+    <ul>
+      <li>メモ帳としても使えるぐらいの編集機能を有する．</li>
+      <li>タグはできるだけマウスで簡単に挿入できるようにする．</li>
+      <li>プレビュー機能を付加する</li>
+      <li>フォントの変更が自由にできるようにする．　</li>
+    </ul>
+  </div>
+  <p>　途中仕様が変更することがあるかもしれません．むしろ仕様や設計の改善は重要です．みなさんは，エクストリームプログラミング(XPプログラミング；e<b>X</b>treme 
+  <b>P</b>rogramming)という言葉をご存知ですか？</p>
+  <div id="keyword">
+    &nbsp;エクストリームプログラミングは，過去のソフトウェア開発手法と異なり，シンプルな設計，プログラマ・エンジニア・顧客のコミュニケーション，・・・（その他いろいろ）に価値を考えるソフトウェア開発手法を指します．エクストリームプログラミングでは，最初の設計はシンプルに始めて，テストや設計の改良を繰り返し，システムの機能を満たす一番適切な設計を保つ状態をキープしていくことでソフトウェアを開発することを目標としています．したがってソフトウェアには無駄な仕様や無駄な動作がないためシンプルでかつ機能的に出来上がるのです．
+  </div>
+  <p>　ここでもエクストリームプログラミングを見習い，最初の設計はシンプルに・・・を心がけていこうと思います．</p>
+  <p>　</p>
+  -->
+</blockquote>
+<table border="0" cellspacing="0" cellpadding="0" width="100%">
+  <tr>
+    <td width="100%" bgcolor="#000099"><font color="#ffffff" size="+1">１．開発するソフトの設計</font></td>
+  </tr>
+</table>
+実際の設計ではこんな問題が挙げられます。<br>
+<center><b>「機能を重視すれば、コーディングは難しくなる」<br>
+「逆にコーディングを簡単にすれば機能は少なくなる」</b></center> 
+このような相反関係をトレードオフと言ったりしますが、このようになるのは当たり前なので開発者はどこまで機能を付加するかを、仕様として与えなくてはなりません。簡単に言えばこのことが設計だと解釈してもよいと思います。(実際は「設計」という言葉を安易に使用しない方が身のためです。設計工学と呼ばれる学問も確立されているぐらいなので…)<br>
+ということで前置きが長くなりましたが、今回の仕様はこのようにしました。<br>
+<br>
+<b>[制限事項]</b>
+<dl>
+  <dt>■ファイルのセーブやオープン作業に関しては既存のコードを使用
+  <dd>既存のコードとは、AppWizardが作成したコードのことを指します。
+  <dt>■*.htmlファイルのみ扱う
+  <dt>■SDI形式(シングルウィンドウ操作)に限定
+  <dt>■タグ挿入形式
+  <dd>MicrosoftのFrontPageのようにダイレクトに編集できない
+</dl>
+<br>
+<b>[付加機能]</b>
+<dl>
+  <dt>□メモ帳ライクな編集機能
+  <dt>□マウス操作重視
+  <dd>タグはできるだけマウスで挿入できるようにする。
+  <dt>□プレビュー機能
+  <dt>□フォントの選択
+  <dd>ディフォルトのSystemフォントから見やすい日本語フォントに変更するのを可能にします。
+</dl>
+では、この仕様で作成していきたいと思います。<br>
+<br>
+<a href="proc2.html">[Next]</a><br>
+[Previous]<br>
+<a href="../index.html">[Home]</a><br>
+
+</body>
+
+</html>

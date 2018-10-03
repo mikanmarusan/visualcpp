@@ -1,0 +1,137 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+   
+  <meta http-equiv="Content-Type" content="text/html;charset=uft-8">
+  <title>コントロールの背景色を変更する--コントロール別背景色変更[ボタン]</title>
+      
+  <link rel="stylesheet" href="style.css" type="text/css">
+</head>
+  <body text="#336666" bgcolor="#c2d1ed" link="#0000ee" vlink="#551a8b" alink="#0000ee"><DIV ALIGN=CENTER><!--#geoguide--></DIV>
+<P align=left><label><FONT size=2>←Back［<A href="section3_2.html" >エディットコントロール</A>］ -- Up［<A 
+href="index.html">コントロールの背景色を変更する</A>］ --  Forward［<A href="section3_4.html" >ボタンコントロール（2）</A>］→ 
+</FONT></label></P>
+<H2 align=center>コントロール別背景色変更<BR>［ボタンコントロール（１）］</H2>
+<DIV align=center>最終更新日［2002.03.25］</DIV>
+ 
+<hr width="100%" size="2"> 
+<blockquote>   
+  <p>
+   　コントロールの背景色の変更にあたって，プログラマが一番困惑するのがプッシュボタンの背景色変更であろう．作者もこの問題に１年以上悩まされてきた<SUP>※1</SUP>．なぜならMSDN 
+  Libraryにはその方法が詳しく記述されていないからである．本節では，ボタンコントロールの背景色変更（１）として，まずMSDN　Libraryやいろいろなweb 
+  siteに掲載されているボタンの背景色の変更の方法とその問題について述べ，より正確にボタンの背景色を変更するために重要な概念である，「動的サブクラス化とその必要性」に触れていく，</p>
+   </blockquote>
+ 
+                      <table cellspacing="0" cellpadding="0" width="100%" border="1">
+      <tbody>
+                          <tr>
+     <td valign="top" bgcolor="#339999"><big><font color="#ffffff">●従来の方法とその問題点</font></big></td>
+                          </tr>
+                        </tbody>
+                      </table>
+ 
+                      <h4>■　従来の方法でやってみると・・・</h4>
+ 
+                      <blockquote>   
+                        <p>　本コーナーでも紹介しているとおり，背景色の変更を行うためには，OnCtlColor関数内において，背景色として設定したいブラシハンドルを返却すればよいのであった．したがってボタンもコントロールの一部であることにはかわりがないから，この方法のとおり背景色を変更することができるはずである．早速作業にとりかかるのであるが，ここでは実装を楽にするために，スタティックコントロールとエディットコントロールのコーディングをすべて削除してしまう．（現在のままでは，面倒くさいという理由もあるが）</p>   
+                        <p>まずCColCtrlの宣言部を以下のように訂正する．訂正といってもダイアログの背景色を決めるブラシのみを残して，ボタンの背景色となるブラシを定義しただけである．<BR><TEXTAREA id=TEXTAREA1 style="OVERFLOW: hidden" name=TEXTAREA1 rows=9 cols=80>/////////////////////////////////////////////////////////////////////////////
+// CColCtrlDlg ダイアログ
+
+class CColCtrlDlg : public CDialog
+{
+// 構築
+public:
+	CBrush	m_brDlg;	// ダイアログの背景色ブラシ
+	CBrush	m_brBtn;	// ボタンの背景色ブラシ
+</TEXTAREA></p>   
+                        <p>つぎにOnInitDialogを編集する．ここもダイアログ背景色のブラシ設定のみを残し，ボタンの背景色のブラシを設定しているだけである．<BR><TEXTAREA id=TEXTAREA2 style="OVERFLOW: hidden" name=TEXTAREA2 rows=15 cols=80>BOOL CColCtrlDlg::OnInitDialog()
+{
+
+	(中略)
+
+	////////////////////////////////////////////////////////////
+	// 背景色の設定
+
+	// ダイアログ
+	m_brDlg.CreateSolidBrush(RGB(255,  0,  0));	// 背景(赤)
+	// ボタン
+	m_brBtn.CreateSolidBrush(RGB(  0,  0,  0));	// 背景(黒)
+	
+	return TRUE;  // TRUE を返すとコントロールに設定したフォーカスは失われません。
+}</TEXTAREA></p>
+  <P>最後にOnCtlColor関数を編集してみよう．この関数を呼び出したコントロールがボタンであれば，ボタンの背景ブラシを返却するという単純コーディングである．<BR><TEXTAREA id=TEXTAREA3 style="OVERFLOW: hidden" name=TEXTAREA3 rows=11 cols=80>HBRUSH CColCtrlDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor) 
+{
+	switch(nCtlColor){
+	case CTLCOLOR_BTN:
+		return (HBRUSH) m_brBtn;
+	case CTLCOLOR_DLG:
+		return (HBRUSH) m_brDlg;
+	default:
+		return CDialog::OnCtlColor(pDC, pWnd, nCtlColor);
+	}
+}
+</TEXTAREA></P>
+  <P>さて，ここで実行してみよう．すると背景色が変更されないことがわかる（figure3.11）．実際ボタンの背景色を変更するときだけは，ボタンをオーナー描画に設定しなければならない．そこで，リソースエディタを開き，ボタンのプロパティを開く．スタイルタブの中のオーナー描画をチェックする．こうすることで，このボタンはオーナー描画ボタンに設定されたことになる．そして実行した結果がfigure3.12である．</P>
+  <P><IMG alt=figure3.11 src="fig3_11.jpeg" 
+  >&nbsp; <IMG alt=figure3.12 src="fig3_12.jpeg" 
+  ><BR><FONT size=2><STRONG>figure3.11　非オーナー描画の場合　　　　figure3.12 
+  オーナー描画にした場合．</STRONG></FONT></P>
+  <P>　この結果を見ると，figure3.12では，ボタンの背景色が変更されているので一見成功しているように見える．しかし肝心なボタンのキャプションが見えない．皆さんにもいろいろ試してみてほしいが，背景色を何色にしてもキャプションが見えないのである．つまりボタンの上に，じかにブラシで上塗りしたようなボタンが出来上がったことになる．これで満足されるのであればそれまでだが，はっきり言って役に立たないと思わないだろうか？さてこの失敗の原因はなんだろうか？</P>
+      </blockquote>
+  <H4>■　失敗の原因はボタン自体にあった<SUP>※2</SUP>！</H4>
+<BLOCKQUOTE>
+  <P>　従来の方法で失敗したのは，他のコントロール（スタティックコントロールやエディットコントロール）の背景色の変更と異なる点があるためである．それは，「オーナー描画」に設定したことである．「<A 
+  href="section1.html">背景色変更のフレームワーク</A>」の節でも述べたと思うが，もともとコントロールの描画責任は，コントロール自体にある<SUP>※3</SUP>．そこで我々は，各コントロールが持つデバイスコンテキストを描画前に書き換えてあげた．そうするとコントロールは，書き換えられたデバイスコンテキストで，自分自身を描画するので，描画色が変更されたコントロールが描かれるのである．<BR>　しかし，オーナー描画にでは，描画責任は全てプログラマー側に移る．これは非常に厄介なものである．なぜなら，フォーカスを持たないとき，フォーカスを持つとき（選択されているとき），押されているとき，無効状態であるときと全ての場合に対応しなくてはならないからである．</P>
+  <TABLE cellSpacing=0 cellPadding=0 border=0 
+    align=center>
+    <caption><STRONG>table3.1 
+    ボタンの状態と描画色変更</STRONG></caption>
+    <TR>
+      <TD>
+        <P align=center>フォーカスあり</P></TD>
+      <TD>
+        <P align=center>フォーカスなし</P></TD>
+      <TD>
+        <P align=center>押された</P></TD>
+      <TD>
+        <P align=center>無効状態</P></TD></TR>
+    <TR>
+      <TD>
+        <P align=center><IMG alt=figure3.13 src="fig3_13.jpeg" 
+        ></P></TD>
+      <TD>
+        <P align=center><IMG alt=figure3.14 src="fig3_14.jpeg" 
+        ></P></TD>
+      <TD>
+        <P align=center><IMG alt=figure3.15 src="fig3_15.jpeg" 
+        ></P></TD>
+      <TD>
+        <P align=center><IMG alt=figure3.16 src="fig3_16.jpeg" 
+        ></P></TD></TR></TABLE></BLOCKQUOTE>
+  <H4>■　それではどのようにするべきだったのか？＜動的サブクラス化＞</H4>
+<BLOCKQUOTE>
+  <P>　これらの問題を解決するために，MFCでは「動的サブクラス化<SUP>※4</SUP>」という手法が用意されている．動的サブクラス化とは，特定のウィンドウに対するサブクラス（派生クラス）を作成することである．しかし，一般的に言われる派生クラスは，プログラムの実行前に作成されるが，動的サブクラス化では，プログラムの実行後（実行中）に作成されるものである．<BR>　ダイアログ上のボタンコントロールは，通常CButtonクラスである．したがってCButtonクラスの性質は保存し，かつそのメンバ関数には無い特定の動作をさせるためには，派生クラスを作成するしかない．そこでダイアログ上の派生クラスを動的に作る必要性が出てくる．このために動的サブクラス化を使用する意義が出てくるのである．今回は背景色を変更するのであるが，通常CButtonクラスが行う自分自身の描画処理を，派生クラスで行えば背景色も変更できるだろう．</P>
+  <P>　動的サブクラス化は，あまり知られていないかもしれないが，以外に使われていることがある．例えばボタンにビットマップを貼り付けたビットマップボタンがいい例である．ダイアログ上のボタンは通常CButtonクラスであるが，ダイアログのメンバ変数としてCBitmapButtonクラスというCButtonクラスの派生クラスを用意し，ボタンの持つクラスを動的にCBitmapButtonクラスとすることで，ビットマップボタンを作ることができる．</P>
+  <P>と文書で説明してもあまりピンとこないと思うので，次節で，実際にCButtonクラスを派生クラスとしてCColorButtonクラスを作成し，動的サブクラス化していこうと思う．</P></BLOCKQUOTE>
+<P>
+<HR>
+
+<P></P>
+<BLOCKQUOTE>
+<FONT size=2>
+※1　本節は，作者がいろいろ悩み，試行錯誤して学んだことのノウハウを少しでも伝えられたらという願いをこめて作成されている．したがってこれが正しい答えであるとは断言できない．ただ「このようにやればうまくい　きました」という方法をせつめいしているのに過ぎない．<BR>
+※2　と，勝手に作者が思っているだけである．決してMicrosoftを批判しているわけではない．<BR>
+※3　このオブジェクト自身の振る舞いをオブジェクトに任せてしまう考え方は，現在プログラミング界で取り上げられるオブジェクト指向そのものである．<BR>※4　これについて詳しく知りたい方は，MSDN 
+  Libraryの［サポート技術情報］--［VisualC++］--［[MSVC] MFC 
+  
+を使用しての動的サブクラス化］を参照してほしい．&nbsp;
+</FONT></BLOCKQUOTE>
+<P align=center><FONT size=2>←Back［<A 
+href="section3_2.html">エディットコントロール</A>］ -- Up［<A 
+href="index.html">コントロールの背景色を変更する</A>］ -- Forward［<A 
+href="section3_4.html">ボタンコントロール（2）</A>   
+ ］→</FONT></P>
+<P align=right>VisualC++でソフトを作ろう　(c) 藤門千明</P>
+     
+                                              </body>
+                                              </html>

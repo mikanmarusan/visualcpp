@@ -1,0 +1,84 @@
+<HTML>
+<HEAD>
+<TITLE>HTMLエディタ〜盆休み〜</TITLE>
+<style type="text/css">
+  <!--
+		A:link { text-decoration:none;  color:#ff4500 }
+		A:visited { text-decoration:none;  color:#ff4500 }  
+		A:active { text-decoration:none;  color:#ff0000 }   
+		A:hover { color:#00008b }	
+	    -->
+</style>
+</HEAD>
+<BODY bgcolor="#FFFFFF"><DIV ALIGN=CENTER><!--#geoguide--></DIV>
+<I><FONT COLOR="red" SIZE="6">共通関数群を作ろう2</FONT></I>
+<HR>
+今回は、共通関数群の中のカラーダイアログ操作関数GetColorString関数のコーディングを行います。前回と同様に、共通関数ファイルmyhtmlcom.cpp内に書き込んでいきます。
+<BR>
+<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" WIDTH="100%">
+  <TR>
+    <TD WIDTH="100%" BGCOLOR="#000099">
+    <FONT COLOR="#ffffff" SIZE="+1">17.カラーダイアログをコーディングする</FONT></TD> 
+  </TR>
+</TABLE>
+<IMG SRC="fig6_4.jpg" ALIGN="left">カラーダイアログとは、左のようなダイアログです。このダイアログはいろんなところで見ることができると思います。例えば、お絵かきソフトのペンキの色を決める時や、ワープロソフトでフォントの色を変更する時にも使いますね。<BR>
+今回も、フォントの色指定などでこのダイアログを使用するのですが、ただ使うのだったら、コモンダイアログなので<BR CLEAR="ALL">
+<B>CColorDialog cDlg;</B><BR>
+<B>cDlg.DoModal();</B><BR>
+などとやればいいのですが、今回は色を得るというよりも色のコードを取得する方に重点を置くべきで、コードですからCString型の変数で色コードを得るほうが便利です。そこでGetColorStringという関数で色コードを取得するように作ってあげようと思います。ここでいう色コードというのはRGB値のことです。RGB値による色の表現方法は、すべての光の色は赤(R)・緑(G)・青(B)の色レベル(256段階)の和で表現することができるという理論で成り立っています。このコードは6桁(初めの2桁が赤、次が緑、最後が青)で作られ、16進で表現できます。例えば、
+<TABLE ALIGN="CENTER">
+<TR><TD BGCOLOR="#ff0000" HEIGHT="20"></TD><TD BGCOLOR="#00ff00"></TD><TD BGCOLOR="#0000ff"></TD><TD BGCOLOR="#3a196f"></TD></TR>
+<TR><TD>#ff0000</TD><TD>#00ff00</TD><TD>#0000ff</TD><TD>#3a196f</TD></TR>
+</TABLE>
+早速ですが、コーディングしたものをお見せします。
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<DL><DT>CString GetColorString(){
+<DD>	COLORREF col;		
+<DD>	DWORD dwColor[3];
+<DD>CString strColor;
+<BR><BR>
+<DD>	<FONT COLOR="green">//Colorダイアログ</FONT>
+<DD>	CColorDialog cDlg(NULL,CC_FULLOPEN,NULL);
+<DD>	if(cDlg.DoModal()!=IDOK){return strColor;}
+<DD>	col = cDlg.GetColor();
+<BR><BR>
+<DD>	dwColor[0] = GetRValue(col);
+<DD>	dwColor[1] = GetGValue(col);
+<DD>	dwColor[2] = GetBValue(col);
+<DD>	strColor.Format("#%02x%02x%02x",dwColor[0],dwColor[1],dwColor[2]);
+<DD>	return strColor;
+<DT>}</DL>
+</TD></TR>
+</TABLE>
+<DL>
+<DT><FONT COLOR="red">COLORREF col;</FONT>
+<DD>カラー値として使われる 32 ビット値の構造体です。カラーダイアログから得られる色情報はここに入ります。
+<DT><FONT COLOR="red">DWORD dwColor[3];</FONT>
+<DD>COLORREF型の変数からR,G,Bの各値を格納します。符号なし整数型です。
+<DT><FONT COLOR="red">CString strColor;</FONT>
+<DD>#○○○○○○の形式の文字列が入るCString型変数。これがHTMLでのカラーコードです。
+<DT><FONT COLOR="red">CColorDialog cDlg(NULL,CC_FULLOPEN,NULL);</FONT>
+<DD>CColorDialogクラスの変数(ダイアログ)を作成します。
+<DD>第一引数が初期選択色(上の場合だと指定なし)、第二引数がダイアログの外観を決めるフラグ、第三引数は親ウィンドウまたはオーナー ウィンドウへのポインタですが、ここではどのウィンドウがこの関数を呼ぶのか分からない、かつ、ポインタを使用する必要性もないのでNULLを指定しておくのがいいでしょう。
+<DT><FONT COLOR="red">if(cDlg.DoModal()!=IDOK){return strColor;}</FONT>
+<DD>ダイアログを開きます
+<DT><FONT COLOR="red">col = cDlg.GetColor();</FONT>
+<DD>ダイアログから選択された色情報をCOLORREF変数colに格納します。
+<DT><FONT COLOR="red">dwColor[0] = GetRValue(col);</FONT>
+<DD>colから赤の値を抽出します。このGetRValue()はマクロで定義されています。
+<DT><FONT COLOR="red">dwColor[1] = GetGValue(col);</FONT>
+<DD>colから緑の値を抽出します。このGetGValue()はマクロで定義されています。
+<DT><FONT COLOR="red">dwColor[2] = GetBValue(col);</FONT>
+<DD>colから青の値を抽出します。このGetBValue()はマクロで定義されています。
+<DT><FONT COLOR="red">strColor.Format("#%02x%02x%02x",dwColor[0],dwColor[1],dwColor[2]);</FONT>
+<DD>#○○○○○○形式に文字列を設定します。%02xとは"16進2桁"の意味です。
+</DL>
+
+<IMG SRC="fig6_5.gif" ALIGN="right">この関数を使って、フォントタグダイアログを次週作っていきます。このダイアログは右のような感じで、[カラー]ボタンを押すと、ダイアログボックスを開いて色を指定させ、結果をEditBoxに表示させます。詳しくは次章ということで。ではよい夏休みを！
+<BR><BR>
+<A HREF="proc7.html">[Next]</A><BR>
+<A HREF="proc6.html">[Previous]</A><BR>
+<A HREF="../index.html">[Home]</A><BR>
+</BODY>
+</HTML>

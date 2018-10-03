@@ -1,0 +1,416 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=shift_jis">
+<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<title>画像Viewerを作ろう</title>
+<link rel="stylesheet" href="../tool/style.css" type="Text/css" media="screen">
+</head>
+
+<body bgcolor="#ffffff" text="#666666"><DIV ALIGN=CENTER><!--#geoguide--></DIV>
+
+<div id="title">
+  <h2 align="left"><font color="#008000">making of image viewer -画像viewerを作ろう-</font></h2>
+</div>
+<blockquote>
+  <p>　Windowsプログラミングの醍醐味は，やはりグラフィカルなプログラミングが可能であるところです．そしてグラフィカルにするための代表格が，イメージを使用することだと思います．イメージの加工は，画像処理工学の知識を有するために，ここでは，画像を表示させるということだけに機能を特化した，画像viewerを作っていこうと思います．</p>
+  <p>　しかし，画像の表示はそんなにたやすくありません．Windowsで標準の画像フォーマットとされているbitmapでさせも，その画像フォーマットを勉強しなければ，画像を表示させることは困難です．そればかりか，現在は，jpeg/gif/tiff/pngなどの数々の画像フォーマットが存在するために，プログラミング初心者ではせいぜいbitmapがやっとというところでしょう．</p>
+  <p>　でもやっぱり，jpegも見たいし，bitmapも見たい・・・と思うのがユーザの心理です．ここでは，画像のフォーマット知識が無くても，いろいろな種類の画像を表示できるアプリケーションを作成していこうと思います．</p>
+  <p align="center">◇</p>
+  <p>注意：このセクションで作成されるアプリケーションは，VisualC++6.0からMFCクラスに追加されたCHtmlViewと呼ばれるクラスを使用します．したがって，それ以前のバージョンのVisualC++では作成することは出来ません．ご了承ください．</p>
+</blockquote>
+<h4>■　どのようにして画像を表示させるのか?　〜CHtmlViewクラスを追う〜</h4>
+<blockquote>
+  <p>　さきほども述べたように，画像を表示させるためには画像のフォーマットを知らなくてはいけません．例えばWindows標準の画像フォーマットBITMAPでさえも，</p>
+  <blockquote>
+    <p align="left"><b>BITMAPFILEHEADER(14byte)<br>
+    BITMAPINFOHEADER(40byte)<br>
+    パレット<br>
+    データ</b></p>
+  </blockquote>
+  <p>というフォーマットで記述されています．したがって本来ならば，表示させたいすべての種類の画像に対するフォーマットを勉強するところから始まるのですが，画像処理を専門にしているサイトではないのでもっと簡単に表示させる方法を考えてみましょう．</p>
+  <p align="center">◇</p>
+  <p>　みなさんは，インターネット上に置かれている画像をどのように閲覧しますか？おそらくは付属のブラウザ（IE）などで閲覧されていると思います．ブラウザはHTMLという言語で記述されたファイルを見るソフトウェアですが，同時に画像も表示させていますよね．つまり「HTMLによる埋め込み画像」を「ブラウザ機能」を使って表示させることができれば，画像viewerができてしまいそうです．このHTMLファイルを表示するために，MFCには（VisualC++6.0から）CHtmlViewというクラスが追加されています．今回HTMLを使用して画像を表示させていきましょう．</p>
+</blockquote>
+<h4>■　アプリケーションの雛型を作る　〜AppWizardとリソース編集〜</h4>
+<blockquote>
+  <div id="method">
+    <ol>
+      <li>[ファイル]--[新規作成]　を選び、プロジェクトのタブをクリック</li>
+      <li><b>MFC AppWizard(exe)</b>を選びプロジェクト名を記述<br>
+        <font color="#008000" size="2">※　ここではViewerというプロジェクト名でソフトを作成する．<br>
+        ※　ここで「新しくワークスペースを作成する」にチェックを入れておく．</font></li>
+      <li>[Step1] で<b>MDI</b>を選択．<br>
+        <font color="#008000" size="2">※　複数ファイルを操作できるアプリケーションになる．</font></li>
+      <li>[Step5]までは「次へ」を押していきます．</li>
+      <li>[Step6]にてCViewerViewクラスをハイライトすると，「基本クラス」コンボボックスが選択できる．<br>
+        ここを<b>CHtmlView</b>に変更する．</li>
+      <li>最後に終了ボタンを押す．<br>
+        <font size="2" color="#008000">※ 
+        このアプリケーションに必要なファイルの雛形が作られる．</font></li>
+    </ol>
+  </div>
+  <p>　メモ帳を作る時は，ビューの基本クラスをCEditViewにしました（覚えているでしょうか？）．ここではHTMLを表示させることがメインであるのでCHtmlViewにしておきます．</p>
+  <p>　雛型ができあがったら試しに実行してみます．実行方法はメニューから「ビルド」-「実行」でしたよね．おそらく，「取り消されたアクション」とか「ページを表示できません」というページが表示されるでしょう．インターネット回線につながっている場合は，以下のようなページが表示されるかも知れません．(figure1)</p>
+  <blockquote>
+    <p><b>figure1 実行結果</b><br>
+    <img border="0" src="fig1.jpg" width="573" height="391"></p>
+  </blockquote>
+  <p>これはCHtmlViewはディフォルトで，http://www.microsoft.com/visualc/　を開くことになっているからです．ここで作ろうとしているソフトウェアは，インターネット接続は考慮に入れる必要性はありません．ですからディフォルトの動作ではなく，あたらしい動作を定義する必要があります．これについては後ほど詳しく解説していくことにしましょう．</p>
+  <p align="center">◇</p>
+  <p>　画像viewerだけあって画像の編集はしないことから，メニューの「編集」という項目は意味をなさないように，メニュー項目の中にはアプリケーションとしてふさわしくないものもあります．それを削除しておきましょう．ここで知っておきたいことがひとつあります．</p>
+  <div id="keyword">
+    <b><u>メニューリソース</u></b>
+    <p>　MDI形式のメニューリソースは２つでセットになっています．それはドキュメントが開かれていない時と開かれている時では，メニューが異なるためです．</p>
+    <p><b>IDR_MAINFRAME:</b>何もドキュメントが開かれていないときに表示されているメニュー<br>
+    <b>IDR_VIEWERTYPE:</b>何かドキュメントが開かれているときに表示されているメニュー
+  </div>
+  <div id="method">
+    <ol>
+      <li>以下に該当するメニュー項目を削除する．<br>
+        <b>IDR_MAINFRAME</b><br>
+        [ファイル]─[新規作成]の項目<br>
+        <b>IDR_VIEWERTYPE</b><br>
+        [ファイル]┬[新規作成]の項目<br>
+        　　　　　　├[上書き保存]の項目<br>
+        　　　　　　└[名前を付けて保存]の項目<br>
+        [編集]の項目全て</li>
+    </ol>
+  </div>
+</blockquote>
+<h4>■ Document - View 
+アーキテクチャ　と　シリアライゼーション</h4>
+<blockquote>
+  <div id="point">
+    　MFCではDocument-Viewアーキテクチャと呼ばれるスタイルでアプリケーションを設計することになります．これは，ドキュメント(データ)とビュー（表示)を分離するということです．
+  </div>
+  <p>DocumentとViewの関係は１対多の関係になります．例えばWYSIWYG<sup><b>※</b></sup>形式のホームページエディタ（ホームページビルダー，FrontPageなどがその代表）では，ドキュメントはHTMLファイルそのものですが，ビューに関しては，「WYSIWYG編集画面」，「タグ編集画面」，「プレビュー画面」などの複数存在することがあるからです．また，アプリケーションによっては（例えばメモ帳など），DocumentとViewの関係は１対１になるものもあります．<br>
+  <font size="2">※　WYSIWYG(What You See is What You Get). [訳]あなたが見ているものをあなたは得る⇒見た通りのものをアウトプットできること)</font></p>
+  <p>　ここで重要なことは，DocumentとViewの関係がどうなっているかだけではなくて，データを操作する部分（ドキュメントクラス）とそのデータを表示する部分（ビュークラス）というものが分離されていることによって，プログラムの複雑化を防いでいるということだといえます．</p>
+  <p>　作ろうとしている画像viewerでも同じ事がいえます．画像のOpen 
+  , Closeと，画像を表示させることは似て非なることです．つまり画像を直接扱うことはドキュメントに任せておいて，画像の表示はビューに専念させればプログラムはすっきりするでしょう．ただDocument-ViewアーキテクチャはMFCだけの考え方ではありません．したがって，このように，設計指向を明確にとらえたソフトウェアの製作は，のちのち自分の力になると思います．</p>
+  <p align="center">◇</p>
+  <p>　Document - View 
+  アーキテクチャが分かったところで，本ソフトウェアの重要な概念，シリアライゼーションについて簡単に説明しておきましょう．これもMFCの考え方の一つです．そして極めて<b>重要</b>です．</p>
+  <p>　ソフトウェアは，通常データを”主記憶装置”＝”メモリ”上に保存しておきます．それはメモリへのアクセスが，ハードディスクのような補助記憶装置よりも断然高速に行えるからです．しかし，ソフトウェアは終了してしまうと確保したメモリを解放してしまうので（そもそも，解放するようにプログラムしなければなりません）せっかくストアした情報も失ってしまいます．これではなんか不便な気がします．そこで私達は「ファイルに保存」という操作でデータを残し，「ファイルを開く」という操作でデータをソフトウェアに渡すことで，その不便さを解消します．</p>
+  <p>　しかし，これはプログラマからみたら面倒くさい話です．なぜなら・・・</p>
+  <div id="point">
+    変数に格納されているデータをファイルに書き込まなくてはなりません．そのためには，
+    <ol>
+      <li>保存用のファイルをファイルディスクリプタを介してOpenする．</li>
+      <li>複数の変数があることを考えて，適切なフォーマットでファイルに書き込む．</li>
+      <li>ファイルをCloseする．</li>
+    </ol>
+    そして読み込むときは，
+    <ol>
+      <li>データが保存されているファイルをファイルディスクリプタを介してOpenする．</li>
+      <li>保存時に決めたフォーマット通りにデータを抽出し変数にデータを代入．</li>
+      <li>ファイルをCloseする．</li>
+    </ol>
+  </div>
+  <p>というコードをいちいち考えなくてはなりません．これは非常に面倒くさいと思いませんか？まだ変数が少なかったらまだしも，データ構造がかなり複雑だったら（構造体など）大変なことになりますね．そこで，”メモリ上の変数”⇔”ディスク上のファイル”のデータのやりとりを直接行う仕組みがあったら便利です．それをシリアライゼーションといいます．特に変数からファイルへの変換を「シリアル化」，逆にファイルから変数への変換を「逆シリアル化」と呼ぶます．</p>
+  <p>　シリアライゼーションのイメージは以下に示すとおりです（figure2）．</p>
+  <blockquote>
+    <p><b>figure2 シリアライゼーション</b><br>
+    <img border="0" src="fig2.jpg" width="474" height="121"></p>
+  </blockquote>
+  <p>　多くの場合，<u>シリアライゼーションはDocumentクラスで行われることが多く，それに伴いシリアル化されるデータ（変数）も，Documentクラスのメンバ変数であることが多い</u>です．なぜなら，MFCでシリアル化できる最低条件は，</p>
+  <ul>
+    <li>CObject の派生クラスであること（CDocumentクラスはCObjectの派生クラスである）
+    <li>マクロDECLARE_SERIAL, INPLEMENT_SERIAL が実装してあること（Documentクラスはディフォルトで実装）
+    <li><b>Serialize</b>関数を実装していること（Documentクラスはディフォルトで実装）</li>
+  </ul>
+  <p>であるからです．シリアル化を実現する関数が，CDocument::Serialize(CArchive&amp; 
+  ar)という関数です．「ファイルを開く」・「ファイルを保存する」という操作がメニューによって行われた時，この関数が呼ばれることになります．</p>
+</blockquote>
+<h4>■　シリアル化による画像ファイルのフルパスの取得</h4>
+<blockquote>
+  <p>　さて，シリアル化を少し使って画像ファイルのフルパスを取得してみます．シリアル化はDocumentクラスのメンバ変数に多いと述べたのでここでもそのようにしていきます．まずDocumentクラスに画像のフルパスを格納するメンバ変数を追加します．</p>
+  <div id="method">
+    <ol>
+      <li>ワークスペースのクラスタブをクリックし，CViewerViewを右クリックし，メンバ変数の追加をクリック<br>
+        <font color="#008000" size="2">※　ダイアログが開かれます．</font></li>
+      <li>ダイアログに以下の値を設定してOKを押す．<br>
+        変数のタイプ：CString<br>
+        変数名：m_strFilePath<br>
+        アクセス制御：public</li>
+    </ol>
+  </div>
+  <p>　つぎに，ViewerDoc.cppのCViewerDoc::Serialize(CArchive&amp; ar)関数を以下のように変更します．</p>
+  <div id="source">
+    <pre><font color="#0000FF">void</font> CViewerDoc::Serialize(CArchive&amp; ar)
+{
+	CFile *cFile;			<font color="#008040">// CFile オブジェクトへのポインタ</font>
+
+	<font color="#0000FF">if</font> (ar.IsStoring())
+	{
+		<font color="#008040">// TODO: この位置に保存用のコードを追加してください。</font>
+	}
+	<font color="#0000FF">else</font>
+	{
+		<font color="#008040">// TODO: この位置に読み込み用のコードを追加してください。</font>
+	
+		<font color="#008040">// アーカイブから画像ファイルの情報を取得</font>
+		cFile = ar.GetFile();
+		<font color="#008040">// 画像ファイルのフルパスをメンバ変数に代入</font>
+		m_strFilePath = cFile-&gt;GetFilePath();
+	}
+}</pre>
+  </div>
+  <p>ここで新しく出てくるオブジェクトCArchiveクラスについて，簡単に説明しておきましょう．</p>
+  <div id="keyword">
+    <b>　CArchiveクラスオブジェクト</b><br>
+    MFCでは、シリアル化される変数オブジェクトと２次記憶装置間のインターフェースとして 
+    CArchive クラスのオブジェクトを使用します。CArchiveオブジェクトを使用することで，かなり簡単にシリアル化・逆シリアル化が可能になります．
+  </div>
+  <p><b>if (ar.IsStoring())</b><br>
+  　シリアライズが保存用（シリアル化）で呼ばれたのか，読み出し用（逆シリアル化）で呼ばれたのかは，Serialize関数の引数であるCArchiveクラスのarに格納されています．そこでCArchiveのメンバIsStoring()で保存用か読み出し用かをチェックします．これがtrueの時は保存用ということになりますが，ここでは読み出しがメインなのでelseの方へ制御が移ります．<br>
+  <br>
+  <b>cFile = ar.GetFile();</b><br>
+  　どのファイルが読み込まれたかという情報もCArchiveが持っているので，そのファイル情報をCFileクラスのポインタに格納します．<br>
+  <br>
+  <b>m_strFilePath = cFile-&gt;GetFilePath();</b><br>
+  　ここでは画像ファイルのフルパスが重要なのですから，CFileオブジェクトからフルパスを取得し，Documentクラスのメンバ変数に格納しておきます．</p>
+  <p>　このように記述すると，「ファイルを開く」で画像ファイルが指定された時，この関数が呼ばれ，ファイルのフルパスが自動的にメンバに格納することができます．</p>
+  <div id="point">
+    確かにシリアル化を使用しなくてもこれらは実現することが可能です．
+    <ol>
+      <li>「開く」メニューに対応したハンドラをDocumentクラスに追加</li>
+      <li>CFileDialogを定義し，DoModalで表示</li>
+      <li>指定された画像ファイルのフルパスを得る</li>
+      <li>メンバ変数に格納</li>
+    </ol>
+    ただ少々面倒くさいかもしれないのでシリアル化の機能を使用したのです．
+  </div>
+</blockquote>
+<h4>■　どのようにしてweb/HTMLページを開いているのか？</h4>
+<blockquote>
+  <p>　先ほど実行した時に，インターネット接続されている環境下ならば，http://www.microsoft.com/visualc/を開くことになっているといいましたが，それは，viewerview.cppのOnInitialUpdata関数の中に</p>
+  <div id="source">
+    <pre><font color="#0000FF">void</font> CViewerView::OnInitialUpdate()
+{
+	CHtmlView::OnInitialUpdate();
+
+	<font color="#008040">// TODO: このコードはポピュラーなウェッブ サイトへナビゲートします</font>
+	<font color="#008040">// 任意のウェッブ サイトに変更してください</font>
+	Navigate2(_T(&quot;http://www.microsoft.com/visualc/&quot;),NULL,NULL);
+}</pre>
+  </div>
+  <p>と記述されているからです．このNavigate2という関数は，引数のURLに移動する関数です．OnInitalUpdate関数は，最初のビューがアタッチされた時（やさしく言えば，<u>ドキュメントが開かれようとしたときなど，ビューが作成されようとした時</u>；MDIでは複数のドキュメントが開かれますが、当然割り当てられるビューも複数になるので、<b>新しくドキュメントを開こうとするときにはこの関数が実行</b>されます）に実行されます．ここで下のように思った人は鋭い方ですね．</p>
+  <p align="center">　<b>Navigate2の第一引数に画像ファイルのフルパスを与えれば，画像が開けるのではないか？</b></p>
+  <p>　答えは△です．理論的には間違いはありませんが，うまくいかないことがあるのです．私の環境ではbitmapファイルをうまく読み込むことは出来ませんでした（笑）．実はCHtmlViewはブラウザと同等なものであるということが影響します．<br>
+  　つまり私の環境下では，<b>たまたま</b>Windows固有の「関連付け」によってjpegやgifといったファイルは，ブラウザで開くことができるのですが，bitmapは通常「ペイント」で開くことになっていたために，ブラウザで開けずペイントで開くというアクションに置き換わってしまうのです．このような<b>環境依存型のソフトウェア</b>は望ましくありません．</p>
+  <p>　したがって，ＨＴＭＬに画像を表示させる旨を記述しておくことで，ＨＴＭＬを開くことを専門としているブラウザが力を発揮し，ファイルの関連付けを気にする必要がなくなります．</p>
+  <p>　ここでいいたいことは・・・</p>
+  <div id="point">
+    <ol>
+      <li>マニュアルに書かれている事は，机上の理論話．</li>
+      <li>現実に適用した時，その理論が成り立つかの保証はされていないことが多い．</li>
+      <li>理論と現実は大きく違う．</li>
+    </ol>
+  </div>
+  <p>ということです．さて気を取り直して，先ほど逆シリアル化を使って得た画像のフルパスを表示できるようにHTMLで記述しなくてはなりません．HTMLにおいて画像を表示するタグは，</p>
+  <blockquote>
+    <p><b>&lt;img src = &quot;画像ファイルの相対/絶対パス&quot;&gt;</b></p>
+  </blockquote>
+  <p>でしたよね．以上をふまえて，OnInitialUpdateを以下のように編集してみましょう．</p>
+  <div id="source">
+    <pre><font color="#0000FF">void</font> CViewerView::OnInitialUpdate()
+{
+	CHtmlView::OnInitialUpdate();
+	
+	CViewerDoc* pDoc = GetDocument();			<font color="#008040">// CViewerDocへのポインタを取得する．</font>
+	CString strHtmlPath = _T(&quot;C:\\tmp.html&quot;);	<font color="#008040">// C:\tmp.htmlを一時ファイルとして使用．</font>
+
+	<font color="#008040">// CString strTag : HTMLファイルに記述するタグ文字列　(以下,そのフォーマット)</font>
+	<font color="#008040">//------------------------------------------------------------------------</font>
+	<font color="#008040">//	&lt;html&gt;</font>
+	<font color="#008040">//	&lt;head&gt;</font>
+	<font color="#008040">//	&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=shift_jis&quot;&gt;</font>
+	<font color="#008040">//	&lt;/head&gt;</font>
+	<font color="#008040">//	&lt;body&gt;</font>
+	<font color="#008040">//	&lt;img src = &quot;(画像ファイルのフルパス)&quot;&gt;</font>
+	<font color="#008040">//	&lt;/body&gt;</font>
+	<font color="#008040">//	&lt;/html&gt;</font>
+	<font color="#008040">//-------------------------------------------------------------------------</font>
+	CString strTag =	&quot;&lt;html&gt;\r\n&quot;
+				&quot;&lt;head&gt;\r\n&quot;
+				&quot;&lt;meta http-equiv=\&quot;Content-Type\&quot; &quot;
+				&quot;content=\&quot;text/html; charset=shift_jis\&quot;&gt;\r\n&quot;
+				&quot;&lt;/head&gt;\r\n&quot;
+				&quot;&lt;body&gt;\r\n&quot;
+				&quot;&lt;img src = \&quot;&quot; + pDoc-&gt;m_strFilePath +  &quot;\&quot;&gt;\r\n&quot;
+				&quot;&lt;/body&gt;\r\n&quot;
+				&quot;&lt;/html&gt;\r\n&quot; ;
+
+	<font color="#008040">// C:\tmp.htmlを書込み用として（既存の場合は中身をクリア）開く．</font>
+	CStdioFile cFile(strHtmlPath,CFile::modeCreate|CFile::modeWrite);
+	cFile.WriteString(strTag);	<font color="#008040">// タグを記述する</font>
+	cFile.Close();			<font color="#008040">// ファイルを閉じる</font>
+
+	Navigate2(strHtmlPath,NULL,NULL);
+}</pre>
+  </div>
+  <p><b>CViewerDoc* pDoc = GetDocument();</b><br>
+  　Documentクラスへのポインタを取得します．これは，逆シリアル化によって取得された画像のフルパスがDocumentクラスのメンバ変数に格納されているため，メンバ変数へのアクセスに必要になるからです．</p>
+  <p><b>CString strHtmlPath = _T(&quot;C:\\tmp.html&quot;);</b><br>
+  　C:\tmp.htmlを，画像を表示させるHTMLファイルとします．そのためにファイル名をCString型で保存しておきます．本来一時ファイルは，他のファイル名とかぶらないユニークな名前をつけてあげなくてはなりませんが，ここではその説明については省略します．あまり難しくないので是非トライして下さい．（当然，このソフトを誰か他の人に使ってもらう時は，必ずユニークな名前を持つ一時ファイルを作らなければいけません．理由はわかりますよね．）<br>
+  　<u>もう１つ重要なことは，文字列の中で <b>\</b> 
+  を使いたい時は <b>\\ </b>と， <b>&quot;</b> を使いたい時は <b>\&quot;</b> 
+  と書かなくてはなりません．これはC言語でも同じ事です．</u><br>
+  <br>
+  <b>CString strTag = ・・・(以下略)</b><br>
+  　実際のタグをCString型で保存します．画像のフルパスについては，pDoc-&gt;m_strFilePath 
+  という形で取得することができます．長くてよくわからないかもしれませんが，
+  <div id="point">
+    &lt;html&gt;<br>
+    &lt;head&gt;<br>
+    &lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; 
+    charset=shift_jis&quot;&gt;<br>
+    &lt;/head&gt;<br>
+    &lt;body&gt;<br>
+    &lt;img src = &quot;(画像ファイルのフルパス)&quot;&gt;<br>
+    &lt;/body&gt;<br>
+    &lt;/html&gt;<br>
+  </div>
+  という情報がstrTagに保存されます．
+  <p><b>CStdioFile cFile(strHtmlPath,CFile::modeCreate|CFile::modeWrite);</b><br>
+  　C:\tmp.htmlを書込み用(CFile::modeWrite)，また既存の場合は中身をクリアして（CFile::modeCreate）開きます．CStdioFileはCFileの派生クラスなので，CFileとしての機能はもちろん，拡張された機能も持ったファイル操作のためのクラスです．</p>
+  <p><b>cFile.WriteString(strTag);</b><br>
+  　先ほどstrTagに保存したタグをファイルに書き込みます．</p>
+  <p><b>cFile.Close();</b><br>
+  　HTMLファイルを閉じます．<br>
+  <br>
+  <b>Navigate2(strHtmlPath,NULL,NULL);</b><br>
+  　HTMLファイル(strHtmlPath)を表示させます．これで画像ファイルが表示できるでしょう．</p>
+</blockquote>
+<h4>■　Document-Viewアーキテクチャの罠　〜アプリケーションの生成〜</h4>
+<blockquote>
+  <p>さて，早速実行してみましょう・・・．多分以下のように表示されると思います(figure3)．</p>
+  <p><b>figure3 なんだこれは？</b><br>
+  <img border="0" src="fig3.jpg" width="449" height="297"></p>
+  <p>　上の×マークは，画像のリンクが正しく張られていないときに起こるものです．Viewer1と書かれた子ウィンドウで右クリックしてみましょう．HTMLファイルなのでポップアップメニューがでてきますよね(^-^;)．ここで，ソースを表示してみてください．ソースはこう記述されていると思います．</p>
+  <div id="point">
+    &lt;html&gt;<br>
+    &lt;head&gt;<br>
+    &lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; 
+    charset=shift_jis&quot;&gt;<br>
+    &lt;/head&gt;<br>
+    &lt;body&gt;<br>
+    <font color="#008040">&lt;img src = &quot;&quot;&gt;&nbsp; ←　ファイルが指定されていない！</font><br>
+    &lt;/body&gt;<br>
+    &lt;/html&gt;
+  </div>
+  <p>　imgタグの中に画像ファイルが指定されていないので，リンクミスとなったため×マークが表示されたようです．しかし初期状態では画像の指定はされるはずがありません．</p>
+  <p>　この問題は，ディフォルトで起動時に新規にドキュメントを作成するように指定されているために起きる現象なのです。ドキュメントが起動時に生成されることによって，</p>
+  <ol>
+    <li>（空の）ドキュメントが生成される．画像パスも当然指定されない．</li>
+    <li>1に伴い，フレームワークは，ビューを生成しようとする．</li>
+    <li>CViewerView::OnInitialUpdateが実行される．</li>
+    <li>画像パスが指定されないまま，HTMLファイルを作成</li>
+    <li>Navigate2でそのファイルを表示・・・</li>
+  </ol>
+  <p>と事がすすんでしまっていたというわけです．これを回避するためには，<b>起動時にドキュメントを生成しなければよい</b>ということになります．こうすることでビュー（子ウィンドウ）も生成されません．ではどこでそのような回避をしたらよいでしょうか？<br>
+  　実は，アプリケーションの根幹の動きを制御するためにViewer.cpp内にCViewerAppクラスが存在します．このクラスの中で特に重要なメンバ関数は，CViewerApp::InitInstance()関数です．この関数がアプリケーションを作成しているといっても構いません．ひまつぶし！？のためにこの関数の中をのぞいてみましょう．この関数の中で特に大切な部分を抜粋します．</p>
+  <p align="center">◇</p>
+  <div id="source">
+    <pre>CMultiDocTemplate* pDocTemplate;
+pDocTemplate = <font color="#0000FF">new</font> CMultiDocTemplate(
+	IDR_VIEWERTYPE,
+	RUNTIME_CLASS(CViewerDoc),
+	RUNTIME_CLASS(CChildFrame), <font color="#008040">// カスタム MDI 子フレーム</font>
+	RUNTIME_CLASS(CViewerView));
+AddDocTemplate(pDocTemplate);</pre>
+  </div>
+  <p>　これは，MDIアプリーケーションのドキュメントテンプレートが定義されているところです．簡単に説明するなら，CViewDocと対応する子ウィンドウはCChildDFrame，ビューはCViewerViewにすると定義しているわけですね．</p>
+  <div id="source">
+    <pre><font color="#008040">// メイン MDI フレーム ウィンドウを作成</font>
+CMainFrame* pMainFrame = <font color="#0000FF">new</font> CMainFrame;
+<font color="#0000FF">if</font> (!pMainFrame-&gt;LoadFrame(IDR_MAINFRAME))
+	<font color="#0000FF">return</font> FALSE;
+m_pMainWnd = pMainFrame;</pre>
+    　
+  </div>
+  <p>　Viewer自体のウィンドウが生成されます．そういえば，IDR_MAINFRAMEはメニュー項目でしたよね．</p>
+  <div id="source">
+    <pre><font color="#008040">// DDE、file open など標準のシェル コマンドのコマンドラインを解析します。</font>
+CCommandLineInfo cmdInfo;
+ParseCommandLine(cmdInfo);
+
+<font color="#008040">// コマンドラインでディスパッチ コマンドを指定します。</font>
+<font color="#0000FF">if</font> (!ProcessShellCommand(cmdInfo))
+	<font color="#0000FF">return</font> FALSE;
+	
+<font color="#008040">// メイン ウィンドウが初期化されたので、表示と更新を行います。</font>
+pMainFrame-&gt;ShowWindow(m_nCmdShow);
+pMainFrame-&gt;UpdateWindow();
+
+<font color="#0000FF">return</font> TRUE;</pre>
+  </div>
+  <p>　ここは，コマンドライン（プログラムの引数みたいなものですね）について書かれています．コマンドラインを指定し，それをパーズ（構文解析）し，その情報を元にpMainFrame-&gt;ShowWindow(m_nCmdShow);でウィンドウを表示する〜なんてことをしていると解釈してください．つまり，コマンドライン情報CCommandLineInfoクラスに，ドキュメントを生成しないというコマンドラインを記述しておけばいいという話なのです．</p>
+  <p align="center">◇</p>
+  <p>　では，コマンドラインを調整して，新規ドキュメントを生成しないようにしましょう．といっても，Viewer.cpp内のCViewerApp::InitInstance()関数内部に以下の1行を加えるだけです．</p>
+  <div id="source">
+    <pre><font color="#008040">// DDE、file open など標準のシェル コマンドのコマンドラインを解析します。</font>
+CCommandLineInfo cmdInfo;
+ParseCommandLine(cmdInfo);
+
+<font color="#008040">// 空の新規ドキュメントを生成しない(ここを追加)</font>
+cmdInfo.m_nShellCommand = CCommandLineInfo::FileNothing;
+
+<font color="#008040">// コマンドラインでディスパッチ コマンドを指定します。</font>
+<font color="#0000FF">if</font> (!ProcessShellCommand(cmdInfo))
+	<font color="#0000FF">return</font> FALSE;
+
+<font color="#008040">// メイン ウィンドウが初期化されたので、表示と更新を行います。</font>
+pMainFrame-&gt;ShowWindow(m_nCmdShow);
+pMainFrame-&gt;UpdateWindow();
+
+<font color="#0000FF">return</font> TRUE;</pre>
+  </div>
+  <p>　実行してみると，子ウィンドウが１つも開かれないviewerが起動し，「ファイルを開く」で指定された画像ファイルを閲覧することが可能になりましたよね．</p>
+</blockquote>
+<h4>■　インターフェースにこだわってみる 
+〜オーバーライド〜</h4>
+<blockquote>
+  <p>　一通り画像viewerになったのはいいのですが，幾つかカッコ悪いところがあります．</p>
+  <ul>
+    <li>大きい画像を表示中，ステータスバーに「画像***をダウンロードしています」と表示されてしまう（figure4）．</li>
+    <li>画像を表示した後，ステータスバーに「ページが表示されました」と表示されてしまう(figure5)．</li>
+  </ul>
+  <p><b>figure4. ダウンロードじゃないってば！</b><br>
+  <img border="0" src="fig4.jpg" width="455" height="35"></p>
+  <p><b>figure5. だからページじゃないってば！</b><br>
+  <img border="0" src="fig5.jpg" width="229" height="38"></p>
+  <p>　とくに上の２つのカッコ悪さは，「HTMLだとバレバレ」です．このステータスバーの表示も，実はCHtmlViewが管理しています．Viewクラスは，表示するためのクラスですからね．ステータスバーの表示は，OnStatusTextChangeで変更できるのです．では変更手順を追ってみましょう．</p>
+  <div id="method">
+    <ol>
+      <li>クラスウィザードを開き，「メッセージマップ」タブをクリックする．</li>
+      <li>ダイアログに以下の値を設定し，「関数の追加」を押す．<br>
+        プロジェクト：Viewer<br>
+        クラス名：CViewerView<br>
+        オブジェクトID：CViewerView<br>
+        メッセージ：OnStatusTextChange</li>
+      <li>「コードの編集」を押す．</li>
+      <li>CCViewerView::OnStatusTextChange(lpszText)関数の中に記述されている，CHtmlView::OnStatusTextChange(lpszText);をコメントアウトする．</li>
+    </ol>
+  </div>
+  <p>こうすると，ファイルを開いている途中でも，開いたあとでも，「レディ」とだけ表示されます．</p>
+  <p align="center">◇</p>
+  <p>　上の操作は，オブジェクト指向プログラミングで重要である<b>オーバーライド（上乗り）</b>というものです．いま扱っているクラスはCViewerViewクラスですが，これはCHtmlViewクラスの継承(つまりCHtmlViewを基にして作られた)クラスです。<br>
+  　オーバーライドとは継承先クラスで，継承元クラスと同じ名前のメンバ関数を定義することです．この場合だと，継承先クラスCViewerView内に，継承元クラスCHtmlViewと同じ名前のメンバ関数を定義することに相当します．</p>
+  <p>　CViewerViewは，CHtmlViewから作られたクラスなので，CViewerView内では，当然CHtmlView::OnStatusTextChangeを使用することができますが，オーバーライドすると，CViewerView内でOnStatusTextChange関数が実行される時は，CViewerView::OnStatusTextChangeが使用されることになります．今回は，CViewerView::OnStatusTextChange内に何も書かなかったために，CHtmlView::OnStatusTextChangeが実行されることがなくなるために，ステータスバーの文字列が変更されることがなくなったのです．</p>
+  <div id="keyword">
+    余談ですが，CViewerViewクラス内で，OnStatusTextChangeをオーバーライドしてしまった場合に，どうしてもCHtmlView::OnStatusTextChangeを使いたい場合はどうするの？という疑問がありますが，OnStatusTextChangeと書くところを<b>::</b>OnStatusTextChange書くことで実行することができます．この<b>::</b>をスコープ解決演算子といいます．
+  </div>
+  <p align="center">◇</p>
+  <p>　このセクションでは，画像viewerの製作を通して，シリアル化とオーバーライドについて学びました．どちらもMFCにおいて重要なことです．是非ご自分でプログラミングされるとより実感が湧くと思います．</p>
+  <p>[<a href="../index.html">back to index</a>]</p>
+  <p align="right">Copyright by Chiaki Fujimon.<br>
+  All Rights Reserved.</p>
+</blockquote>
+
+</body>
+
+</html>

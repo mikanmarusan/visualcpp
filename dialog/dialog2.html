@@ -1,0 +1,139 @@
+<HTML>
+<HEAD>
+<TITLE>UpdateData</TITLE>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html;CHARSET=utf-8">
+<style type="text/css">
+  <!--
+		A:link { text-decoration:none;  color:#ff4500 }
+		A:visited { text-decoration:none;  color:#ff4500 }  
+		A:active { text-decoration:none;  color:#ff0000 }   
+		A:hover { color:#00008b }	
+	    -->
+</style>
+</HEAD>
+<BODY BGCOLOR="white" TEXT="black"><DIV ALIGN=CENTER><!--#geoguide--></DIV>
+<I><FONT COLOR="red" SIZE="6">UpdateData</FONT></I><BR>
+<HR>
+　前回は、EditBoxに割り当てた変数のカテゴリをコントロールにしましたね。今回はカテゴリを値として、エディットボックスの値の操作を学びます。<BR><BR>
+<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" WIDTH="100%">
+  <TR>
+    <TD WIDTH="100%" BGCOLOR="#000099">
+    <FONT COLOR="#ffffff" SIZE="+1">準備作業</FONT></TD> 
+  </TR>
+</TABLE>
+ここではプロジェクトを作成し、リソースの設定まで片づけておきましょう。前回一通りやりましたが、今回は復習の意味でもう1回詳しく説明していきますね。<BR><BR>
+<U><FONT COLOR="red">1.プロジェクトの作成</FONT></U><IMG SRC="fig2_1.jpg" ALIGN="LEFT" WIDTH="444" HEIGHT="299"><BR>
+　新規作成でプロジェクトを作成します。WIN32MFCAPPWIZARDを選択してください。プロジェクト名はCal (：計算のCallculaterの頭3文字ということで)にしておきます。まあ、簡単な計算をさせる道具を作ろう!ということですね。後は1章と同じく以下のようにウィザードを進めます。<BR><BR>
+
+STEP1：作成するアプリケーションの種類-->ダイアログベースにする
+STEP2：アプリケーションへ組み込む機能-->変更なし
+STEP3：ソースファイルのコメント-->した方がよい　：MFCライブラリとのリンク-->共有DLLにする
+STEP4：終了 <BR><BR>
+
+<U><FONT COLOR="red">2.ダイアログリソースを編集する</FONT></U><BR>
+　ResourceViewを表示します。前回リソースのことは一通りやったので、今回は図のように作成できますね。IDも以下のようにまとめました。<BR>
+<TABLE BORDER ALIGN="CENTER">
+<CAPTION>配置するコントロールとID</CAPTION>
+<TR><TD ALIGN="CENTER" VALIGN="MIDDLE">オブジェクト</TD><TD ALIGN="CENTER" VALIGN="MIDDLE">ID</TD><TD ALIGN="CENTER" VALIGN="MIDDLE">キャプション</TD><TD ALIGN="CENTER" VALIGN="MIDDLE">その他</TD></TR>
+<TR><TD ROWSPAN="3" VALIGN="MIDDLE">EditBox</TD><TD VALIGN="MIDDLE">IDC_EDIT1</TD><TD ROWSPAN="3" VALIGN="MIDDLE">なし</TD><TD ROWSPAN="2" VALIGN="MIDDLE">特になし</TD></TR>
+<TR><TD VALIGN="MIDDLE">IDC_EDIT2</TD></TR>
+<TR><TD VALIGN="MIDDLE">IDC_EDIT3</TD><TD VALIGN="MIDDLE">読み取り専用</TD></TR>
+<TR><TD VALIGN="MIDDLE">Button</TD><TD VALIGN="MIDDLE">IDC_BUTTON1</TD><TD VALIGN="MIDDLE">計算(&amp;C)</TD><TD VALIGN="MIDDLE">特になし</TD></TR>
+</TABLE>
+
+<Br>
+と、ココまでは前回とほとんど変わりません。リソースをよく見ると、IDC_EDIT1の値とIDC_EDIT2の掛け算をした結果をIDC_EDIT3に書込むのかも・・・という予感がします(そのままか)。<BR>
+IDC_EDIT3は直接入力しないので読み取り専用にしておくといいと思います。<BR><BR>
+ここで新しいものが1つ出てきましたね。Buttonのキャプション<BR>
+<DL>
+<DD>計算(&amp;C)
+<DT><BR>ですね。でもリソースに表示されているのは、
+<DD><BR>計算(<U>C</U>)
+</DL>
+です。これはよくショートカットキーと呼ばれるもので、Alt+(この場合) Cでマウスでボタンを押さなくてもキーボードがボタンを押してくれます。別にこのソフトでは不要かもしれませんが、MFCソフトを作る上で絶対必要になるので先にこっそり教えちゃいました。<BR><BR>
+
+<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" WIDTH="100%">
+  <TR>
+    <TD WIDTH="100%" BGCOLOR="#000099">
+    <FONT COLOR="#ffffff" SIZE="+1">CLASSWIZARDをつかってオブジェクト間のメッセージをつくる</FONT></TD> 
+  </TR>
+</TABLE>
+
+<U><FONT COLOR="red">1. エディットボックスを選択してCLASSWIZARDを実行します。</FONT></U><BR>
+　さきほど、各エディットボックスにIDをつけました。ではIDC_EDIT1を例にして話を進めます。まずIDC_EDIT1のエディットボックスを選択し右クリックをすると、ClassWizardがあります。これでIDC_EDIT1に対するクラスウィザードを実行できます。<BR><BR>
+<U><FONT COLOR="red">2. EDITボックスのメンバ変数を決めます。</FONT></U><BR>
+　IDC_EDIT1をクリックし（1の通りならディフォルトのはずです）、「変数の追加」ボタンを押してください。
+　メンバ変数をm_val1とし、カテゴリを値にします。変数のタイプは実数値の計算ができるように、double型（倍精度浮動小数点型といいます。高い精度をもつ実数計算用の変数です）にしておきましょう。この調子で3つのエディットボックス以下の表のようなメンバ変数を設定してあげればOKです。<BR>
+
+<TABLE BORDER ALIGN="CENTER">
+<CAPTION VALIGN="TOP" ALIGN="CENTER">EditBoxのIDとメンバ変数</CAPTION>
+<TR><TD>ID</TD><TD>メンバ変数名</TD><TD>カテゴリ</TD><TD>変数の型</TD></TR>
+<TR><TD>IDC_EDIT1</TD><TD>m_val1</TD><TD>値</TD><TD>double</TD></TR>
+<TR><TD>IDC_EDIT2</TD><TD>m_val2</TD><TD>値</TD><TD>double</TD></TR>
+<TR><TD>IDC_EDIT3</TD><TD>m_answer</TD><TD>値</TD><TD>double</TD></TR>
+</TABLE>
+<BR>
+<U><FONT COLOR="red">3.ボタンを作ります。</FONT></U><BR>
+　今度は「計算」のボタンにアクションを付けます。この作業は前回もやりましたね。オブジェクトは「計算」ボタンのIDであるIDC_BUTTON1にして、メッセージのBN_CLICKEDをハイライトし、「関数の追加」ボタンを押します。<BR>メンバ関数名はディフォルトで結構です。<BR>
+　この「関数の追加」はボタンをクリックした時にEDITボックスにメッセージを送る関数を自動に作ってくれるということです。自動的に関数の初期コードを書いてくれたり、ヘッダファイルにもいろいろ書込んでくれる便利なものです。<BR>次に実際のコード（プログラム）を記述してみます。<BR><BR>
+<U><FONT COLOR="red">4.ソースコードを書きこみます。</FONT></U><BR>
+　「コード編集」クリックすると、にCCalDlg::OnButton1という関数が表示されているはずです(多分)。この関数内に以下のコードを書き上げてください。
+<BR>
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+void CCountDlg::OnButton1(){<BR>
+{<BR>
+　　　m_answer=m_val1*m_val2;<BR>
+}<BR>
+</TD></TR>
+</TABLE><BR><BR>
+解説はしなくてもいいと思いますが、<BR>
+<FONT COLOR="navy">IDC_EDIT1の値と、IDC_EDIT2の値を掛け算して、IDC_EDIT3の変数に代入している</FONT><BR>
+と言うことです。さて、ビルド-実行してみましょう。そして思い通りの計算ができるでしょうか???
+<BR>
+<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" WIDTH="100%">
+  <TR>
+    <TD WIDTH="100%" BGCOLOR="#000099">
+    <FONT COLOR="#ffffff" SIZE="+1">あれ？計算しても結果が表示されない・・・。</FONT></TD> 
+  </TR>
+</TABLE>
+確かにソースコードは間違っていません。でもうまく実行できません。<BR>
+
+「原因」<BR>
+率直に言うと、m_val1やm_val2に実際には値が入っていないのです。つまりm_val1とm_val2には「適当」な値が入っているに過ぎないのです。どういうこと??と思う人もいると思いますが、こんなコードがないと意味がないと思いませんか?
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+void CCountDlg::OnButton1(){<BR>
+{<BR>
+<FONT COLOR="red">　　　m_val1 = (IDC_EDIT1の値）;<BR>
+　　　m_val2 = (IDC_EDIT2の値）;</FONT><BR>
+　　　m_answer=m_val1*m_val2;<BR>
+　　　<FONT COLOR="red">(IDC_EDIT3の値） = m_answer;</FONT><BR>
+}<BR>
+<FONT COLOR="red">赤い部分がないと意味がないよね</FONT>
+</TD></TR>
+</TABLE><BR>
+さっきはただEditBoxの中に値を書いてButtonを押しただけです。<BR>Boxの値をメンバ変数に取り込んだり、計算した値をDialogのEditBoxにまた書込んだりする機能があれば便利です。MFCはこれを1つの命令でこなします。<BR>
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<BIG><FONT COLOR="red">UpdateData()関数</FONT></BIG><BR>
+Dialogの値をそのメンバ変数に取り込む時--->引数をtrueにする。<BR>
+メンバ変数の値をそのDialogに返す時--->引数をfalseにする。<BR>
+</TD></TR>
+</TABLE><BR>
+これを使えば、先ほどのコードに追加するには上の2つです。「計算前にDialogから値を取り出して、計算後は値をDialogに返す」のですから、<BR>
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+void CCountDlg::OnButton1(){<BR>
+{<BR>
+　　　<FONT COLOR="red">UpdateData(true);</FONT><BR>
+　　　m_answer=m_val1*m_val2;<BR>
+　　　<FONT COLOR="red">UpdateData(false);</FONT><BR>
+}<BR>
+</TD></TR>
+</TABLE><BR>
+これで多分大成功です。Dialogでデータを解析する時はよく使う手法なので覚えておいてもいいと思います。さて、Buttonのアクションを勉強して、EditBoxのデータ計算をマスターしたところで、今度はDialogコントロールの背景色を変更してみます。そんなに難しくないので気楽に行きましょう。
+<BR><BR><A HREF="../index.html">Back to Index</A>
+
+</BODY>
+</HTML>

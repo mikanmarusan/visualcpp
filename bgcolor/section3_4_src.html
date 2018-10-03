@@ -1,0 +1,156 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+   
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+  <title>コントロールの背景色を変更する--コントロール別背景色変更[ボタン]</title>
+      
+  <link rel="stylesheet" href="style.css" type="text/css">
+</head>
+  <body text="#336666" bgcolor="#c2d1ed" link="#0000ee" vlink="#551a8b" alink="#0000ee"><DIV ALIGN=CENTER><!--#geoguide--></DIV>
+<P align=left>colorbtn.hの全インプリメンテーション</P>
+<P align=left><TEXTAREA id=TEXTAREA1 name=TEXTAREA1 rows=43 cols=125>////////////////////////////////////////////////////////////////////
+//
+//	CLASS	:	CColorButton
+//	FILE	:	colorbtn.h
+//	FUNCTION:	カラーボタンを実装するクラス(定義部)
+//
+////////////////////////////////////////////////////////////////////
+
+#ifndef ___CCOLORBTN_H_
+#define ___CCOLORBTN_H_
+
+class CColorButton : public CButton
+{
+
+	DECLARE_DYNAMIC(CColorButton)
+
+private:
+	COLORREF	coltext;	// キャプションカラー(通常時)
+	COLORREF	colbackground;	// 背景色
+	COLORREF	coldisabled;	// ボタンが無効時のキャプションカラー
+
+public:
+	// コンストラクタ・デストラクタ
+	CColorButton(); 
+	virtual ~CColorButton(); 
+
+	// メンバ関数
+	BOOL AutoLoad(const UINT nID, CWnd* pParent);				// ボタンをCColorButtonにアタッチ
+	void SetTextColor(const COLORREF color){coltext = color;}		// キャプションカラー設定
+	void SetBackGroundColor(const COLORREF color){colbackground = color;}	// 背景色設定
+	void SetTextColor(const COLORREF color){coltext = color;}		// キャプションカラー設定
+	void SetDisabledColor(const COLORREF color){coldisabled = color;}	// ボタン無効時のキャプションカラー設定
+	COLORREF GetTextColor() { return coltext; }				// キャプションカラー取得
+	COLORREF GetBackGroundColor() { return colbackground; }		// 背景色取得
+	void SetTextColor(const COLORREF color){coltext = color;}		// キャプションカラー設定
+	COLORREF GetDisabledColor() { return coldisabled; }			// ボタン無効時のキャプションカラー取得
+
+protected:
+	virtual void DrawItem(LPDRAWITEMSTRUCT lpDIS);			// ボタンのオーナー描画
+	void DrawBkGround(CDC *pDC, CRect rect,const COLORREF color);		// 背景色描画
+	void DrawCaption(CDC *pDC, CRect rect,const COLORREF color,const CString&amp; str);	// キャプション描画
+};
+#endif </TEXTAREA></P>
+<P>&nbsp;</P>
+<P>colorbtn.cppの全インプリメンテーション</P>
+<P><TEXTAREA id=TEXTAREA2 name=TEXTAREA2 rows=96 cols=93>////////////////////////////////////////////////////////////////////
+//
+//	CLASS	:	CColorButton
+//	FILE	:	colorbtn.h
+//	FUNCTION:	カラーボタンを実装するクラス(実現部)
+//
+////////////////////////////////////////////////////////////////////
+
+#include "stdafx.h"
+#include "colorbtn.h"
+
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
+#endif
+
+IMPLEMENT_DYNAMIC(CColorButton, CButton)
+
+CColorButton::CColorButton() 
+{
+	// ディフォルトカラー
+	coltext = RGB(0, 0, 0);			// #0x00,0x00,0x00
+	colbackground = RGB(192, 192, 192);	// #0xC0,0xC0,0xC0
+	coldisabled = RGB(128, 128, 128);	// #0x80,0x80,0x80
+} 
+
+CColorButton::~CColorButton()
+{
+} 
+
+// ボタンをCColorButtonアタッチにする
+BOOL CColorButton::AutoLoad(const UINT nID, CWnd* pParent)
+{
+	// ダイナミックサブクラス化
+	if (!SubclassDlgItem(nID, pParent))
+		return false;
+
+	return true;
+} 
+
+// オーナー描画する
+void CColorButton::DrawItem(LPDRAWITEMSTRUCT lpDIS)
+{
+	CDC* pDC = CDC::FromHandle(lpDIS-&gt;hDC);
+	CString strCaption;
+
+	UINT nState = lpDIS-&gt;itemState; 
+	CRect focusRect, btnRect;
+	focusRect.CopyRect(&amp;lpDIS-&gt;rcItem);
+	btnRect.CopyRect(&amp;lpDIS-&gt;rcItem); 
+
+	// フォーカス矩形領域の作成
+	focusRect.left += 4;
+    focusRect.right -= 4;
+    focusRect.top += 4;
+    focusRect.bottom -= 4;
+
+	// ボタンのキャプションを取得
+	GetWindowText(strCaption);
+
+	// ボタンの描画(背景色、エッジ、キャプション)
+    DrawBkGround(pDC, btnRect, GetBackGroundColor()); 
+  	DrawCaption(pDC, btnRect, GetTextColor(),strCaption);
+	pDC-&gt;DrawEdge(btnRect,EDGE_RAISED,BF_RECT);
+
+	// フォーカスを得たときや選択されているとき
+	if (nState &amp; ODS_FOCUS)
+	{
+		if (nState &amp; ODS_SELECTED)
+		{ 
+			pDC-&gt;DrawEdge(btnRect,EDGE_SUNKEN,BF_RECT);
+		}
+		pDC-&gt;DrawFocusRect(focusRect);
+	}// ボタンが無効であるとき
+	else if(nState &amp; ODS_DISABLED)
+	{
+  		DrawCaption(pDC, btnRect, GetDisabledColor(), strCaption);
+    }
+} 
+
+// 背景色描画
+void CColorButton::DrawBkGround(CDC *pDC, CRect rect,const COLORREF color)
+{ 
+	CBrush brush(color);
+	pDC-&gt;FillRect(rect, &amp;brush);
+}
+
+// キャプション描画
+void CColorButton::DrawCaption(CDC *pDC, CRect rect,const COLORREF color,const CString&amp; str)
+{
+    COLORREF oldcolor = pDC-&gt;SetTextColor(color);
+	pDC-&gt;SetBkMode(TRANSPARENT);
+	pDC-&gt;DrawText(str,rect,DT_CENTER|DT_VCENTER|DT_SINGLELINE);
+	pDC-&gt;SetTextColor(oldcolor);
+}</TEXTAREA></P>
+
+     
+</body>
+</html>

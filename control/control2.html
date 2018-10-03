@@ -1,0 +1,251 @@
+<HTML>
+<HEAD>
+<TITLE>コントロール2--Button</TITLE>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html;CHARSET=utf-8">
+<style type="text/css">
+  <!--
+		A:link { text-decoration:none;  color:#ff4500 }
+		A:visited { text-decoration:none;  color:#ff4500 }  
+		A:active { text-decoration:none;  color:#ff0000 }   
+		A:hover { color:#00008b }	
+	    -->
+</style>
+</HEAD>
+<BODY BGCOLOR="white" TEXT="black"><DIV ALIGN=CENTER><!--#geoguide--></DIV>
+
+<I><FONT COLOR="red" SIZE="6">Buttonの使い方</FONT></I><HR>
+今回のコントロールはボタンです。このボタンは、いたるところで使われますので用途は様々なんですが、是非習得しておきたい項目でしょう。
+<BR><BR>
+
+<!-- セクションタイトル（始め） -->
+<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" WIDTH="100%">
+  <TR>
+    <TD WIDTH="100%" BGCOLOR="#000099">
+    <FONT COLOR="#ffffff" SIZE="+1">1. とりあえず、ボタンを使ってみよう</FONT></TD> 
+  </TR>
+</TABLE>
+<!-- セクションタイトル（終わり） -->
+おなじみの新規作成でプロジェクトを作ることから始めましょう。<BR>
+<!-- インデントリスト（始め） -->
+<DL>
+<DT><FONT COLOR="red">1.プロジェクトでMFC AppWizard（exe）を選択し、プロジェクト名は、DlgButtonとしておく</FONT><BR>
+<FONT COLOR="red">2.「作成するアプリケーションの種類」はダイアログベースを選択</FONT><BR>
+<FONT COLOR="red">.3.終了</FONT>
+</DL>
+<!-- インデントリスト（終わり） -->
+
+ダイアログを編集します。
+<!-- インデントリスト（始め） -->
+<DL>
+<DT><FONT COLOR="red">1.ワークスペースのリソースタブをクリック</FONT><BR>
+<FONT COLOR="red">2.DlgButtonリソースのDialogフォルダをダブルクリック</FONT><BR>
+<FONT COLOR="red">3.IDD_DLGBUTTON_DIALOGを開く</FONT><BR>
+<FONT COLOR="red">4.以下の図のように編集する。</FONT>
+<DD>OKボタンは残しておいて、キャンセルボタンと”Todo：ダイアログのコントロールをここに配置”というスタティックは消す。Button<IMG SRC="button.gif" WIDTH="21" HEIGHT="21">を適当な大きさで配置（IDは<FONT COLOR="blue">IDC_BUTTON1</FONT>）<BR>
+<DT><FONT COLOR="red">5.ビルド--実行を行う</FONT><BR>
+<DD>実行結果も図にしておきました。まだボタンを押しても何にもなりません（笑）
+</DL>
+<!-- インデントリスト（終わり） -->
+<CENTER><IMG SRC="fig2_1_1.gif" WIDTH="278" HEIGHT="137">&lt;--(編集内容)<IMG SRC="fig2_1_2.gif" WIDTH="277" HEIGHT="138">&lt;--(実行結果)<BR></CENTER><BR>
+
+<!-- セクションタイトル（始め） -->
+<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" WIDTH="100%">
+  <TR>
+    <TD WIDTH="100%" BGCOLOR="#000099">
+    <FONT COLOR="#ffffff" SIZE="+1">2.さてボタンに動作をつけましょう</FONT></TD> 
+  </TR>
+</TABLE>
+<!-- セクションタイトル（終わり） -->
+今までの作業はボタンを配置しただけです。MFCの基本はメッセージの受け渡し、というのは先ほどから結構述べていますが、現段階では、ボタンはメッセージを送るようになっていないために、ボタンを押しても何にもならないのです。じゃあ、メッセージを早くつけてよ。ということでメッセージの付け方を述べたいと思います。<BR><BR>
+<!-- インデントリスト（始め） -->
+<DL>
+<DT><FONT COLOR="red">1.ボタンを右クリックしてClassWizardを起動</FONT>
+<DT><FONT COLOR="red">2.以下の様に選択されているか確認</FONT>
+<DD>プロジェクト：DlgButton
+<DD>クラス名：CDlgButtonDlg
+<DD>オブジェクトID：IDC_BUTTON1
+<DT><FONT COLOR="red">3.メッセージでBN_CLICKEDをハイライト</FONT>
+<DD>このメッセージは「ボタンを押した瞬間に送られる」メッセージです。「関数の追加」ボタンが淡色表示から通常の表示になったらよいです。
+<DT><FONT COLOR="red">4.「関数の追加」ボタンを押す。</FONT>
+<DD>関数名を指定せよと表示されます。今は、ディフォルトのOnButton1でOKです。
+<DT><FONT COLOR="red">5.「コードの編集」ボタンを押して、ClassWizardを終了します。</FONT>
+<DD>別にこの時点でコードの編集を押さずにOKだけ押してClassWizardを終了し、CDlgButtonDlgのファイルからさっき作った関数を見ても同じことです。ただ手間を省くだけですよ。
+</DL>
+<!-- インデントリスト（終わり） -->
+さて、後はコードを書くのみです。一番手っ取り早いのはAfxMessageBox関数を使うことです。この関数は、メッセージ関数とも呼ばれ、ただメッセージを小さなウィンドウで表示してくれるだけですが、このように関数が動作しているのかなどのちょっとした確認するのには非常に便利な関数です。これを利用してコードを書きます。<BR><BR>
+<!-- センターテーブル（始め） -->
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<BIG><FONT COLOR="red">OnButton関数内のコード</FONT></BIG><BR>
+<PRE>
+<FONT COLOR="blue">void</FONT> CDlgButtonDlg::OnButton1() 
+{
+	<FONT COLOR="green">// TODO: この位置にコントロール通知ハンドラ用のコードを追加してください</FONT>
+	AfxMessageBox("OnButton1関数");
+}
+</PRE>
+</TD></TR>
+</TABLE>
+<!-- センターテーブル（終わり） --><BR>
+この関数はただ単に、「OnButton1関数」と書かれたウィンドウを表示するだけです。さて、実行してButtonを押してみましょう。<BR><BR>
+<CENTER><IMG SRC="fig2_2.gif" WIDTH="158" HEIGHT="114"></CENTER><BR>
+となったらOK。しかし、今回はこれがメインではありません。ボタンアクションを作るのは実は<A HREF="../dialog/dialog1.html">別のコーナー</A>でも解説しています。今回はちょっと変わったボタンについて解説しようと思います。<BR><BR>
+
+<!-- セクションタイトル（始め） -->
+<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" WIDTH="100%">
+  <TR>
+    <TD WIDTH="100%" BGCOLOR="#000099">
+    <FONT COLOR="#ffffff" SIZE="+1">3.コントロールをいじるために〜SubClass化</FONT></TD> 
+  </TR>
+</TABLE>
+<!-- セクションタイトル（終わり） -->
+コントロールをいじる、例えばボタンに表示する文字（キャプション）が味気ないので、ビットマップが表示できたらいいいと思うかもしれません。MFCでは、CBitmapButtonなんてその名前のとおりのクラスが用意されているので実際は楽にできそうなのですが、そうも行きません。実際は動的にSubClass化しないとコントロールは変更できないのです。そのサブクラスという物は?という疑問が湧いてきましたね。まずそこから解説します。<BR><BR>
+
+<BIG><FONT COLOR="blue"><I>サブクラスとは何でしょう？</I></FONT></BIG><BR>
+サブクラス化を超簡単にいうと（実際今から言う表現は実際は間違っているかもしれないのですが、わかりやすくいうなら・・・という感じで説明しています）、<U>あるダイアログやウィンドウが持つコントロールをあたかもそのダイアログやウィンドウの子分のように扱えるようにする</U>ということです。極端にいうと、ダイアログのクラスからコントロールを直接カスタマイズすることが可能になるわけです。さきほど作ったプログラムのボタンをビットマップ表示します。どんな感じでやるかといいますと・・・
+<!-- インデントリスト（始め） -->
+<DL>
+<DT><FONT COLOR="red">1.ビットマップリソースの準備</FONT>
+<DD>・これがなくちゃ始まりません。リソースタブをクリックし、DlgButtonリソースというところを右クリックします。「挿入」を選んでBitmapを追加して下さい。Bitmapは自分の好きな絵を描いてくれればOKです。
+<DD>・ビットマップのIDはIDB_BITMAP1にしておきます。
+<DT><FONT COLOR="red">2.DlgButtonDlg.hにメンバ変数を追加</FONT>
+<DD><FONT COLOR="blue">private:</FONT>
+<DD><FONT COLOR="blue">CBitmapButton&nbsp;m_BmpBtn;</FONT>
+<DD>と追加して下さい。これは名前の通りビットマップのボタンを操る変数です。(CButtonと似ているかな?)
+<DT><FONT COLOR="red">3.OnInitDialog関数（DlgButtonDlg.cpp）に以下の文を追加する。</FONT>
+</DL>
+<!-- インデントリスト（終わり） -->
+<!-- センターテーブル（始め） -->
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<BIG><FONT COLOR="red">OnInitDialogのコード</FONT></BIG><BR>
+<PRE>
+<FONT COLOR="green">// TODO: 特別な初期化を行う時はこの場所に追加してください。</FONT>
+	if (!m_BmpBtn.SubclassDlgItem(IDC_BUTTON1, this))
+	return(FALSE);
+
+	m_BmpBtn.SetButtonStyle(BS_PUSHBUTTON|BS_OWNERDRAW);
+	m_BmpBtn.LoadBitmaps(IDB_BITMAP1);
+	m_BmpBtn.SizeToContent();
+</PRE>
+</TD></TR>
+</TABLE>
+<!-- センターテーブル（終わり） -->
+<!-- インデントリスト（始め） -->
+<DL>
+<DT><FONT COLOR="red">4.実行します</FONT>
+<DD>私は日の丸の絵のビットマップをボタンに貼り付けました。どうです?
+</DL>
+<!-- インデントリスト（終わり） -->
+<CENTER><IMG SRC="fig2_3.gif" WIDTH="277" HEIGHT="138"></CENTER>
+<BR>
+<BIG><FONT COLOR="blue"><I>なぜあのコードが必要なのか？</I></FONT></BIG><BR>
+サブクラス化によって、<U>あたかもコントロールがダイアログクラスの一員のように考えることができコントロールの詳細な操作ができる</U>と、言いましたが、実際どのように動いているかを説明します、<BR><BR>
+<DL>
+<DT><FONT COLOR="red">if(!m_BmpBtn.SubclassDlgItem(IDC_BUTTON1, this))</FONT>
+<DT><FONT COLOR="red">return(FALSE);</FONT>
+<DD>・thisというのは、自分自身（すなわちこのダイアログ自身）です。IDC_BUTTON1を動的サブクラス化します。サブクラス化は「動的」に行われるため、失敗する可能性があります。失敗すると関数が0を返してきます。これを"!"演算子で論理否定しています。ということは、関数が失敗するとifの論理値が1(真)になるため、return (FALSE)が返されます。
+<DD>・この関数が無事に実行されると、IDC_BUTTON1というコントロールは、CWnd(ウィンドウやダイアログの操作ができる関数)のメッセージを受け取るとるようになります。このサブクラス化をしないと、ボタンはCButtonクラスのメッセージのみしか受け付けないのです。
+<DT><FONT COLOR="red">m_BmpBtn.SetButtonStyle(BS_PUSHBUTTON|BS_OWNERDRAW);</FONT>
+<DD>ボタンのスタイル（外観や機能）を決めています。SetButtonStyle(フラグ)という形でセットします。今回はBS_PUSHBUTTONとBS_OWNERDRAWというフラグを設定しています。
+<DD><B><FONT COLOR="blue">BS_OWNERDRAW</FONT></B>：オーナー描画ボタンを作成します(通常のボタンにようにMFCが直接描画するのとちがいプログラマーが描画させるボタン)。特にCBitmapButton クラスを使うときはこのスタイルを設定しなければなりません。
+<DD><B><FONT COLOR="blue">BS_PUSHBUTTON</FONT></B>：ユーザーがボタンを選択したときに、オーナー ウィンドウ（この場合ダイアログ）に WM_COMMAND（ボタンをクリックしたという）メッセージを送るプッシュ ボタンを作成します。
+<DD>詳しくはMSDNのボタンスタイルを参照して下さい。
+<DT><FONT COLOR="red">m_BmpBtn.LoadBitmaps(IDB_BITMAP1);</FONT>
+<DD>ビットマップを読み込んでいます。これはなんとなく分かりますね。
+<DT><FONT COLOR="red">m_BmpBtn.SizeToContent();</FONT>
+<DD>ボタンのサイズをビットマップの大きさにしてくれる便利な関数です。実際これをかかないとビットマップが欠けてしまったり、ビットマップでないところを押してもボタンが動作してしまうことがあるので、一応このコードは書いておく方がいいでしょう。
+</DL>
+これをOnInitDlgで記述することも肝心です。このOnInitDlgはダイアログを表示する前に実行されるので、ここでボタンをビットマップを付けて表示するコードを記述しておかないと意味がないのです。（まぁ別のところでできないことはないけど）。このコーナーの最後にチェックボックスについて触れます<BR><BR>
+<!-- セクションタイトル（始め） -->
+<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" WIDTH="100%">
+  <TR>
+    <TD WIDTH="100%" BGCOLOR="#000099">
+    <FONT COLOR="#ffffff" SIZE="+1">4.チェックボックスを使おう</FONT></TD> 
+  </TR>
+</TABLE>
+<!-- セクションタイトル（終わり） -->
+ <BR>
+チェックボックスは「ボタン」ではないような感じがします。しかしこれはボタンなのです。CButtonクラスにCheckボタンに関する関数がありますし。RadioButtonについてはまた別に取り上げる予定です。とりあえず作ってみましょう。
+<!-- インデントリスト（始め） -->
+<DL>
+<DT><FONT COLOR="red">1.先ほどのダイアログを変更する。</FONT>
+<DD>チェックボックス<IMG SRC="check.gif" WIDTH="20" HEIGHT="21">を追加します。3個チェックボックスを追加してください。IDとキャプションの関係は一応このように設定すればこのコーナーの説明は楽に読むことができるでしょう（おそらく）
+<DD>ID：IDC_CHECK1&nbsp;キャプション：A
+<DD>ID：IDC_CHECK2&nbsp;キャプション：B
+<DD>ID：IDC_CHECK3&nbsp;キャプション：C
+<DT><FONT COLOR="red">2.実行します。</FONT>
+<DD>先ほどのボタンビットマップ表示が反映されているのでIDC_BITMAP1がビットマップ表示されたままですが、別に気にしなくて結構です。以下の感じに仕上がればリソースの変更は終了です。
+</DL>
+<!-- インデントリスト（終わり） -->
+<CENTER><IMG SRC="fig2_4.gif" WIDTH="242" HEIGHT="162"></CENTER><BR>
+このままではチェックボックスが扱えません(実行してチェックボックスにチェックはできますが、ボタンを押しても一番始めのメッセージボックスが起動するだけです)。そのためにはコードを記述する必要性があります。まぁ当然といえば当然の話ですが。<BR><BR>
+先ほどボタンとメッセージを結び付けた関数OnButton1を編集します。
+<!-- センターテーブル（始め） -->
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<BIG><FONT COLOR="red">OnButton1関数の編集</FONT></BIG><BR><PRE>
+<FONT COLOR="blue">void</FONT> CDlgButtonDlg::OnButton1() 
+{
+	<FONT COLOR="blue">int</FONT> nCheckFlg[3] = {0,0,0};
+	<FONT COLOR="blue">int</FONT> nCheckCount = 0;
+
+	CButton* pBtn1 = (CButton*)GetDlgItem(IDC_CHECK1);<FONT COLOR="green">//CheckButton1のポインタの取得</FONT>
+	CButton* pBtn2 = (CButton*)GetDlgItem(IDC_CHECK2);<FONT COLOR="green">//CheckButton2のポインタの取得</FONT>
+	CButton* pBtn3 = (CButton*)GetDlgItem(IDC_CHECK3);<FONT COLOR="green">//CheckButton3のポインタの取得</FONT>
+	
+	nCheckFlg[0] = pBtn1->GetCheck();<FONT COLOR="green">//チェック状態の取得(チェックされていると1が返る)</FONT>
+	nCheckFlg[1] = pBtn2->GetCheck();
+	nCheckFlg[2] = pBtn3->GetCheck();
+
+	<FONT COLOR="blue">for</FONT>(<FONT COLOR="blue">int</FONT> i=0;i&lt;3;i++)
+		nCheckCount += nCheckFlg[i];<FONT COLOR="green">//チェック数の数をカウント</FONT>
+	
+	<FONT COLOR="blue">switch</FONT>(nCheckCount){
+		<FONT COLOR="blue">case 0</FONT>:AfxMessageBox("Not Selected.");<FONT COLOR="blue">break</FONT>;
+		<FONT COLOR="blue">case 1</FONT>:AfxMessageBox("One Box Selected.");<FONT COLOR="blue">break</FONT>;
+		<FONT COLOR="blue">case 2</FONT>:AfxMessageBox("Two Boxes Selected.");<FONT COLOR="blue">break</FONT>;
+		<FONT COLOR="blue">case 3</FONT>:AfxMessageBox("All Boxes Selected.");<FONT COLOR="blue">break</FONT>;
+		<FONT COLOR="blue">default</FONT>:break;
+	}	
+}</PRE>
+</TD></TR>
+</TABLE>
+<!-- センターテーブル（終わり） --><BR>
+実行してもらえると分かりますが、適当な数チェックを入れて、ボタンを押すと何個チェックしているのかを答えてくれるものができています。ここでは上のコードの中で重要なものを2つ説明します。
+<!-- インデントリスト（始め） -->
+<DL>
+<DT><FONT COLOR="red">CButton*&nbsp; pBtn1 = (CButton*)GetDlgItem(IDC_CHECK1);</FONT>
+<DD>GetDlgItemとはダイアログの中のコントロールを指定するのによく使う関数で、通常そのコントロールのクラスにキャスト(強制型変換)して使います。(CButton*)というのがキャストと呼ばれる物で、GetDlgItemの戻り値をCButton型(ポインタ)に変更しています。これをpBtn1というCButton型に代入しています。これ以降pBtn1を使うことによってIDC_CHECK1を操作できるようになるわけです。
+<DT><FONT COLOR="red">nCheckFlg[0] = pBtn1->GetCheck();</FONT>
+<DD>先ほどのpBtn1はCButtonクラスなのでCButtonクラスの関数が使用できます。GetCheck関数は、チェックボックスがチェックされていたら1、されていなかったら0を返す関数です。これが1ならチェックボックスはチェックされている状態です。
+</DL>
+<!-- インデントリスト（終わり） -->
+
+チェックされているかを調べる関数があるなら、強制的にチェックを入れる関数もあるんです。これは、SetCheck関数という関数なんですが、以下のように使います。
+<!-- インデントリスト（始め） -->
+<DL>
+<DT><FONT COLOR="red">SetCheck(true);</FONT>
+<DD>チェックを入れます。チェックがあらかじめ入っている場合は何もしません。
+<DT><FONT COLOR="red">SetCheck(false);</FONT>
+<DD>チェックを外します。チェックがあらかじめ入ってない場合は何もしません。
+</DL>
+<!-- インデントリスト（終わり） -->
+<!-- センターテーブル（始め） -->
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<BIG><FONT COLOR="red">具体的には・・・</FONT></BIG><BR>
+<PRE>
+<FONT COLOR="blue">void</FONT> CDlgButtonDlg::OnButton1() 
+{
+	CButton* pBtn1 = (CButton*)GetDlgItem(IDC_CHECK1);<FONT COLOR="green">//CheckButton1のポインタの取得</FONT>
+	pBtn1->SetCheck(true);<FONT COLOR="green">//チェック状態の設定</FONT>
+}</PRE>
+</TD></TR>
+</TABLE>
+<!-- センターテーブル（終わり） --><BR>
+実行してボタンを押して下さい。何にもチェックしていないとき、IDC_CHECK1(キャプションAのやつ)が強制的にチェックが入ったでしょうか？チェックが入ったら成功です。このボタンアクションはかなり使えるテクニックです。絶対習得することをお勧めします。
+<BR><BR>
+<A HREF="../index.html">Back to Index</A>
+</BODY>
+</HTML>

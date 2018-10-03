@@ -1,0 +1,101 @@
+<HTML>
+<HEAD>
+  <META NAME="GENERATOR" CONTENT="Adobe PageMill 3.0J Win">
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html;CHARSET=utf-8">
+  <TITLE>Samples</TITLE>
+<style type="text/css">
+  <!--
+		A:link { text-decoration:none;  color:#ff4500 }
+		A:visited { text-decoration:none;  color:#ff4500 }  
+		A:active { text-decoration:none;  color:#ff0000 }   
+		A:hover { color:#00008b }	
+	    -->
+</style>
+</HEAD>
+<BODY text=#000099 bgColor=#ceffff><DIV ALIGN=CENTER><!--#geoguide--></DIV><FONT size=5><I><B><FONT 
+color=navy>サンプルコードコーナー</FONT></B></I></FONT> 
+<HR>
+<FONT 
+size=2>ここでは、本サイトのレベル(初心者)を超えるようなものでリクエストの非常に多いものなどを載せるコーナーです。(具体的な解説は行いません)<BR><FONT 
+color=red>※ここに置かれているサンプルコードを、ご自由に使用しても構いません。本サンプルコードを使用して不都合が生じても、管理者は責任を負いかねます。各自責任の持てる範囲でご使用ください。</FONT></FONT><BR><BR>
+<DL>
+  <DT><B><FONT color=navy size=4>[01](エクスプローラの左側のような)ディレクトリ構造ツリー表示</FONT></B> 
+  <DT>概要 
+  <DD><FONT 
+  size=2>本サンプルコードは、海外VisualC++サイトcodeguruに書かれていたサンプルを、参考・応用して作成したコードです。通常のSDIアプリを作成し、以下の二つのクラスを新規に追加しています。 
+  </FONT>
+  <DD><FONT color=red size=2>CDirTreeCtrlクラス</FONT><FONT 
+  size=2>：(CTreeCtrlの派生クラス) ディレクトリツリーのインプリメンテーション </FONT>
+  <DD><FONT color=red size=2>CSortStrArrayクラス</FONT><FONT 
+  size=2>：(CStringArrayの派生クラス)文字列配列クラスのインプリメンテーション </FONT>
+  <DD><FONT 
+  size=2>なお、codeguruからのサンプルではドイツ語でのコメントがありましたが、日本語でコメントを打ち直しています。なお簡単なところなどはコメントを省略しています。おそらくMDSNがないと理解が不能です(笑) 
+  </FONT>
+  <DD><FONT size=2><BR></FONT>
+  <DD><FONT 
+  size=2>ビュークラスのメンバにCDirTreeCtrlクラスの変数を追加し、ビュー内部でCreateを呼び、そこでツリーを表示させています。詳しくはコードを見てください。 
+  </FONT>
+  <DT>実行例 
+  <DD><IMG src="fig1.gif"> 
+  <DT>ダウンロード 
+  <DD><A href="Explorer.lzh">Explorer.lzh (LHA形式：57,344 bytes)</A> 
+</DD></DL><B><FONT 
+size=4>[02]動いている全プロセス情報を取得したい(簡易プロセスビューワー)</FONT></B><BR>概要<BR><FONT 
+size=2>ウィンドウズプログラミングを進めていくとかならずプロセスに関するプログラミングに触れることがある。ここではWindowsAPIを用いて全プロセス情報を取得するコードを紹介する。</FONT><BR>コーディング<BR><FONT 
+size=2>(ShowProcessという関数名は特に意味がない)</FONT><BR>
+<TABLE height=416 width=688 border=0>
+  
+  <TR>
+    <TD bgColor=#ffffff height=437><FONT color=#000000 size=2>void 
+      ShowProcess()<BR>{<BR>　　HANDLE hSnapShot; </FONT><FONT color=#006666 
+      size=2>　　　　　　// スナップショット </FONT><FONT color=#000000 
+      size=2><BR>　　PROCESSENTRY32 pEntry; </FONT><FONT color=#006666 size=2>　　// 
+      プロセスエントリ</FONT><FONT color=#000000 size=2><BR>　　FILE *fp; // ファイルポインタ 
+      </FONT>
+      <P><FONT color=#000000 
+      size=2>　　hSnapShot=CreateToolhelp32Snapshot(TH32CS_SNAPALL,0);<FONT 
+      color=#006666> // システムのスナップショットを取得</FONT><BR>　　pEntry.dwSize 
+      =sizeof(pEntry); <FONT color=#006666>// 
+      プロセスントリの前処理(Process32Firstを呼ぶために必要)</FONT><BR>　<BR>　　<FONT 
+      color=#006666>// 
+      最初のプロセスの取得(Process32Nextを呼ぶために必要)</FONT><BR>　　Process32First 
+      (hSnapShot,&amp;pEntry); </FONT></P>
+      <P><FONT color=#000000 size=2>　　<FONT color=#006666>// 
+      ファイルオープン(プロセス情報記録用)</FONT><BR>　　fp = 
+      fopen("proc.dat","w");<BR><BR>　　while(1)<BR>　　{<BR>　　　　BOOL hRes = 
+      Process32Next (hSnapShot,&amp;pEntry); <FONT color=#006666>// 
+      プロセスの取得</FONT></FONT></P>
+      <P><FONT color=#000000 size=2>　　　　<FONT color=#006666>// 
+      プロセスが取得できなかったらLoopを抜ける</FONT><BR>　　　　if(hRes == FALSE) break;</FONT></P>
+      <P><FONT color=#000000 size=2>　　　　<FONT color=#006666>// 
+      プロセス情報の書き込み</FONT><BR>　　　　fprintf(fp,"[Exec] = %s\n",pEntry.szExeFile); 
+      <FONT color=#006666>　　　　　　　　　　　　　　　　　// 
+      Exeファイル名</FONT><BR>　　　　fprintf(fp,"[ProcessID] = 
+      %d\n",pEntry.th32ProcessID); <FONT color=#006666>　　　　　　　　　　// 
+      プロセスID</FONT><BR>　　　　fprintf(fp,"[Thread] = 
+      %d\n",pEntry.cntThreads);<FONT color=#006666> 　　　　　　　　　　　　　　// 
+      スレッド</FONT><BR>　　　　fprintf(fp,"[ParentProcessID] = 
+      %d\n",pEntry.th32ParentProcessID);<FONT color=#006666> 　// 
+      親プロセスID</FONT><BR>　　　　fprintf(fp,"[Priority] = 
+      %d\n",pEntry.pcPriClassBase);　　　　　　　　　　　　<FONT color=#006666>// 
+      優先度</FONT><BR>　　　　fprintf(fp,"\n");<BR>　　}<BR>　　fclose(fp);<BR>}</FONT></P><BR></TD></TR></TABLE><BR>実行例(MFC版)<BR><IMG 
+alt="FIG2.GIF - 18,985BYTES" src="fig2.gif"><BR>ダウンロード<BR><A 
+href="../lzhfiles/pvmfc.lzh">ProcessViewer for MFC</A><BR><A 
+href="../lzhfiles/pvapi.lzh">ProcessViewer for 
+WindowsAPI</A><BR><BR><STRONG><FONT 
+size=4>[03]カラーボタンを作りたい</FONT></STRONG><BR>概要<BR><FONT 
+size=2>ダイアログクラスでOnCtlColorを追加することで、ダイアログやエディットボックスなどのコントロールに色をつけることができる。ダイアログ、エディットボックス、スタティックなどは比較的簡単に背景色をつけることができるが、ボタンの場合はオーナー描画で背景色を設定するために、キャプションやフォーカス状況が表示されず、背景色一色で塗りつぶされてしまう、かっこ悪いボタンになってしまう。そこでダイアログクラスのOnCtlColorを試用しないで、ボタンの色を変更するクラスライブラリ(自作)を紹介する。</FONT><BR>クラスライブラリ<BR><FONT 
+size=2><FONT 
+color=#ff0000>CColorButtonクラス</FONT>：カラーボタンを実装するためのクラスライブラリ(自作)です。CButtonクラスから派生しているので、CButtonクラスのメンバは使用可能です。</FONT><BR>準備<BR><FONT 
+size=2>1.colorbtn.h/colorbtn.cppの２つのファイルをプロジェクトに追加する(追加されるとclassviewにCColorButtonが表示される)<BR>2.使用するファイルでcolorbtn.hをインクルードする</FONT><BR>使用方法<BR><FONT 
+size=2><FONT 
+color=#ff0000>(1)インスタンス生成</FONT><BR>CColorButtonを使用するクラス内でインスタンスを生成(変数を定義)します。一般的にはヘッダにメンバとして記述するのが普通です。特にダイアログであれば、ダイアログクラスのヘッダにメンバ変数として定義します。<BR><FONT 
+color=#ff0000>(2)アタッチ</FONT><BR>カラーをつけたいボタンは通常CButtonクラスの変数であるため、CColorButtonとして利用するためには関連付けが必要となります。これをサブクラス化というのですが、AutoLoadという関数で実現します。AutoLoad関数の引数には、コントロールIDと親ウィンドウが必要ですが、通常ダイアログの中のボタンに適用する場合には、親ウィンドウにはthisを与えればよいです。<BR><FONT 
+color=#ff0000>(3)カラー設定(任意)</FONT><BR>キャプションの色(通常時と無効時)と背景色の色を設定します。設定しなくてもディフォルトで色をつけていますが、ディフォルト色は通常のボタンと変わらないので、各自設定してください。<BR></FONT>注意<BR><FONT 
+color=#ff0000 size=2>ボタンはオーナー描画ボタンでなくてはなりません。</FONT><BR>実行例<BR><IMG 
+alt="FIG3.GIF - 3,692BYTES" src="fig3.gif"><BR>ダウンロード<BR><A 
+href="../lzhfiles/ccb_library.lzh">CColorButtonクラスライブラリ(使用解説書付き)<BR></A><A 
+href="color.lzh">実行例ソース</A><BR><BR><A 
+href="../index.html">Back to index</A>  
+</BODY>
+</HTML>

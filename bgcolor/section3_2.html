@@ -1,0 +1,287 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>   
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+  <title>コントロールの背景色を変更する--コントロール別背景色変更[エディットコントロール]</title>      
+  <link rel="stylesheet" href="style.css" type="text/css">
+</head>
+  
+<body text="#336666" bgcolor="#c2d1ed" link="#0000ee" vlink="#551a8b" alink="#0000ee"><DIV ALIGN=CENTER><!--#geoguide--></DIV> 
+<p align=left><FONT size=2>
+←Back［<A href="section3_1.html">スタティックコントロール</A>］
+ -- Up［<A href="index.html">コントロールの背景色を変更する</A>］ -- 
+Forward［<A href="section3_3.html">ボタンコントロール（1）</A>
+  ］→
+</FONT>
+</p> 
+<h2 align=center>コントロール別背景色変更<BR>
+［エディットコントロール］</h2> 
+<div align="center">
+   最終更新日［2002.03.25］</div>
+ 
+<hr width="100%" size="2"> 
+<blockquote>   
+  <p>
+   　エディットコントロール（エディットボックス）とは，ユーザに何か入力させたり，ユーザに何か提示させるための四角いボックスである．このコントロールの描画色を変更させることは，少し複雑であるが，要所をおさえると実は簡単なのである．</p>
+   </blockquote>
+ 
+                                          <table cellspacing="0" cellpadding="0" width="100%" border="1">
+      <tbody>
+                                              <tr>
+     <td valign="top" bgcolor="#339999"><big><font color="#ffffff">●エディットボックスの背景色を変更する</font></big></td>
+                                              </tr>
+                                            </tbody>
+                                          </table>
+ 
+                                          <h4>■　エディットボックスの「色」とは？</h4>
+ 
+                                          <blockquote>   
+                                            <p>　スタティックテキストの「色」が２つあったように，このオブジェクトも，文字列が表示されるオブジェクトのため３つの「色」が存在する．</p>
+   
+                                            <ol>
+     <li>テキスト自体の色 
+                                              <li>テキストが書かれている部分のテキストの背景(バウンディングボックス)色 
+                                              <li>テキストが書かれていない部分のエディットボックスの内部の色</li>
+                                            </ol>
+   
+                                            <p>スタティックテキストと同様，１と２の色はそれぞれ</p>
+   
+                                            <ol>
+     <li>     
+                                                <div><strong>CDC::SetTextColor(COLORREF
+color)</strong></div>
+                                              <li>     
+                                                <div><strong>CDC::SetBkColor(COLORREF
+color)</strong></div>
+                                              </li>
+                                            </ol>
+   
+                                            <p>を使えばよいが，3の色の変更は，ダイアログの場合と同様ブラシハンドルを返すことで実現できる．エディットボックスは，そのスタイル(単一行，複数行，読取専用または無効状態)によって動作が異なる．ここではそれぞれの場合を分けて説明していく．その前にリソースを編集しておこう．</p>
+   
+                                            <ol>
+     <li>     
+                                                <div>Resourceタブをクリック．<br>
+Dialogの中の<strong>IDD_COLCTRL_DIALOG</strong>をダブルクリックで開く．</div>
+                                              <li>     
+                                                <div>figure3.5のようにエディットボックスを追加する．</div>
+                                              <li>     
+                                                <div>スタイルは変更しない(変更しなければディフォルトで単一行エディットボックスになる)．</div>
+                                              <li>     
+                                                <div>実行してみるとfigure3.6のようになるだろう．</div>
+                                              </li>
+                                            </ol>
+     
+                                            <p><IMG id=IMG1 alt=figure3.5 src="fig3_5.jpeg">
+&nbsp; <IMG alt=figure3.6 src="fig3_6.jpeg">
+                                            <br>
+                                            <font size="2"><strong>figure3.5
+   リソース編集　　　　　　　　　　 　　figure3.6 実行結果</strong></font></p>
+                                            </blockquote>
+ 
+                                            <h4>■　単一行エディットボックスの背景色の変更</h4>
+ 
+                                            <blockquote> 
+                                              <p>　エディットボックスの背景色の変更は，実は非常に簡単である．なぜならエディットボックスに書かれるものがテキストであるという点では，スタティックテキストの背景色の変更と同じ手続きをするだけでよいからである．しかも，我々はすでにスタティックテキストの（背景）色の変更を学んだ．なおかつエディットボックスが単一行スタイルであれば，さらに悩むことはない．以下のコーディングを行えば実現は容易にできる．</p>
+   
+                                              <p>まずは，メンバ変数を追加する．追加するメンバ変数は，エディットボックスの背景色となるブラシと，エディットボックスのテキスト色である．</p>
+ 
+                                              <p><TEXTAREA id=CODE9 style="OVERFLOW: hidden" name=CODE9 rows=11 readOnly cols=80>/////////////////////////////////////////////////////////////////////////////
+// CColCtrlDlg ダイアログ
+
+class CColCtrlDlg : public CDialog
+{
+// 構築
+public:
+	CBrush	m_brDlg;		// ダイアログの背景色ブラシ
+	CBrush	m_brEdit;		// エディットボックスの背景色ブラシ(追加)
+	COLORREF	m_colStaticText;// スタティックテキストのテキスト色
+	COLORREF	m_colEditText;	// エディットボックスのテキスト色(追加)
+</TEXTAREA></p>
+ 
+                                              <p>　ColCtrlDlg.cpp内のOnInitDialog関数で，さきほど追加したメンバ変数のカラーを作る．いままでのコーディングを見やすくするためには，以下のように編集しておくとことをお勧めする．ここではエディットボックスの背景色（テキストが書かれていない部分）を黒，テキストを水色にしている．</p>
+ 
+                                              <p><TEXTAREA id=CODE10 style="OVERFLOW: hidden" name=CODE10 rows=19 readOnly cols=85>BOOL CColCtrlDlg::OnInitDialog()
+{
+	(中略)
+	
+	// TODO: 特別な初期化を行う時はこの場所に追加してください。
+
+	////////////////////////////////////////////////////////////
+	// 背景色の設定
+
+	// ダイアログ
+	m_brDlg.CreateSolidBrush(RGB(255,  0,  0));	// 背景(赤)
+	// スタティック
+	m_colStaticText = RGB(255,255,255);		// テキスト(白)
+	// エディットボックス
+	m_brEdit.CreateSolidBrush(RGB(  0,  0,  0));	// 背景(黒)
+	m_colEditText = RGB(  0,255,255);		// テキスト(水色)
+	
+	return TRUE;  // TRUE を返すとコントロールに設定したフォーカスは失われません。
+}
+</TEXTAREA></p>
+ 
+                                              <p>　OnCtlColor関数を以下のように修正する．</p>
+ 
+                                              <p><TEXTAREA id=CODE11 style="OVERFLOW: hidden" name=CODE11 rows=20 readOnly cols=80>HBRUSH CColCtrlDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor) 
+{
+	switch(nCtlColor){
+	// エディットボックス
+	case CTLCOLOR_EDIT:
+	case CTLCOLOR_MSGBOX:
+		pDC-&gt;SetBkMode(TRANSPARENT);	// 背景透過
+		pDC-&gt;SetTextColor(m_colEditText);	// テキスト色設定
+		return (HBRUSH) m_brEdit;		// 背景色ブラシ
+	// スタティックテキスト
+	case CTLCOLOR_STATIC:
+		pDC-&gt;SetBkMode(TRANSPARENT);	// 背景透過
+		pDC-&gt;SetTextColor(m_colStaticText);	// テキスト色設定
+		return (HBRUSH) m_brDlg;		// ダミーブラシ
+	// ダイアログ
+	case CTLCOLOR_DLG:
+		return (HBRUSH) m_brDlg;		//　背景色ブラシ
+	default:
+		return CDialog::OnCtlColor(pDC, pWnd, nCtlColor);
+	}
+}</TEXTAREA></p>
+  <P>やろうとしていることは非常に単純で，エディットボックスであれば，</P>
+  <P><STRONG>pDC-&gt;SetBkMode(TRANSPARENT);</STRONG><BR>テキストが書かれる部分の背景は透過色にする<BR><STRONG>pDC-&gt;SetTextColor(m_colEditText);</STRONG><BR>テキストカラーを決める<BR><STRONG>return 
+  (HBRUSH) m_brEdit;<BR></STRONG>テキストが書かれない背景色を決定する（返す）</P>
+  <P>としているだけである．スタティックコントロールの場合と比べれば，きちんと指定した背景ブラシを返すだけの違いであることは容易にわかるであろう．<BR>　少し疑問に思えるのは，nCtlColorを分岐させるときに，ただCTLCOLOR_EDITの場合として分岐するのではなくて，CTLCOLOR_MSGBOXも付加させている点である（つまりnCtlColorが，CTLCOLOR_EDITかCTLCOLOR_MSGBOXであれば実行されるということ）．これはMSDNにそうせよと書いてあるからそうしているのであるが，実際にはCTLCOLOR_MSGBOXを不可させる必要は特にない<SUP>※1</SUP>．</P>
+                                              </blockquote>
+<H4>■　複数行エディットボックスの背景色の変更</H4>
+<BLOCKQUOTE>
+  <P>　エディットボックスの背景色の変更の一番厄介なところは，複数行にまたがる時である．はじめに厄介さを勉強してもらい，失敗しない複数行エディットボックスの背景色の変更を勉強していくことにする．まず複数行エディットボックスをつくらなくてはならない．</P>
+  <OL>
+     <li>     
+                                                <div>Resourceタブをクリック．<br>
+Dialogの中の<strong>IDD_COLCTRL_DIALOG</strong>をダブルクリックで開く．</div>
+                                              <li>     
+                                                <div>先ほど追加したエディットボックスの大きさを変更する．</div>
+                                              <li>     
+                                                <div>エディットボックスのプロパティを開き，スタイルタブをクリック．<BR><STRONG>［チェックする項目］<BR></STRONG>・複数行<BR>・垂直スクロールバー<BR>・改行を許可<BR><STRONG>［チェックをはずす項目］</STRONG><BR>・水平オートスクロール</div>
+                                              <li>     
+                                                <div>実行して，文字列を打ち込んで見たのがfigure3.7である．<BR>（実際に打ち込んで動作するか見てみよう．）</div>
+                                              </li></OL>     
+                                                <p><IMG alt=figure3.7 src="fig3_7.jpeg" 
+  >　<IMG alt=figure3.8 src="fig3_8.jpeg" ><BR><FONT 
+  size=2><STRONG>figure3.7 うまく動作している気がする　　　figure3.8 
+  表示がおかしくなる例</STRONG></FONT></p>     
+                                                <p>　背景も黒に変更されているし，テキストも水色になっているから，一見うまく動作しているように見える．では記述した文字列を削除してみよう．deleteキーやbackspaceキーで削除したつもりなのに消えていないという状況が起こるかもしれない．また長い文を打ち込んでスクロールしてみよう．たちまち表示がおかしくなる（figure3.8は，”あいうえお”と1行づつ打ち込んでスクロールした結果，スクロールしたら文字が重なってしまった）だろう．どうやら単一行エディットボックスでは起きなかった問題が生じている．この原因はなんだろうか？もちろん!? 
+  MSDNにも複数行エディットボックスについてなにも言及されていないから困ったものである．</p>     
+                                                <p>　てっとり早くいうと<STRONG>，「複数行エディットコントロールでは，背景モードをTRANSPARENTに設定することができない」</STRONG>ということである．これは，コーディング上ではエラーがでることはないが，<STRONG>「新しいテキストを入力したり，スクロールしたりするときに，古いテキストが消去されない」</STRONG>ため，事実上背景モードをTRANSPARENTに設定することができないということである．この現象は，単一行エディットボックスでは起きない．</p>     
+                                                <p>　解決策としては，背景モードをOPAQUE（塗りつぶし）に設定し，テキストが書かれている部分の背景色を設定してあげればよい．つまり</p>     
+                                                <p><TEXTAREA id=CODE11 style="OVERFLOW: hidden" name=CODE11 rows=22 readOnly cols=80>HBRUSH CColCtrlDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor) 
+{
+	switch(nCtlColor){
+	// エディットボックス
+	case CTLCOLOR_EDIT:
+	case CTLCOLOR_MSGBOX:
+		pDC-&gt;SetBkMode(OPAQUE);	// 背景塗りつぶし
+		pDC-&gt;SetBkColor(RGB(0,0,0));// ブラシと同じ色のテキスト背景色
+		pDC-&gt;SetTextColor(m_colEditText);	// テキスト色設定
+		return (HBRUSH) m_brEdit;		// 背景色ブラシ
+	// スタティックテキスト
+	case CTLCOLOR_STATIC:
+		pDC-&gt;SetBkMode(TRANSPARENT);	// 背景透過
+		pDC-&gt;SetTextColor(m_colStaticText);	// テキスト色設定
+		return (HBRUSH) m_brDlg;		// ダミーブラシ
+	// ダイアログ
+	case CTLCOLOR_DLG:
+		return (HBRUSH) m_brDlg;		//　背景色ブラシ
+	default:
+		return CDialog::OnCtlColor(pDC, pWnd, nCtlColor);
+	}
+}</TEXTAREA></p>     
+                                                <p>と設定し直そう．するとうまく動作するはずである．<BR>　したがって単一行エディットボックスの時でも背景モードをTRANSPARENT（透過）に設定せず，背景モードをOPAQUEに設定し，テキスト背景色を指定してあげた方が，複数行に移行する際には都合がよい．だったらはじめからそのように解説したらよいのでは？と言われるかもしれないが，背景モードをTRANSPARENTにする際の注意点をあえて述べたいためにこのような回り道をした．</p></BLOCKQUOTE>     
+                                                <h4>■　読み取り（または使用禁止）エディットボックスの背景色の変更</h4>
+<BLOCKQUOTE>
+  <P>　ここでは，読み取り専用エディットボックスの背景色の変更について解説していく．読取専用エディットボックスの背景色の変更は，単一行・複数行のエディットボックスの背景色の変更とは大きく異なる．なぜなら，文字列を変更することができないという点では，エディットボックスというよりもスタティックテキストに近いからである．まず現在配置されているエディットボックスのプロパティを開き，リソース名を確認しほしい．これがIDC_EDIT1（ディフォルト）になっていたらいいのであるが，なっていない場合はIDC_EDIT1に直してほしい．以下はエディットボックスがIDC_EDIT1であるとして話をすすめていく．単一行・複数行エディットボックスの違いは特に意識しなくてもいいが，ここでは現在の複数行エディットボックスのままにしておく．<BR>　ここでも，単一行・複数行と同様に，背景が黒でテキストが水色の読取専用エディットボックスを作ることを目標にしていこう．</P>
+  <P>まず、OnOnInitDialogの中で，「背景色の設定」部分の下に，以下のようなコードを追加する．<TEXTAREA id=CODE10 style="OVERFLOW: hidden" name=CODE10 rows=12 readOnly cols=80>BOOL CColCtrlDlg::OnInitDialog()
+{
+	(中略)
+
+	////////////////////////////////////////////////////////////
+	// エディットボックスの設定
+	CEdit* pEdit = (CEdit*)GetDlgItem(IDC_EDIT1);// CEditポインタを得る
+	pEdit-&gt;SetWindowText(_T("VisualC++"));		// 文字列を設定
+	pEdit-&gt;SetReadOnly(true);			// 読取専用に設定	
+	
+	return TRUE;  // TRUE を返すとコントロールに設定したフォーカスは失われません。
+}
+</TEXTAREA><BR><STRONG>CEdit* pEdit = 
+  (CEdit*)GetDlgItem(IDC_EDIT1);<BR></STRONG>CWnd::GetDlgItemは、ダイアログ 
+  ボックスまたは他のウィンドウ内の指定されたコントロールまたは子ウィンドウへのポインタを返す．返されたポインタは、CWnd*であるため，実際に使用する際には，コントロールの型へキャストして使用する必要がある．<BR>この操作でエディットコントロール：IDC_EDIT1を操作するためのポインタpEditを得ることができる．<BR><STRONG>pEdit-&gt;SetWindowText(_T("VisualC++"));<BR></STRONG>CWnd::SetWindowTextは、ウィンドウの文字列を設定する関数である．エディットボックスのポインタを使ってこのメンバ関数を実行すると，エディットボックスに文字列を表示することができる．<BR><STRONG>pEdit-&gt;SetReadOnly(true);</STRONG><BR>エディットコントロールを読取専用エディットコントロールに変えることができる．&nbsp;</P>
+  <P>エディットコントロールを読取専用に設定し，初期文字列を設定した．それでは正しく描画色が変更できたか確かめるために実行してみたのがfigure3.9である．OnCtlColor関数に関しては一切触れていないはずなので，本来なら描画色は変更されているはずなのだが，うまく変更されてないことに気づいただろうか？</P>
+  <P align=center><IMG alt=figure3.9 src="fig3_9.jpeg" ><BR><STRONG><FONT 
+  size=2>figure 3.9 失敗している！</FONT></STRONG></P>
+  <P>
+  　一旦整理してみよう．今回のエディットボックスとスタティックコントロールの描画色を比較してみると以下の表のようになる．目標は真ん中の行のエディットボックスの結果であるのだが，今回の失敗作は一番下の行である．ここで重要なことに気がつく．どうやらスタティックコントロールの結果と同じになっているのではないか！</P>
+  <P>
+  <TABLE id=TABLE1 style="WIDTH: 50%" cellSpacing=1 cellPadding=1 width="50%" 
+  align=center border=1>
+    
+    <TR>
+      <TD>ケース</TD>
+      <TD>エディットコントロール</TD>
+      <TD>スタティックコントロール</TD></TR>
+    <TR>
+      <TD>通常の場合</TD>
+      <TD bgColor=#ffffff><FONT color=black>VisualC++</FONT></TD>
+      <TD>
+        <P align=center>-</P></TD></TR>
+    <TR>
+      <TD>期待しているもの</TD>
+      <TD bgColor=#000000><FONT color=#00ffff>VisualC++</FONT></TD>
+      <TD>
+        <P align=center>-</P></TD></TR>
+    <TR>
+      <TD>今回の失敗作</TD>
+      <TD bgColor=#ff0000><FONT color=#ffffff>VisualC++</FONT></TD>
+      <TD bgColor=red><FONT 
+    color=white>スタティックテキスト</FONT></TD></TR></TABLE></P>
+  <P>　以上からわかるとおり，<STRONG>読取専用のエディットコントロールは，文字列の変更が許されていないという点では，スタティックコントロールと等価と考えてよいということである</STRONG>．したがって，<STRONG>読取専用のエディットコントロールが，ダイアログのOnCtlColor関数を呼び出す時，引数であるnCtlColorにはCTLCOLOR_STATICが格納されている</STRONG>のである．したがって先ほどまでのOnCtlColor関数のコーディングのままでは，読取専用のエディットボックスに関しては，CTLCOLOR_STATIC以下のステートメントが実行されてしまっていたのである．</P>
+  <P>というわけでOnCtlColor関数を以下のように変更してほしい．<BR><TEXTAREA id=CODE11 style="OVERFLOW: hidden" name=CODE11 rows=24 readOnly cols=80>HBRUSH CColCtrlDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor) 
+{
+	switch(nCtlColor){	
+	case CTLCOLOR_STATIC:
+		// 読み取り専用エディットボックス
+		if(IDC_EDIT1 == pWnd-&gt;GetDlgCtrlID() ){
+			pDC-&gt;SetBkMode(OPAQUE);
+			pDC-&gt;SetBkColor(RGB(0,0,0));
+			pDC-&gt;SetTextColor(m_colEditText);			
+			return (HBRUSH) m_brEdit;
+		}
+		// 通常のスタティックテキスト
+		else{
+			pDC-&gt;SetBkMode(TRANSPARENT);
+			pDC-&gt;SetTextColor(m_colStaticText);
+			return (HBRUSH) m_brDlg;		
+		}
+	// ダイアログ
+	case CTLCOLOR_DLG:
+		return (HBRUSH) m_brDlg;			//　背景色ブラシ
+	default:
+		return CDialog::OnCtlColor(pDC, pWnd, nCtlColor);
+	}
+}</TEXTAREA><BR>　読取専用エディットコントロールは，nCtlColorにCTLCOLOR_STATICが格納されているので，通常のスタティックコントロールのコーディングとかぶってしまう．そこで第2引数を使用することで，この関数を呼び出したコントロールが，通常のスタティックコントロールなのか，読取専用エディットコントロールかを判定しているのが上のコーディングである．</P>
+  <P>pWnd-&gt;GetDlgCtrlID(void)で，ウィンドウやダイアログの子ウィンドウまたはコントロールのID値を返すことができる．この値がIDC_EDIT1であれば，それは呼び出したコントロールが読取専用エディットコントロールであることになるのは容易にわかるだろう．さて実行してみよう．</P>
+  <P align=center><IMG alt=figure3.10 src="fig3_10.jpeg" 
+  ><BR><STRONG><FONT size=2>figure3.10 実行結果</FONT></STRONG></P>
+  <P>これでエディットコントロールの描画色の変更が自由自在に！？なっただろう！</P></BLOCKQUOTE>
+<HR>
+
+<BLOCKQUOTE>
+  <P><FONT 
+  size=2>※1　そもそも，我々は自作のアプリケーションにおいて，CTLCOLOR_MSGBOXが送られたことを検出できないからである（つまるところバグである）．この問題に対してはMicrosoftも気づいているようで，MSDNやオフィシャルホームページのサポート技術情報（Knowledge 
+  Base）：Q99808に解決策？らしきサンプル</FONT><FONT 
+  size=2> 
+  が掲載されているようである．</FONT></P></BLOCKQUOTE><FONT size=3>
+<P align=center><FONT size=2>
+←Back［<A href="section3_1.html">スタティックコントロール</A>］
+ -- Up［<A href="index.html">コントロールの背景色を変更する</A>］ -- 
+Forward［<A href="section3_3.html">ボタンコントロール（1）</A>］→</FONT> </P>
+<P align=right>VisualC++でソフトを作ろう　(c) 藤門千明</P></FONT>
+     
+                                              </body>
+                                              </html>

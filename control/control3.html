@@ -1,0 +1,252 @@
+<HTML>
+<HEAD>
+<TITLE>コントロール3--RadioButton</TITLE>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html;CHARSET=utf-8">
+<style type="text/css">
+  <!--
+		A:link { text-decoration:none;  color:#ff4500 }
+		A:visited { text-decoration:none;  color:#ff4500 }  
+		A:active { text-decoration:none;  color:#ff0000 }   
+		A:hover { color:#00008b }	
+	    -->
+</style>
+</HEAD>
+<BODY BGCOLOR="white" TEXT="black"><DIV ALIGN=CENTER><!--#geoguide--></DIV>
+
+<I><FONT COLOR="red" SIZE="6">RadioButtonの使い方</FONT></I><HR>
+今回のコントロールはラジオボタンです。このボタンは、複数の選択肢から1つを選択するときに使用します。お分かりの通り、ラジオボタンもCButtonクラスの一員なんですが、今回はラジオボタンをCButtonクラスの物とみなして操作していく方法と、どれ(何番のラジオボタン)を選択したかを返すだけの整数型のコントロールとして操作するかの2通りの方法で行います。
+<BR><BR>
+
+<!-- セクションタイトル（始め） -->
+<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" WIDTH="100%">
+  <TR>
+    <TD WIDTH="100%" BGCOLOR="#000099">
+    <FONT COLOR="#ffffff" SIZE="+1">1. ダイアログリソースの編集から始めましょう</FONT></TD> 
+  </TR>
+</TABLE>
+<!-- セクションタイトル（終わり） -->
+当然のことながら新規作成です。とりあえずダイアログベースで説明していきましょう。<BR>
+<!-- インデントリスト（始め） -->
+<DL>
+<DT><FONT COLOR="red">1.プロジェクトでMFC AppWizard（exe）を選択し、プロジェクト名は、DlgRadioとしておく</FONT><BR>
+<FONT COLOR="red">2.「作成するアプリケーションの種類」はダイアログベースを選択</FONT><BR>
+<FONT COLOR="red">3.終了</FONT>
+</DL>
+<!-- インデントリスト（終わり） --><BR>
+それではまずリソースの変更からです。
+ダイアログを編集します。
+<!-- インデントリスト（始め） -->
+<DL>
+<DT><FONT COLOR="red">1.ワークスペースのリソースタブをクリック</FONT><BR>
+<FONT COLOR="red">2.DlgRadioリソースのDialogフォルダをダブルクリック</FONT><BR>
+<FONT COLOR="red">3.IDD_DLGRADIO_DIALOGを開く</FONT><BR>
+<FONT COLOR="red">4.以下の図のように編集する。</FONT>
+<DD>OKボタンは残しておいて、キャンセルボタンと”Todo：ダイアログのコントロールをここに配置”というスタティックは消す。RadioButton<IMG SRC="radio.gif" WIDTH="20" HEIGHT="20">とEditボックスを下の図のように配置します。<BR>
+<DL>
+<DT><FONT COLOR="red">ID：</FONT>IDC_RADIO1&nbsp;&nbsp;<FONT COLOR="red">キャプション：</FONT>RadioButton1
+<DT><FONT COLOR="red">ID：</FONT>IDC_RADIO2&nbsp;&nbsp;<FONT COLOR="red">キャプション：</FONT>RadioButton2
+<DT><FONT COLOR="red">ID：</FONT>IDC_RADIO3&nbsp;&nbsp;<FONT COLOR="red">キャプション：</FONT>RadioButton3
+<DT><FONT COLOR="red">ID：</FONT>IDC_EDIT_STATE&nbsp;&nbsp;
+<DD>※エディットボックスは読み取り専用にしておくと便利です。(コントロールを右クリックしてプロパティを開けば分かります)
+</DL>
+<DT><FONT COLOR="red">5.ビルド--実行を行う</FONT><BR>
+<DD>実行結果も図にしておきました。まだラジオボタンを押しても何にもなりません。ここまでがリソース編集です。
+</DL>
+
+<!-- インデントリスト（終わり） -->
+<CENTER><IMG SRC="fig3_1.gif" WIDTH="354" HEIGHT="213"></CENTER><BR>
+
+<!-- セクションタイトル（始め） -->
+<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" WIDTH="100%">
+  <TR>
+    <TD WIDTH="100%" BGCOLOR="#000099">
+    <FONT COLOR="#ffffff" SIZE="+1">2.ラジオボタンを動かそう</FONT></TD> 
+  </TR>
+</TABLE>
+<!-- セクションタイトル（終わり） -->
+まずは、プログラム開始時に適当なラジオボタンを選択状態にしておく必要があります。といっても簡単な関数があるので便利です。先ほどラジオボタンをCButtonクラスのように振る舞えるようにしたのは、CButtonクラスに有る簡単な関数を使用したいからだったと行っても過言ではありません。さてさて、プログラムの開始時つまりダイアログが作られるっときにラジオボタンの1つを選択状態にしたいわけなんですけど、どこにコードを記述しておけばいいのでしょうか???となやむところですが、この場合は、OnInitDialog関数内に書込むのがベストです。さっそく次のコードを書込んでみましょう。<BR>
+<!-- センターテーブル（始め） -->
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<BIG><FONT COLOR="red">OnInitDialog関数内(DlgRadioDlg.cpp)</FONT></BIG><BR><PRE>
+<FONT COLOR="green">// TODO: 特別な初期化を行う時はこの場所に追加してください。</FONT>
+CButton* pBtn = (CButton*)GetDlgItem(IDC_RADIO1);
+pBtn->SetCheck(1);
+
+CEdit* pEdt = (CEdit*)GetDlgItem(IDC_EDIT_STATE);
+pEdt->SetWindowText("1");</PRE>
+</TD></TR>
+</TABLE>
+<!-- センターテーブル（終わり） -->
+そして実行するとあら不思議！始めからRadioButton1が選択されています。上のコードの解説を簡単にしておきますね。<BR>
+<!-- インデントリスト（始め） -->
+<DL>
+<DT><FONT COLOR="red">CButton* pBtn = (CButton*)GetDlgItem(IDC_RADIO1);</FONT>
+<DD>IDC_RADIO1というボタンコントロールにアクセスする変数（ポインタ）を設定します。変数名はpBtnとしておきます。
+<DT><FONT COLOR="red">pBtn->SetCheck(1);</FONT>
+<DD>つまりpBtnはIDC_RADIO1を指しています。IDC_RADIO1にCheckを付けます(選択状態にします)。
+<DT><FONT COLOR="red">CEdit* pEdt = (CEdit*)GetDlgItem(IDC_EDIT_STATE);</FONT>
+<DD>IDC_EDIT_STATEというエディットボックスにアクセスする変数（ポインタ）を設定します。変数名はpEdtとしておきます。
+<DT><FONT COLOR="red">pEdt->SetWindowText("1");</FONT>
+<DD>つまりpEdtはIDC_EDIT_STATEを指しています。IDC_EDIT_STATEのボックスに文字列「1」を表示します。
+</DL>
+<!-- インデントリスト（終わり） -->
+なんとなくどんなソフトを作ろうとしているか分かってきましたか？どの(何番の)ラジオボタンを押しているかどうかEdiボックスに出力しているわけです。ということは、ユーザが各ラジオボタンをクリックして選択したとき、Editボックスに状態を反映する必要性があります。簡単に言ってしまうと、ボタンを押したときに関数を駆動させればいいのです。例えばRadioButton2を押したときに動く関数をOnRadioButton2とすると、この関数には、Editボックスに"2"を表示するコードを書いてしまえばいいのです。では実際に行ってみましょう。
+<BR><BR>
+それではClassWizardを使って、3つの関数を作成します。<BR>
+<!-- インデントリスト（始め） -->
+<DL>
+<DT><FONT COLOR="red">IDC_RADIO1に対してメッセージBN_CLICKEDを選択し、関数の追加</FONT>
+<DD>このとき、関数名はなんでもいいんですけど、OnRadio1Clickでいいと思います。
+<DT><FONT COLOR="red">同様にIDC_RADIO2、IDC_RADIO3に対しても同じことを行う。</FONT>
+<DD>OnRadio2ClickとOnRadio3Clickという関数名で作っておけば無難でしょう。
+<DT>以下のコードを記述してみます。
+</DL>
+<!-- インデントリスト（終わり） -->
+<!-- センターテーブル（始め） -->
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<BIG><FONT COLOR="red">DlgRadioDlg.cpp内</FONT></BIG><BR><PRE>
+<FONT COLOR="blue">void</FONT> CDlgRadioDlg::OnRadio1Click() 
+{
+	CEdit* pEdt = (CEdit*)GetDlgItem(IDC_EDIT_STATE);
+	pEdt->SetWindowText("1");
+}
+
+<FONT COLOR="blue">void </FONT>CDlgRadioDlg::OnRadio2Click() 
+{
+	CEdit* pEdt = (CEdit*)GetDlgItem(IDC_EDIT_STATE);
+	pEdt->SetWindowText("2");
+}
+
+
+
+<FONT COLOR="blue">void</FONT> CDlgRadioDlg::OnRadio3Click() 
+{
+	CEdit* pEdt = (CEdit*)GetDlgItem(IDC_EDIT_STATE);
+	pEdt->SetWindowText("3");
+}</PRE>
+</TD></TR>
+</TABLE>
+<!-- センターテーブル（終わり） --><BR>
+実行してみると分かりますが、RadioButtonを選択するとEditBoxにその結果が反映されていることが分かります。コードを見るとすぐ分かりますが、超原始的なことをしているのに過ぎないのですね。どれかのRadioButtonを選択したらEditBoxのポインタを取得しアクセスできるようにして、SetWindowText関数でEditBoxに番号を表示しているだけです。<BR>
+しかし・・・これでは通常のButtonを配置しても同じ動作ができるんじゃないの?と感じますね。まさにその通り。RadioButtonは単に使用するだけでは通常のボタンと変わりません。次はもっとRadioButtonチック？にしようと思います。<BR><BR>
+
+<!-- セクションタイトル（始め） -->
+<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" WIDTH="100%">
+  <TR>
+    <TD WIDTH="100%" BGCOLOR="#000099">
+    <FONT COLOR="#ffffff" SIZE="+1">3.ラジオボタンを本格的に使用してみよう</FONT></TD> 
+  </TR>
+</TABLE>
+<!-- セクションタイトル（終わり） -->
+とりあえず前に書いたコードが邪魔なので消してしまいます。具体的に言えば、RadioButtonを押したときに動作させた3つの関数を削除したいのですが、Ver6.0からは関数の削除が簡単になっているんですが、私はVer5,0なので少し面倒です。ではVer5.0のパターンでやってしまいましょう。<BR>
+<!-- インデントリスト（始め） -->
+<DL>
+<DT><FONT COLOR="red">1.ClassWizardを開きます。</FONT>
+<DT><FONT COLOR="red">2.一番下に「メンバ関数」という欄があるはずですので、そちらに目をむけます。</FONT>
+<DT><FONT COLOR="red">3.先ほど作った関数OnRadio1Clickを探して、ハイライト(選択状態)にします</FONT>
+<DD>すると「関数の削除」ボタンが押せるようになるはずです。
+<DT><FONT COLOR="red">4.関数の削除ボタンを押します。</FONT>
+<DD>インプリメントを手動で〜なんてメッセージが出てしまった場合も「はい」を押します。
+<DT><FONT COLOR="red">5.全く同様にして残りの2つの関数を削除します。</FONT>
+<DD>この方法で削除した物は、先ほど書いた関数のコードじゃなくて、アプリケーション中でのメッセージの結び付けを削除しただけです。当然さっき書いた3つの関数ですが、あの部分は残っている（Ver6.0以降だとコメント分にされてしまうかもしれませんね）ので関数ごと消して下さい。
+<DT><FONT COLOR="red">6.ビルド-実行します。</FONT>
+<DD>これでRadioButtonをおしてもEditBoxに何も反映されない状態まで戻りますね。
+<DD><!-- インデントされて表示されます -->
+</DL>
+<!-- インデントリスト（終わり） --><BR>
+っと気を抜いては行けません。OnInitDialogにコードを記述しているのでしたね。あの部分もバサっと削除して置きます。
+<BR><BR>
+さて、気を取り直してリソースの編集を行います。ここからがRadioButtonを使うためのコツなんで要チェックです。<BR>
+ここでグループボックス<IMG SRC="group.gif" WIDTH="22" HEIGHT="22">を使用します。今まで使用したことのある人はお分かりですが、見た目がよくなるようにこのグループボックスがあるんでしたよね。今回は、3つのRadioButtonをグループボックスで囲みます。<BR>
+とりあえずは下の図のようにリソースを編集してみましょう。ID等も下のようにお願いします。<BR><BR>
+<IMG SRC="fig3_2.gif" ALIGN="LEFT">
+<!-- インデントリスト（始め） -->
+<DL>
+<DT>「チェックボタン」
+<DD><FONT COLOR="red">ID：</FONT>IDC_BTN_CHECK&nbsp;&nbsp;<FONT COLOR="red">キャプション：</FONT>Check
+<DT>「グループボックス」
+<DD><FONT COLOR="red">ID：</FONT>IDC_STATIC&nbsp;&nbsp;<FONT COLOR="red">キャプション：</FONT>グループ
+<DT>３つのRadioButtonはさっきのままで結構です。（調子に乗って削除してしまったら一番始めに戻って作り直して下さい）
+</DL>
+<!-- インデントリスト（終わり） -->
+実行してみましょう。あれれ・・・RadioButtonって始めは1つ選択されていなければいけないのに選択されてないや・・・と思いますが、それはあとでやるので今は気にしちゃだめです。ここで重要なことを1つしますので絶対に忘れないでくださいね。今から行うのは、3つのRadioButtonを一括操作するために必須の作業です。グループボックスでRadioButtonを囲んだ理由がこの作業を通して始めて意味のあるものになるんですが、それは以下の作業を行ってから解説することにします。<BR>
+<!-- インデントリスト（始め） -->
+<DL>
+<DT><FONT COLOR="red">1.リソースの編集画面で、3つのRadioButtonの1番上のやつ（IDC_RADIO1）を右クリック</FONT>
+<DT><FONT COLOR="red">2.一般のタブをクリック</FONT>
+<DD>一般タブの中身はコントロールの表示・非表示を決める大事な場所です。スタイルタブと共によく使います。
+<DT><FONT COLOR="red">3.グループをチェック</FONT>
+</DL>
+<!-- インデントリスト（終わり） -->
+この作業がきちんとできたかどうかは実は簡単に調べることができます。ClassWizardを開きメンバ変数タブをクリックしてコントロールIDの中を見てみましょう。RadioButtonコントロールは3つあるはずに、IDC_RADIO1しか表示されていない場合、さきほどの作業は成功です。つまりこの作業を通して、3つのコントロールが、<U>操作上1つに統合されている</U>というわけです。<BR>
+ついでにこのIDC_RADIO1に関してメンバ変数を設定します。変数の追加ボタンを押すとダイアログが開くため、以下の設定を施します。
+<!-- インデントリスト（始め） -->
+<DL>
+<DT><FONT COLOR="red">メンバ変数名</FONT>-->m_nRadio
+<DT><FONT COLOR="red">カテゴリ</FONT>-->値
+<DD>「値」に設定しておくと、下の方に"ラジオボタングループ型転送"と出るはずですが、今回はこの機能を使うのです。
+<DT><FONT COLOR="red">変数のタイプ</FONT>-->int
+<DD>まぁ、intしか選べないんですけどね(笑)、これはカテゴリを「値」にしているからです。
+</DL>
+<!-- インデントリスト（終わり） -->
+このメンバ変数の設定はアツイです。なぜなら、m_nRadio=0のとき一番上のボタンが選択状態になります。そしてm_nRadio=1のときに2番目のボタンが選択状態に・・・と上から番号で整理されるのです。つまり、<U>m_nRadioの値を調べれば、どのボタンが選択されいたのかが一目瞭然</U>となるわけです。言い換えれば、<U>m_nRadioの値を変更すれば、どのRadioButtonも選択状態に設定できる</U>のでアツイのです。<BR>
+まず手はじめに、IDC_RADIO1（一番上のボタン）を選択状態にします。さきほども言いましたが、この作業はダイアログが表示される瞬間でいいわけですから、OnInitDialogで実行すべきですね。
+<!-- センターテーブル（始め） -->
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<BIG><FONT COLOR="red">OnInitDialog内で</FONT></BIG><BR><PRE>
+<FONT COLOR="green">// TODO: 特別な初期化を行う時はこの場所に追加してください。</FONT>
+m_nRadio = 0;<FONT COLOR="green">//IDC_RADIO1を選択状態</FONT>
+UpdateData(<FONT COLOR="blue">false</FONT>);
+</PRE></TD></TR>
+</TABLE>
+<!-- センターテーブル（終わり） -->
+コードの最後にあるUpdateDataは、Dialogのコーナーでも紹介した便利関数です。m_nRadioなどのメンバ変数に値を代入するだけでは、ダイアログに反映されません。そのためにはメンバ変数の状況をダイアログに反映したり、もしくはダイアログの状況をメンバ変数に反映する関数が必要になります。このUpdateDataは引数によって、以下の動作をします。
+<!-- インデントリスト（始め） -->
+<DL>
+<DT><FONT COLOR="red">false</FONT>
+<DD>メンバ変数に設定したことをダイアログに反映させます
+<DT><FONT COLOR="red">true</FONT>
+<DD>ダイアログの状況をメンバ変数に書き込みます。
+</DL>
+<!-- インデントリスト（終わり） -->
+だから今回はメンバ変数→ダイアログですから、引数はfalseになるわけですね。さて、一旦実行してみましょう。一番上のRadioButtonが選択されていればOKです。<BR><BR>
+最後にRadioButtonの状況を読み取ってレスポンスを返すようにしてこのコーナーを終了しましょう。
+<DL>
+<DT><FONT COLOR="red">1.ClassWizaedを開き、メッセージマップタブをクリック</FONT>
+<DT><FONT COLOR="red">2.以下の項目を選択する</FONT>
+<DD>クラス-->DlgRadio
+<DD>オブジェクトID-->IDC_BTN_CHECK
+<DD>メッセージ-->BN_CLICKED
+<DT><FONT COLOR="red">3.関数の追加ボタンを押し、コードの編集ボタンを押す</FONT>
+<DD>関数名はディフォルトのOnBtnCheckで結構です。以下OnBtnCheckという関数名で進めていきます。
+<DT><FONT COLOR="red">4.以下のコードを記述する</FONT>
+</DL>
+<!-- センターテーブル（始め） -->
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<BIG><FONT COLOR="red">OnBtnCheck関数</FONT></BIG><BR><PRE>
+<FONT COLOR="blue">void</FONT> CDlgRadioDlg::OnBtnCheck() 
+{
+	UpdateData(<FONT COLOR="blue">true</FONT>);
+	<FONT COLOR="blue">switch</FONT>(m_nRadio){
+	<FONT COLOR="blue">case</FONT> 0:
+		AfxMessageBox("RadioButton1が選択されています");<FONT COLOR="blue">break</FONT>;
+	<FONT COLOR="blue">case</FONT> 1:
+		AfxMessageBox("RadioButton2が選択されています");<FONT COLOR="blue">break</FONT>;
+	<FONT COLOR="blue">case</FONT> 2:
+		AfxMessageBox("RadioButton3が選択されています");<FONT COLOR="blue">break</FONT>;
+	<FONT COLOR="blue">default</FONT><FONT COLOR="blue">:break;</FONT>
+	}
+}</PRE>
+</TD></TR>
+</TABLE>
+<!-- センターテーブル（終わり） --><BR>
+まずダイアログの選択状況をメンバ変数に書込む操作が必要ですが、これはUpdateData関数で引数をtrueにしてあげればいいですね。上記のコードはswitch-case文で行っています。分からない人はC/C++の参考書を読んで下さい。条件分岐の基本ですから。<BR>
+実行してみれば分かりますが、適当にRadioButtonを選択して「チェック」ボタンを押すと、どのRadioButtonを選択しているのか表示しますよ。
+<BR><BR>
+<A HREF="../index.html">Back to Index</A>
+</BODY>
+</HTML>

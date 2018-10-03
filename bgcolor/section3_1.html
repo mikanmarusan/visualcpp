@@ -1,0 +1,168 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+   
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+  <title>コントロールの背景色を変更する--コントロール別背景色変更[スタティックコントロール]</title>
+      
+  <link rel="stylesheet" href="style.css" type="text/css">
+</head>
+  <body text="#336666" bgcolor="#c2d1ed" link="#0000ee" vlink="#551a8b" alink="#0000ee"><DIV ALIGN=CENTER><!--#geoguide--></DIV>
+<P align=left><label><FONT size=2>←Back［<A href="section2.html" >ダイアログの背景色の変更</A>］ -- Up［<A 
+href="index.html">コントロールの背景色を変更する</A>］ -- Forward［<A 
+href="section3_2.html">エディットコントロール</A>  ］→ 
+</FONT></label></P>
+<H2 align=center>コントロール別背景色変更<BR>［スタティックコントロール］</H2>
+<DIV align=center>最終更新日［2002.03.25］</DIV>
+ 
+<hr width="100%" size="2"> 
+<blockquote>   
+  <p>
+   　スタティックコントロールは，ダイアログ上でユーザに変更されない文字列等を指す．スタティックコントロールの描画色を変更するのは比較的簡単である．以下の手順で描画色を変更していこう．</p>
+   </blockquote>
+ 
+                      <table cellspacing="0" cellpadding="0" width="100%" border="1">
+      <tbody>
+                          <tr>
+     <td valign="top" bgcolor="#339999"><big><font color="#ffffff">●スタティックコントロールの描画色を変更する</font></big></td>
+                          </tr>
+                        </tbody>
+                      </table>
+ 
+                      <h4>■　スタティックコントロールの「色」とは？</h4>
+ 
+                      <blockquote>   
+                        <p>　スタティックコントロールの色の構成を見ていくために，とりあえずテストコーディングを行ってみる．</p>
+   
+                        <ol>
+     <li>     
+                            <div>Resourceタブをクリック．<br>
+Dialogの中の<strong>IDD_COLCTRL_DIALOG</strong>をダブルクリックで開く．</div>
+                          <li>     
+                            <div>以下figure3.1のように編集し閉じる．</div>
+                          <li>     
+                            <div>実行してみるとfigure3.2のようになる．</div>
+                          </li>
+                        </ol>
+     
+                        <p dir="ltr" style="MARGIN-RIGHT: 0px" ><br>
+                        <IMG id=IMG1 alt=figure3.1 src="fig3_1.jpeg">
+&nbsp;&nbsp;&nbsp; <IMG alt=figure3.2 src="fig3_2.jpeg">
+                        <br>
+                        <font size="2"><strong>figure3.1      リソースの編集　　　　　　　　　　　　　figure3.2　実行結果</strong></font></p>
+   
+                        <p>　この実行結果が表す重要なことは，ダイアログの背景色がいくら赤いとはいえ，<u>スタティックコントロールの背景色とダイアログの背景色は全く無関係</u> 
+  であるということだ．それでは，スティックコントロールの背景色をダイアログと同じ<font color="red">赤色</font>に，そしてテキストの色を<font color="white">
+白色</font>にしていくことにする．</p>
+ 
+                        <p><TEXTAREA id=CODE5 style="OVERFLOW: hidden" name=CODE5 rows=11 readOnly cols=100>/////////////////////////////////////////////////////////////////////////////
+// CColCtrlDlg ダイアログ
+
+class CColCtrlDlg : public CDialog
+{
+// 構築
+public:
+	CBrush		m_brDlg;	// ダイアログの背景色ブラシ
+	COLORREF	m_colStaticText;	// スタティックテキストのテキスト色
+
+	CColCtrlDlg(CWnd* pParent = NULL);	// 標準のコンストラクタ
+</TEXTAREA></p>
+ 
+                        <p>　ColCtrlDlg.cpp内のOnInitDialog関数で，さきほど追加したメンバ変数のカラーを作る．</p>
+ 
+                        <p><TEXTAREA id=CODE6 style="OVERFLOW: hidden" name=CODE6 rows=11 readOnly cols=100>BOOL CColCtrlDlg::OnInitDialog()
+{
+	(中略)
+	
+	// TODO: 特別な初期化を行う時はこの場所に追加してください。
+
+	m_brDlg.CreateSolidBrush(RGB(255,  0,  0));	// 赤色のブラシを作成する
+	m_colStaticText = RGB(255,255,255);		// スタティックテキスト(白色)
+	
+	return TRUE;  // TRUE を返すとコントロールに設定したフォーカスは失われません。
+}
+</TEXTAREA></p>
+ 
+                        <p>　OnCtlColor関数を以下のように修正する．</p>
+ 
+                        <p><TEXTAREA id=CODE7 style="OVERFLOW: hidden" name=CODE7 rows=14 readOnly cols=77>HBRUSH CColCtrlDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor) 
+{
+	switch(nCtlColor){
+	case CTLCOLOR_STATIC:
+		pDC-&gt;SetBkMode(TRANSPARENT);
+		pDC-&gt;SetTextColor(m_colStaticText);
+		return (HBRUSH) m_brDlg;	
+	case CTLCOLOR_DLG:
+		return (HBRUSH) m_brDlg;		
+	default:
+		break;
+	}
+	return CDialog::OnCtlColor(pDC, pWnd, nCtlColor);
+}
+</TEXTAREA></p>
+ 
+                        <p><IMG id =IMG2 alt=figure3.3 src="fig3_3.jpeg">
+　　<IMG alt=figure3.4 src="fig3_4.jpeg">
+                        <br>
+                        <font size="2"><strong>figure3.3    実行結果　　　　　　　　　　　　　　　figure3.4
+   スタティック背景色を変えてみる</strong></font></p>
+   
+                        <p>　実行すると，figure3.3のようにスタティックコントロールの背景もしっかり赤になり，テキスト色は白色になっている．なぜ変更できたのかはCDCクラスのメンバ関数を考えればすぐわかる．</p>
+   
+                        <dl>
+                        <dt><strong> pDC-&gt;SetBkMode(TRANSPARENT)</strong>
+                          <dd>「テキストが書かれている部分」の背景色を透明にする．透明なブラシ(そんなものは現実には無いのであるが)で塗りつぶすということは，ダイアログの背景色が透けて見えることになることにつながる． 
+
+                            <dt><strong>pDC-&gt;SetTextColor(COLORREF   
+  color)</strong>
+                              <dd>「テキスト自体」の色をcolorに設定する．</dd>
+                                </dl>
+   
+                                <p>　重要なことは，    テキストが書かれている部分の背景色を透過状態にしたからといってもNULL以外のブラシハンドルを返さなくてはDCの変更は認識されないので，とりあえずダイアログで指定したブラシと同じ物を返しておくことにする．<br>
+    　いわばNULLでないブラシだったら何を返しても別に構わない．<u>ダイアログの背景色を指定したブラシで，スタティックの背景を変えているわけではないので</u>
+注意してほしい．</p>
+      </blockquote>
+ 
+                                <h4>■　ダイアログの背景とテキストの背景をちがったものにするには？</h4>
+<BLOCKQUOTE>   
+                                  <p>　先ほどは，ダイアログの背景とテキストの背景を同じにする場合について述べた．この場合の方が一般的なのであるが，人によってはダイアログの背景色とテキストの背景色を変更したい場合もあるだろう．これに関してはあまり詳しく説明しないが，以下のようにコーディングしてみてほしい．</p>
+   
+                                  <p><TEXTAREA id=CODE8 style="OVERFLOW: hidden" name=CODE8 rows=15 readOnly cols=69>HBRUSH CColCtrlDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor) 
+{
+	switch(nCtlColor){
+	case CTLCOLOR_STATIC:
+		pDC-&gt;SetBkMode(OPAQUE);
+		pDC-&gt;SetBkColor(RGB(0,0,0));
+		pDC-&gt;SetTextColor(m_colStaticText);
+		return (HBRUSH) m_brDlg;	// この返却値はダミー
+	case CTLCOLOR_DLG:
+		return (HBRUSH) m_brDlg;		
+	default:
+		break;
+	}
+	return CDialog::OnCtlColor(pDC, pWnd, nCtlColor);
+}
+</TEXTAREA></p>
+ 
+                                  <dl>
+                                  <dt><strong>pDC-&gt;SetBkMode(TRANSPARENT)</strong>
+                                    <dd>「テキストが書かれている部分」の背景色を，SetBkColor関数で設定した色で塗りつぶす． 
+                                      <dt><strong>pDC-&gt;SetBkColor(COLORREF
+color)</strong>
+                                        <dd>テキストが書かれている部分」の背景色をcolorに設定する．</dd>
+                                          </dl>
+   
+                                          <p>　これを実行すると，figure3.4のようにスタティックコントロールの背景は黒になる．しかし関数内部で返したブラシはダイアログの背景の時に作成した赤のブラシである．これからも分かるとおり，<u>
+スタティックコントロールの背景色は，ブラシで決まるのではない</u>ということである．是非注意してほしい．  </p></BLOCKQUOTE>
+<P>
+<HR>
+
+<P></P>
+<P align=center><FONT size=2>←Back［<A 
+href="section2.html">ダイアログの背景色の変更</A>］ -- Up［<A 
+href="index.html">コントロールの背景色を変更する</A>］ -- Forward［<A 
+href="section3_2.html">エディットコントロール</A>］→</FONT></P>
+<P align=right>VisualC++でソフトを作ろう　(c) 藤門千明</P>
+     
+                                              </body>
+                                              </html>

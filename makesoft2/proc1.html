@@ -1,0 +1,78 @@
+<HTML>
+<HEAD>
+<TITLE>BitmapLoader〜第1週〜</TITLE>
+<style type="text/css">
+  <!--
+		A:link { text-decoration:none;  color:#ff4500 }
+		A:visited { text-decoration:none;  color:#ff4500 }  
+		A:active { text-decoration:none;  color:#ff0000 }   
+		A:hover { color:#00008b }	
+	    -->
+</style>
+</HEAD>
+<BODY bgcolor="#FFFFFF"><DIV ALIGN=CENTER><!--#geoguide--></DIV>
+<I><font color="red" size="6">BitmapLoader〜イントロダクション〜 </font></I> 
+<HR>
+　ソフト制作短編コーナーにて、画像Viewer(VisualC++6.0のみ)を作成しました。これは、CHtmlViewクラスというHTMLファイルを簡単に開くことのできるクラスを利用し、画像ファイルをHTMLで表示させただけなので、実際にイメージについて手を加えたわけではありません。<br>
+　今回は、Bitmapファイルだけの表示となりますが、実際にファイルを読み込み、メモリに書き込み・・・などを行い、本格的なBitmap表示を行っていこうと思います。<br>
+<BR>
+
+<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" WIDTH="100%">
+  <TR>
+    <TD WIDTH="100%" BGCOLOR="#000099"> <font size="+1" color="#ffffff">1.本ソフトウェア制作で学ぶことの出来る技術</font></TD> 
+  </TR>
+</TABLE>
+<p>本ソフトウェア制作を通して以下のことを学ぶことができるでしょう。皆さんのプログラミング経験のお手伝いになれば幸いです。</p>
+<blockquote> ■　ビットマップファイルの読み込み方法<br>
+  ■　メモリデバイスコンテキストの作成と利用<br>
+  ■　再描画処理(クリッピング)<br>
+  ■　DocとViewの明示的な使い分け</blockquote>
+<p>なんだか難しそうですが、少しづつ学習していくので心配ないですよ。 </p>
+<table border="0" cellspacing="0" cellpadding="0" width="100%">
+  <tr> 
+    <td width="100%" bgcolor="#000099"> <font size="+1" color="#ffffff">2.プロジェクトの作成</font></td>
+  </tr>
+</table>
+<p>プロジェクトを作成します。作成内容については以下の通りです。</p>
+<p><font color="#FF0000">[初期画面]</font><br>
+  プロジェクト名BmpLoader<br>
+  プロジェクト種類 MFC AppWizard(exe)<br>
+  &quot;新規にワークスペースを作成&quot;にチェック<br>
+  <br>
+  <font color="#FF0000">[ステップ1]</font><br>
+  作成するアプリケーションの種類においてSDIをチェック<br>
+  <br>
+  <font color="#FF0000">[ステップ2〜]</font><br>
+  特に変更なし</p>
+<p>今回は、SDI(Single Document Interface)のソフトウェアとして作成していきます(その方が簡単なので)。</p>
+<table border="0" cellspacing="0" cellpadding="0" width="100%">
+  <tr> 
+    <td width="100%" bgcolor="#000099"> <font size="+1" color="#ffffff">3.リソースの編集</font></td>
+  </tr>
+</table>
+<p>BitmapLoaderですから、メニューの中で「編集」する項目や新規作成・保存といった項目は不必要です。そこで不要なものは全て削除してしまいます。</p>
+<p><font color="#FF0000">1. 「編集」の以下の全てのメニュー項目を削除する(「編集」ポップアップも削除)。<br>
+  </font><br>
+  <font color="#FF0000">2. 「ファイル」内において、&quot;印刷&quot;、&quot;印刷プレビュー&quot;、&quot;プリンタの設定&quot;、&quot;アプリケーションの終了&quot;以外の項目を削除する。</font><br>
+  <font size="2">　&quot;開く&quot;を削除してしまうのか？と思う人がいるかもしれませんが、メニューにある&quot;開く&quot;が押されると、Appwizardが自動的にCWinAppクラスのOnFileOpenを実行するように、以下の通りに記述しているため(BmpLoader.cppにて)です。<br>
+  <b>ON_COMMAND(ID_FILE_OPEN, CWinApp::OnFileOpen)</b><br>
+  　今回はビットマップファイルを開きます。したがってディフォルトであるCWinApp::OnFileOpenでは対処できないので、こちらでファイルを開く機構を新たに作らなくてはならないので、&quot;開く&quot;(ID_FILE_OPEN)を削除してしまうのです。</font><br>
+  <br>
+  <font color="#FF0000">3. &quot;開く&quot;メニューを追加する。</font></p>
+<table border="0" bgcolor="#FFFFFF" width="316" align="center">
+  <tr> 
+    <td width="310" valign="top" bgcolor="#000000"><font size="2" color="#FFFFFF">Fig1_1.jpg 
+      &quot;開く&quot;メニューを追加</font></td>
+  </tr>
+  <tr> 
+    <td width="310" valign="top"><img src="fig1_1.jpg" width="506" height="200"></td>
+  </tr>
+</table>
+<p><br>
+  <font size="2">　キャプションにて、&quot;...&quot;と書いていますが、これは「このメニューを開くと何かダイアログが開く」 という意味だそうです。しかしキャプションは表示文字列に過ぎないので 
+  なくても構いません。またCtrl+Oとはアクセラレータキーです。アクセラレータキーは、後で設定しますのでとりあえず書いておきます。</font> <br></p>
+<p><a href="proc2.html">[Next]</a><br>
+  [Previous]<br>
+  <a href="../index.html">[Home]</a></p>
+</BODY>
+</HTML>

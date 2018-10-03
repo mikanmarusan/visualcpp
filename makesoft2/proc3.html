@@ -1,0 +1,277 @@
+<HTML>
+<HEAD>
+<TITLE>BitmapLoader〜第3週〜</TITLE>
+<style type="text/css">
+  <!--
+		A:link { text-decoration:none;  color:#ff4500 }
+		A:visited { text-decoration:none;  color:#ff4500 }  
+		A:active { text-decoration:none;  color:#ff0000 }   
+		A:hover { color:#00008b }	
+	    -->
+</style>
+</HEAD>
+<BODY BGCOLOR="#ffffff"><DIV ALIGN=CENTER><!--#geoguide--></DIV>
+<I><font color="red" size="6">BitmapLoader〜メモリDCの作成と応用〜</font></I> 
+<HR>
+<p>　前回、デバイスコンテキスト(DC)とメモリデバイスコンテキスト(以下メモリDC)について詳しく(？)解説しました。今回は、メモリDCを使う必要性を再描画処理から述べ、実際にメモリデバイスコンテキストを作成し管理する方法を解説します。</p>
+<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" WIDTH="100%">
+  <TR> 
+    <TD WIDTH="100%" BGCOLOR="#000099"> <font color="#ffffff" size="+1">6.再描画の重要性</font></TD>
+  </TR>
+</TABLE>
+<p>　「再描画」と簡単に言ってしまいますが、実はかなり大変な作業のことなのです。みなさんはWindowsに付属の&quot;Paint&quot;を使用してお絵かきをした経験があると思います。この&quot;Paint&quot;では、書いた絵の上に何らかのウィンドウが重なったりウィンドウのサイズが変更されても、書いた絵はきちんと表示されていますよね。こんなの当たり前でしょうと思った方…それは違うんです。これは&quot;Paint&quot;というソフトが積極的に再描画しているためです。<br>
+  　前回、最後に3本の線を描くプログラムを書いていただきましたが、あのソフトウェアの上に、何か別のウィンドウを重ねたりウィンドウのサイズを変更しても3本の線はきちんと表示されているはずです。<b>あれはソフトウェアの方で積極的に再描画をかけているからです</b>。といっても私たちはそんなコーディングをしたわけではありませんでした。それは、再描画の必要性が生じたとき、フレームワーク(AppWizardで作られたソフトウェアの基本構造)がViewクラスのOnDraw関数を呼ぶことになっているため、自動的に再描画処理がされていたという結果の賜物です。</p>
+<p>　しかし、全ての描画コードをOnDrawで書くとは限りませんし、描画コードをOnDrawのみで書くことは非常にナンセンスです。したがって、自分で描いたものは自分の責任で再描画を行う必要性が生じます。</p>
+<p>　先ほど、再描画は大変な作業であると言いました。例えば、円を1つ描いたとします。この時点で、このプログラムに対して円を再描画する責任が生じたことになります。今度は四角を書いたとします。この時点で、このプログラムに対して円と四角を再描画する責任が生じました。・・・なんてことを繰り返していきますと、再描画すべきものがどんどん増えてしまいます。DCの描画関数の実行速度は比較的遅いために、再描画すべき図形が増えてしまうと、とんでもないことになってしまうことが目にみえてくるでしょう。<br>
+  さらに恐ろしいことは、再描画すべき順序を覚えていなくてはならないということです。ではこれらの問題を解決する方法はあるのでしょうか？</p>
+<p>その一つがメモリデバイスコンテキストなのです。</p>
+<table border="0" cellspacing="0" cellpadding="0" width="100%">
+  <tr> 
+    <td width="100%" bgcolor="#000099"> <font color="#ffffff" size="+1">7.メモリDCと再描画</font></td>
+  </tr>
+</table>
+<p>　メモリDCは「裏画面」と呼ばれると<a href="proc1.html">イントロダクション</a>でも述べました。これに対してユーザが見ているディスプレイ画面を「表画面」と呼ばれることがあります。この表画面とは「通常のデバイスコンテキスト」に相当するものです。</p>
+<p>　ディスプレイで表示される色などの情報は、フレームバッファと呼ばれるメモリに書き込まれます。フレームバッファとは、簡単に言えばディスプレイの1つ１つのピクセルが出すべき色情報をもっているバッファのことです。ウィンドウが移動するとき、フレームバッファの内容が変わることで、私たちにはウィンドウが動いたように見えるのです。このフレームバッファと表画面は密接に関わりあっているため、他のウィンドウの移動やウィンドウのサイズ変更による影響を受けてしまいます。ところがメモリDCは、通常のメモリ領域に過ぎないので、影響を全く受けないという性質があります。</p>
+<p>描画処理の基本は、2段階に分けられます。</p>
+<p><font color="#FF0000">1.　描画処理をメモリDC(裏画面)に対して行う。<br>
+  2.　メモリDCの情報を表画面へ転送する。</font></p>
+<p>そして再描画の処理とは、</p>
+<p><font color="#FF0000">再描画の要求があった時、メモリDCの情報を表画面に転送する。</font></p>
+<p>これらの処理を図にすると以下のようになるでしょう。</p>
+<table border="0" bgcolor="#FFFFFF" width="316" align="center">
+  <tr> 
+    <td width="310" valign="top" bgcolor="#000000"><font size="2" color="#FFFFFF">Fig3_1.jpg 
+      描画処理</font></td>
+  </tr>
+  <tr> 
+    <td width="310" valign="top"><img src="fig3_1.jpg" width="399" height="226"></td>
+  </tr>
+</table>
+<table border="0" bgcolor="#FFFFFF" width="316" align="center">
+  <tr> 
+    <td width="310" valign="top" bgcolor="#000000"><font size="2" color="#FFFFFF">Fig3_2.jpg 
+      再描画処理</font></td>
+  </tr>
+  <tr> 
+    <td width="310" valign="top"><img src="fig3_2.jpg" width="399" height="231"></td>
+  </tr>
+</table>
+<br>
+<table border="0" cellspacing="0" cellpadding="0" width="100%">
+  <tr> 
+    <td width="100%" bgcolor="#000099"> <font color="#ffffff" size="+1">8.メモリDCを作成する。</font></td>
+  </tr>
+</table>
+<p>　長ーい解説でしたが、DCとメモリDCは絶対知っておきたい内容なのでかなり詳しく解説しました。さてメモリDCを作成してみましょう。作成したといっても何も起きません(ただのメモリ領域を確保するだけですからね)</p>
+<p><font color="#FF0000">1.メモリデバイスコンテキストを定義する</font><br>
+  <font size="2">以下の表のように変数を追加する。</font></p>
+<table border="0" bgcolor="#FFFFFF" width="335" align="center">
+  <tr> 
+    <td width="329" valign="top" bgcolor="#000000"><font size="2" color="#FFFFFF">変数の追加(BmpLoaderView.hファイル内)</font></td>
+  </tr>
+  <tr> 
+    <td width="329" valign="top"><font color="#006666" size="2">// インプリメンテーション</font><font color="#000000" size="2"><br>
+      <font color="#0000FF">public:</font><br>
+      <blockquote> <font color="#006666">// 以下を追加</font><br>
+        CDC dcMem; <font color="#006666">// メモリデバイスコンテキスト</font><br>
+        CBitmap* pOldBitmap; <font color="#006666">// ストックビットマップ</font><br>
+        CBitmap* pBitmap; <font color="#006666">// ビットマップ</font> </blockquote>
+      </font></td>
+  </tr>
+</table>
+<p><font size="2">　</font><font size="2">メモリDCの定義以外に、ビットマップオブジェクトへのポインタ変数を2つ定義しています。デバイスコンテキストはビットマップオブジェクトを必ず1つ持たなくてはいけないと前章でもいいましたが、デバイスコンテキストによる描画情報は単なるビットマップに過ぎません。あとでビットマップオブジェクトの領域を動的に確保する予定なので、ここではそのポインタpBitmapを定義しておきます。pOldBitmapは、メモリDCがビットマップオブジェクト(pBitmap)持つとき、それまで持っていたビットマップオブジェクトをストックしておかなくてはならないので、そのストック用として定義しておきます。<br>
+  <br>
+  </font><font color="#FF0000">2.CBmpLoaderView::OnInitialUpdateをオーバーライドする</font><br>
+  <font size="2">　</font><font size="2">ClassWizardを起動し、メッセージタブ内において、以下のように選択しOKを押します。<br>
+  <b>クラス名</b> CBmpLoaderView<br>
+  <b>オブジェクトID</b> CBmpLoaderView<br>
+  <b>メッセージ</b> OnInitialUpdate<br>
+  　オーバーライドとは、クラスの継承において基底クラス内のメンバ関数(メソッド)と同名・同引数のメンバ関数を派生クラス内で作ることを言います</font><font size="2">。オーバーライドせずにOnInitialUpdateを呼ぶと、基本クラスのCView::OnInitialUpdateが呼ばれますが、オーバーライド後はCBmpLoaderView::OnInitialUpdateの方が呼ばれるようになります。詳しくは<a href="../word/index.html" target="_blank">プログラミング辞典</a>を参考にしてください。</font><br>
+  <br>
+  <font color="#FF0000">3.OnInitialUpdate()内にコーディングをする</font></p>
+<table border="0" bgcolor="#FFFFFF" width="588" align="center">
+  <tr> 
+    <td width="582" valign="top" bgcolor="#000000"><font size="2" color="#FFFFFF">OnInitialUpdate内のコーディング(BmpLoaderView.cpp内)</font></td>
+  </tr>
+  <tr> 
+    <td width="582" valign="top"> <font size="2" color="#0000FF">void</font><font size="2"> 
+      CBmpLoaderView::OnInitialUpdate() <br>
+      { <br>
+      </font>
+      <blockquote><font size="2"> CDC *pDC;<font color="#006666">//通常のデバイスコンテキストを格納するポインタ</font><br>
+        CRect cClient;<font color="#006666">//クライアント領域</font><br>
+        CBrush cBrush;<font color="#006666">//ブラシ</font><br>
+        CBrush *pOldBrush;<font color="#006666">//ブラシのストック変数</font><br>
+        <font color="#006666"><br>
+        // ビットマップオブジェクトの動的確保</font><br>
+        pBitmap = <font color="#0000FF">new</font> CBitmap();<br>
+        <br>
+        <font color="#006666">// クライアント領域の取得</font><br>
+        GetClientRect(&amp;cClient);<br>
+        <br>
+        <font color="#006666">// 現在のDCのポインタを取得</font><br>
+        pDC=GetDC();<br>
+        <br>
+        <font color="#006666">// 通常のDCとメモリDCに互換性をつける</font><br>
+        dcMem.CreateCompatibleDC(pDC);<br>
+        <br>
+        <font color="#006666">// 通常のDCの互換性のあるビットマップをメモリ上に作成</font><br>
+        pBitmap-&gt;CreateCompatibleBitmap(pDC,cClient.Width(),cClient.Height());<br>
+        <br>
+        <font color="#006666">//ビットマップとメモリDCの関連付け</font><br>
+        pOldBitmap = dcMem.SelectObject(pBitmap);<br>
+        <br>
+        <font color="#006666">//白のBrushを作成</font><br>
+        cBrush.CreateSolidBrush(RGB(255,255,255));<br>
+        <br>
+        <font color="#006666">//現在のbrushのポインタをpOldBrushとして残しておく </font><br>
+        pOldBrush=dcMem.SelectObject(&amp;cBrush);<br>
+        <br>
+        <font color="#006666">// クライアント領域でbitmapをコピー</font><br>
+        dcMem.PatBlt(0,0,cClient.Width(),cClient.Height(),PATCOPY);<br>
+        <br>
+        <font color="#006666">//昔のBrushに戻す</font><br>
+        dcMem.SelectObject(pOldBrush);<br>
+        <br>
+        <font color="#006666">//DCを解放</font><br>
+        ReleaseDC(pDC);</font></blockquote>
+      <font size="2">} </font></td>
+  </tr>
+</table>
+<p>解説<font size="2"><br>
+  <b>pBitmap = new CBitmap();</b><br>
+  ビットマップオブジェクトを動的に作成します。pBitmapはビットマップオブジェクトのポインタですが、ポインタは単にアドレスが入るだけですから、オブジェクト自体は定義されていません。そこでオブジェクトを動的に作成する必要があります。<br>
+  <br>
+  <b>GetClientRect(&amp;cClient);</b><br>
+  ウィンドウ内の白い画面領域のサイズを取得します。<br>
+  <br>
+
+  <b>pDC=GetDC();</b><br>
+  現在のウィンドウに関連付けされているデバイスコンテキスト(表画面)へのポインタを取得します。メモリDCとビットマップの領域を確保するために必要になります。<br>
+  <br>
+  <b>dcMem.CreateCompatibleDC(pDC);</b><br>
+  　表画面と裏画面の関連付けを行います。これは先ほど説明した「転送」からも分かるように、デバイスコンテキストとメモリDCが似たような構造をとっていないと「転送」することが出来ないからです。さきほどメモリDCをメンバ変数として定義しましたが、ウィンドウが破棄されるまで再描画の度にメモリDCからデータを転送する必要があるからため(関数内にローカルで定義した場合、関数を抜けてしまうと無効になってしまう）、メモリDCの変数をメンバとして保持したのです。</font><font size="2"><br>
+  <br>
+  <b>pBitmap-&gt;CreateCompatibleBitmap(pDC,cClient.Width(),cClient.Height());</b><br>
+  メモリDCの描画情報はビットマップで保持するといいましたが、そのビットマップのデータ領域を作成します。このとき、先ほど取得した現在のDC(表画面）と互換性のあるビットマップを作成する必要があります。これで表画面と非常に似た構造のビットマップができあがります。<br>
+  <br>
+  <b>pOldBitmap = dcMem.SelectObject(pBitmap);</b><br>
+  作成したビットマップをメモリDCに持たせます。このとき初めに持っていたメモリDCのビットマップをストックしておく必要があるので、pOldBitmapに保持しておきます。<br>
+  <br>
+  <b>cBrush.CreateSolidBrush(RGB(255,255,255));</b><br>
+  白い塗りつぶしブラシを作成します。<br>
+  <br>
+  <b>pOldBrush=dcMem.SelectObject(&amp;cBrush);</b><br>
+  メモリDCに白いブラシを持たせます。このとき、先ほどまで持っていたブラシをストックしておきます。<br>
+  <br>
+  <b>dcMem.PatBlt(0,0,cClient.Width(),cClient.Height(),PATCOPY);</b><br>
+  現在持っているブラシを使用し、現在メモリDCが選択しているビットマップに色やパターンをつけます。今選択しているブラシは白い塗りつぶしブラシなので、白くぬりつぶされたビットマップとなります。これらは初期画面でクライアント領域を白くしておくためです。<br>
+  <br>
+  <b>dcMem.SelectObject(pOldBrush);</b><br>
+  ブラシが不要になったので、先ほどまでストックしておいたブラシを元に戻しておきます。<br>
+  <b><br>
+  ReleaseDC(pDC);</b><br>
+  現在のデバイスコンテキストへのポインタを解放します。取得したら解放・・・これは基本ですね。<br>
+  </font></p>
+<p><font color="#FF0000">4.CBmpLoaderView::OnDestroyをオーバーライドする</font><br>
+  <font size="2">　</font><font size="2">ClassWizardを起動し、メッセージタブ内において、以下のように選択しOKを押します。この作業を行うと、OnDestroy関数が追加されます。<br>
+  <b>クラス名</b> CBmpLoaderView<br>
+  <b>オブジェクトID</b> CBmpLoaderView<br>
+  <b>メッセージ</b> WM_DESTROY<br>
+  OnDestroyは、ウィンドウを閉じた時に送られるWM_DESTROYメッセージによって実行される関数で、ウィンドウの破棄を行う関数です。<br>
+  </font><br>
+  <font color="#FF0000">5.OnDestroy()にコーディングする</font></p>
+<table border="0" bgcolor="#FFFFFF" width="588" align="center">
+  <tr> 
+    <td width="582" valign="top" bgcolor="#000000"><font size="2" color="#FFFFFF">OnDestroy内のコーディング(BmpLoaderView.cpp内)</font></td>
+  </tr>
+  <tr> 
+    <td width="582" valign="top"> <font color="#0000FF" size="2">void</font><font color="#000000" size="2"> 
+      CBmpLoaderView::OnDestroy() <br>
+      {<br>
+	  <blockquote> 
+        <p><font color="#006666">// ストックしておいたビットマップを割り当てる</font><br>
+          dcMem.SelectObject(pOldBitmap);<br>
+          <br>
+          <font color="#006666">// ビットマップオブジェクトを削除する</font><br>
+          pBitmap-&gt;DeleteObject();<br>
+          <br>
+          <font color="#006666">// メモリデバイスコンテキストの削除</font><br>
+          dcMem.DeleteDC();<br>
+          <br>
+          <font color="#006666">// 正規のOnDestroyを実行する</font><br>
+          CView::OnDestroy();</p>
+        </blockquote>
+      }</font></td>
+  </tr>
+</table>
+<p>解説<br>
+  <font size="2"><b>dcMem.SelectObject(pOldBitmap);</b><br>
+  メモリDCは、OnInitialUpdate関数で新しいビットマップを持っているので、ストックしておいたビットマップ(メモリDCが初めに持っていたもの)を再び割り当てます。<br>
+  <br>
+  <b>pBitmap-&gt;DeleteObject();</b><br>
+  ビットマップオブジェクトを削除します。必ずメモリDCからビットマップの選択を外したあと(つまり</font><font color="#000000" size="2">SelectObject</font><font size="2">を実行した後)に実行しなくてはなりません。<br>
+  <br>
+  <b>dcMem.DeleteDC();</b><br>
+  メモリDCを削除します。これで通常のデバイスコンテキストとの互換性も失われます。ただし変数自体は削除されません。メモリDCの変数は、CBmpLoaderViewがなくなるときにデストラクタが起動し完全に削除されるからです。<br>
+  <br>
+  <b>CView::OnDestroy();</b><br>
+  これは、オーバーライドした時に既に書かれているはずですが残しておいたほうがいいと思います。<br>
+  </font><br>
+  <font color="#FF0000">6.転送コードを記述する</font><br>
+  <font size="2">　最後に転送コードを記述します。転送を行うタイミングは、画面の更新と再描画の要求があったときです。どちらにしろ、再描画も更新時もCView::OnPaint関数が呼ばれることになっており、OnPaint関数がOnDraw関数を呼ぶことになっています。したがって、転送コードはOnDraw関数に記述すればよいことになりますね。したがってOnDraw関数に転送コードを記述します。</font> 
+</p>
+<table border="0" bgcolor="#FFFFFF" width="614" align="center">
+  <tr> 
+    <td width="608" valign="top" bgcolor="#000000"><font size="2" color="#FFFFFF">OnDraw内のコーディング(BmpLoaderView.cpp内)</font></td>
+  </tr>
+  <tr> 
+    <td width="608" valign="top"> <font size="2" color="#0000FF">void</font><font size="2"> 
+      CBmpLoaderView::OnDraw(CDC* pDC)<br>
+      {<br>
+	  <blockquote>
+      CBmpLoaderDoc* pDoc = GetDocument();<br>
+        ASSERT_VALID(pDoc);<br>
+        <br>
+        CRect cClip; <font color="#006666">// 更新領域</font><br>
+        int nResult; <font color="#006666">// 更新領域の取得状況</font><br>
+        <br>
+        <font size="2" color="#006666">// クリッピングを判定する</font><br>
+        nResult = pDC-&gt;GetClipBox(&amp;cClip); <br>
+        <br>
+        <font color="#006666">// クリッピング領域が空だったり、エラーが生じたらreturn</font><br>
+        if(nResult == ERROR || nResult == NULLREGION){return;} <br>
+        <br>
+        <font color="#006666">// メモリDCの情報を通常のDC(表画面)に転送する</font><br>
+        pDC-&gt;BitBlt(cClip.left,cClip.top,cClip.Width(),cClip.Height(),&amp;dcMem,cClip.left,cClip.top,SRCCOPY);</blockquote>
+      }</font></td>
+  </tr>
+</table>
+<p>解説<br>
+  <font size="2"><b>nResult = pDC-&gt;GetClipBox(&amp;cClip);</b><br>
+  クリッピングとは、描画を行う場合に特定の範囲を描画させないことをいいます。つまりウィンドウの一部をだけ再描画すれば全体の画像が再構築できる場合に、すべての情報を描画すると時間の無駄であるので、再描画するべき四角形領域を取得します。このときクリッピング作業による判定情報がreturnされるので捕まえておきます。<br>
+  <br>
+  <b>if(nResult == ERROR || nResult == NULLREGION){return;}</b><br>
+  捕まえたクリッピング判定情報が、Errorの時またはNULLREGIONの時のみreturnします(再描画処理を行いません)。<br>
+  <b>Error </b>デバイス コンテキストが正しくありません。<br>
+  <b>NULLREGION </b>クリッピング領域が空です。<br>
+  <br>
+  <b>pDC-&gt;BitBlt(cClip.left,cClip.top,cClip.Width(),cClip.Height(),&amp;dcMem,cClip.left,cClip.top,SRCCOPY);</b><br>
+  ビットマップを転送元のメモリDCから現在のデバイス コンテキストにコピーします。このとき、<br>
+  <b>cClip.left</b>　転送先四角形の左上隅の論理 x 座標を指定します。<br>
+  <b>cClip.top</b>　転送先四角形の左上隅の論理 y 座標を指定します。<br>
+  <b>cClip.Width()</b>　転送先四角形と転送元ビットマップの幅を (論理単位) で指定します。<br>
+  <b>cClip.Height()</b>　転送先四角形と転送元ビットマップの高さを (論理単位) で指定します。<br>
+  <b>&amp;dcMem</b>　ビットマップをコピーするデバイス コンテキストを識別する CDC オブジェクトへのポインタを指定します。<br>
+  <b>cClip.left</b>　転送元ビットマップの左上隅の論理 x 座標を指定します。<br>
+  <b>cClip.top</b>　転送元ビットマップの左上隅の論理 y 座標を指定します。<br>
+  <b>SRCCOPY</b> 　転送元ビットマップを転送先ビットマップにコピーするフラグです。<br>
+  です。</font></p>
+<p>　ここまで記述したら実行してみてください。何も起こらなければそれでOKです。まだビットマップを読み込むコードを記述していませんものね。次章ではビットマップ読み込みコードを書いていきます。<br>
+</p>
+<p><A HREF="proc4.html">[Next]</A><BR>
+  <A HREF="proc2.html">[Previous]</A><BR>
+  <A HREF="../index.html">[Home]</A><BR>
+</p>
+</BODY>
+</HTML>

@@ -1,0 +1,294 @@
+<HTML>
+<HEAD>
+<TITLE>HTMLエディタ〜第8週〜</TITLE>
+<style type="text/css">
+  <!--
+		A:link { text-decoration:none;  color:#ff4500 }
+		A:visited { text-decoration:none;  color:#ff4500 }  
+		A:active { text-decoration:none;  color:#ff0000 }   
+		A:hover { color:#00008b }	
+	    -->
+</style>
+</HEAD>
+<BODY bgcolor="#FFFFFF"><DIV ALIGN=CENTER><!--#geoguide--></DIV>
+<I><FONT COLOR="red" SIZE="6">リンクタグを実現しよう</FONT></I>
+<HR>
+HTMLの醍醐味は、やっぱりハイパーリンクでしょうね。このハイパーリンクを実現すれば、かなりHTMLエディタらしくなってくるでしょうね。今回は、<A HREF="proc6.html">共通関数群を作ろう</A>で作成した"絶対・相対パス変換"のコードが正しく動作するかを確かめるという目的もあります。では頑張って行きましょう。
+
+<BR>
+<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" WIDTH="100%">
+  <TR>
+    <TD WIDTH="100%" BGCOLOR="#000099">
+    <FONT COLOR="#ffffff" SIZE="+1">21.やっぱりリソースをいじるのです</FONT></TD> 
+  </TR>
+</TABLE>
+さて、ここでは今回のリンクタグでは、以下の３つのリンクのみをサポートすることにします。詳しいことは書けません(専門ではないし、専門の人にたたかれそうですしね)が、簡単に説明しました。
+<DL>
+<DT><FONT COLOR="navy">1.  http:(Hypertext Transfer Protocol)</FONT>
+<DD>WorldWideWebにおける通常のリンクに使用する。
+<DT><FONT COLOR="navy">2.   ftp:(File Transfer Protocol)</FONT>
+<DD>ファイル転送にしようするサーバーへのリンクへ使用する。
+<DT><FONT COLOR="navy">3.mailto:</FONT>
+<DD>メールアドレスのリンクに使用する。
+</DL>
+ここでやっぱり、ダイアログを作成します。
+<DL>
+<DT><FONT COLOR="red">1.リソースタブをクリック、ダイアログを追加</FONT>
+<DD>IDはIDD_DLG_LINKが適当でしょう。ダイアログのタイトルはリンク設定なんかがベストだと思います。
+<DT><FONT COLOR="red">2.こんな感じで編集する(図を参考にしてください)</FONT>
+<DD><IMG SRC="fig8_1.jpg">
+<DT><FONT COLOR="red">3.IDC_LINK_RADIO_HTTPを選択・プロパティをオープン</FONT>
+<DD>一般タグのグループをチェックしてください。三つのラジオボタンをグループ化します。
+<DT><FONT COLOR="red">4.ダイアログのクラスを作成</FONT>
+<DD>※ダイアログをダブルクリックすると、ダイアログのクラスを<B>新規に作成する</B>か、<B>既存のクラスを選択する</B>か聞かれるので新規に作成するを選択してOKを押す。
+<DD>※クラス名をCDlgSetLinkにしOK(ファイル名は自動補完されるので手を加える必要ないです)
+<DD>※この操作については、chapter7で詳しく説明したのでもうわかりますよね。
+<DT><FONT COLOR="red">5.コントロールに対応するメンバ変数を作成する</FONT>
+<DD>クラスウィザードを開き、メンバ変数タブをクリックします。以下の図のようにメンバ変数を設定してください(前回の説明が分かっていれば簡単ですよね)
+<DD><IMG SRC="fig8_2.gif">
+<DD>ここで大切なのは、ラジオボタンがグループ化されれば、グループをチェックしたIDC_LINK_RADIO_HTTPのみクラスウィザードのメンバ変数の欄で見えるはずです。そうでなければ、ラジオボタンがグループ化されていません。
+</DL>
+これで下ごしらえ？は完了です。次はダイアログの動作を決めていきます。
+<BR>
+<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" WIDTH="100%">
+  <TR>
+    <TD WIDTH="100%" BGCOLOR="#000099">
+    <FONT COLOR="#ffffff" SIZE="+1">22.メッセージをバインドしていきます</FONT></TD> 
+  </TR>
+</TABLE>
+まずはラジオボタンの動作を決めていきます。今回の動作とは、"ラジオボタンを押すことによるエディットボックスへの文字列表示"です。なんだか堅苦しいネーミングですが、要するにhttp:が選択されている状況では、エディットボックスにもhttp:が表示されているようにするわけです。当然mailto:が
+選択されていたら、エディットボックスにもmailto:が表示されるように設計します。なぜこのような操作を行うと便利かといいますと、最終的なリンクのタグは<BR>
+<BLOCKQUOTE>
+<FONT COLOR="navy">&lt;A HREF = "○○○○○○"&gt;〜&lt;/A&gt;</FONT>
+</BLOCKQUOTE>
+で記述され、この○○○○○○の中に
+<DL>
+<DT>通常のURLであったら
+<DD>http://www.geocities.co.jp/SiliconValley-PaloAlto/9127/
+<DT>ftpサーバであったら
+<DD>ftp://visual.sample.co.jp/ (架空のサイトですよ、もしかして存在したりして^^;)
+<DT>メールアドレスだったら
+<DD>mailto:chiaki_f@milk.freemail.ne.jp
+</DL>
+が入ります。したがってエディットボックスに書かれる文字そのものを○○○○○○だとすれば、タグ生成コードは非常に単純になるからです。もしこの補完を行わないと、タグを生成する時に、いろいろ面倒くさいことになります。例えば、メールアドレスをリンクするときがもっとも不便です。HTMLをよくご存知の人は、mailto:から書き始めるかも知れませんし、あるいは初心者の人はただ、メールアドレスを書き込むかもしれないので、コーディングで条件判定を・・・なんて面倒くさいことが待っているでしょう。これをなくすためにわざとhttp:やftp:やmailto:の文字列をあらかじめ書き込んでしまおうという魂胆なのです。<BR><BR>
+"うんちく"を語るのはまた今度にしておいて、早速コーディングの方へ行ってみましょう。
+<DL>
+<DT><FONT COLOR="red">1.クラスウィザードでメッセージをバインドする</FONT>
+<DD>IDC_LINK_RADIO_HTTPとIDC_LINK_RADIO_FTPとIDC_LINK_RADIO_MAILに対してBNCLICKEDメッセージをバインドする。これも前章で説明しているのでわかりますよね。この操作だけでも面倒だぁという面倒くさがり屋さんは、このダイアログリソースを開き、ラジオボタンをダブルクリックしても同じことができます。
+<DD>※３つの関数を追加することになりますが、関数名はディフォルトで結構でしょう。毎回ディフォルトじゃんって言われそうですが、自動的に作られる関数名は、IDから作られた物です。したがってID名をしっかりつけていけば関数名に凝らなくても、自動的に作ってくれるのです。
+<DD><IMG SRC="fig8_3.gif">
+<DT><FONT COLOR="red">2.以下のコードをコーディングします。</FONT>
+<DD>
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<PRE><FONT COLOR="green">/////////////////////////////////////////////////////////////////////////////</FONT>
+<FONT COLOR="green">// CDlgSetLink メッセージ ハンドラ</FONT>
+
+void CDlgSetLink::OnLnkRadioHttp() 
+{
+	m_strUrl = "http:";
+	UpdateData(false);
+}
+
+void CDlgSetLink::OnLnkRadioMail() 
+{
+	m_strUrl = "mailto:";
+	UpdateData(false);
+}
+
+void CDlgSetLink::OnLnkRadioFtp() 
+{
+	m_strUrl = "ftp:";
+	UpdateData(false);	
+}
+</PRE>
+</TD></TR>
+</TABLE>
+<DD>ただエディットボックスに文字を反映させるだけですが、一旦メンバ変数に文字列を代入し、UpdateData(false);でメンバからエディットボックスにデータを反映させています。この操作で、メンバ変数m_strUrlの値と表示されている文字列は一致します。(が、当然のことながらユーザがエディットボックスにデータを書きこむと、エディットボックスとメンバ変数のデータは異なってきます。)
+<DT><FONT COLOR="red">3.メニューリソースを編集する</FONT>
+<DD>では、ラジオボタンが動作するかを確認するために、リンクダイアログを表示させましょう。リソースのメニューを開き、[挿入]に以下の[リンク]メニューを追加する。
+<DD><IMG SRC="fig8_5.gif">
+<DD>クラスウィザードで、ID_INS_LINKにCOMMANDメッセージをバインドするのですが、ここではCMyHtmlViewクラスのCOMMANDにバインドしましょう。関数名はディフォルト(OnInsLink)です。したがって[リンク]を押すとビューのOnInsLink関数が駆動するようになります。この関数に以下のコードを記述します。
+<DD>
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<PRE><FONT COLOR="green">// リンク</FONT>
+void CMyHtmlView::OnInsLink() 
+{
+	CString strSel;
+ 	CDlgSetLink cDlg;
+ 	if(cDlg.DoModal()!=IDOK){return;}
+}
+</PRE>
+</TD></TR>
+</TABLE>
+<DD>さて実行してみましょう。ラジオボタンを押すとエディットボックスに文字列が書き込まれますよね。しかし初めてダイアログを起動した時に、ラジオボタンの選択がされていないことに気がつきましたか？(気づかなかった人は確認しておきましょう)。一般的にラジオボタンは、複数の選択肢のうちどれか1つを選択するためのボタンですから、初期選択されていなければなりません。そこで・・・
+<DT><FONT COLOR="red">4.メッセージWM_INITDIALOGハンドラを追加</FONT>
+<DD>具体的には、下の図のような操作です。
+<DD><IMG SRC="fig8_4.gif">
+<DD>BOOL CDlgSetLink::OnInitDialog() という関数が自動的に挿入されます。WM_INITDIALOGはダイアログが表示される前にダイアログに送られるメッセージで、このメッセージが出たらOnInitDialog() を実行すると定義したことになります。ここで
+<DD><TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<PRE>BOOL CDlgSetLink::OnInitDialog() 
+{
+	CDialog::OnInitDialog();
+	
+	m_strUrl = "http:";
+	m_btnCheck.SetCheck(1);
+	UpdateData(false);
+
+	return TRUE;  <FONT COLOR="green">// コントロールにフォーカスを設定しないとき、戻り値は TRUE となります</FONT>
+	              <FONT COLOR="green">// 例外: OCX プロパティ ページの戻り値は FALSE となります</FONT>
+}
+</PRE>
+</TD></TR>
+</TABLE>
+<DD>※SetCheck関数とは、ラジオボタンでグループのチェックを入れたもの(リーダー)を選択状態にする関数です。
+</DL>
+<HR WIDTH="50%">
+最後に残ったのは、参照ボタンです。これはホームページを作成する時など、ローカル(PC内の)ファイルをリンクするのに使用するものです。まずはメッセージバインドからいつものように行っていきます。
+<DL>
+<DT><FONT COLOR="red">1.クラスウィザードでIDC_LINK_BTN_URLに関して、メッセージBN_CLICKEDを選択し、関数の追加</FONT>
+<DD>これがよく言うメッセージバインドです。関数名はディフォルト(OnLnkBtnUrl)で結構ですよ。
+<DT><FONT COLOR="red">2.コードを書き込む　(今回はちょっと複雑です)</FONT>
+<DD>
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<PRE>void CDlgSetLink::OnLnkBtnUrl() 
+{
+	<FONT COLOR="green">// Documentのポインタ</FONT>
+	CMyHtmlDoc* pDoc = GetMyDocument();
+
+	CString strBasePath;	<FONT COLOR="green">// 基準(現在開いているドキュメント)フルパス</FONT>
+	CString strFilePath;	<FONT COLOR="green">// リンクターゲットのフルパス</FONT>
+
+	<FONT COLOR="green">// ファイルを開くダイアログ(コモンダイアログ)</FONT>
+	CString strFilter = "htmlファイル(*.html;*.htm)|*.html; *.htm|全てのファイル(*.*)|*.*||";
+	CFileDialog cDlg(true,NULL,NULL,OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT,strFilter,NULL);
+	if(cDlg.DoModal()!=IDOK){return;}
+	<FONT COLOR="green">// リンクターゲットのフルパス取得</FONT>
+	strFilePath = cDlg.GetPathName();
+
+	<FONT COLOR="green">// ドキュメントフルパスを取得</FONT>
+	strBasePath = pDoc->GetPathName();
+
+	<FONT COLOR="green">// 未保存のためドキュメントフルパスが取得できない場合</FONT>
+	if(strBasePath.IsEmpty()){AfxMessageBox("ドキュメントを一度保存してください");return;}
+
+	<FONT COLOR="green">// 相対パスの計算</FONT>
+	m_strUrl = GetRelativePath(strBasePath,strFilePath);
+	UpdateData(false);	
+}
+</PRE>
+</TD></TR>
+</TABLE>
+</DL>
+ここでいつものようにコードを追っていきましょう。
+<DL>
+<DT><FONT COLOR="red">CMyHtmlDoc* pDoc = GetMyDocument();</FONT>
+<DD>ドキュメントへのポインタを取得します。現在操作しているドキュメントのパスを取得するために使用します。#include "myhtmldoc.h"のインクルードも忘れずに。これは共通関数群で作成したマクロでしたね。したがって#include "myhtmlcom.h"のインクルードも忘れてはいけませんよ！
+<DT><FONT COLOR="red">CString strFilter = "htmlファイル(*.html;*.htm)|*.html; *.htm|全てのファイル(*.*)|*.*||";</FONT>
+<DT><FONT COLOR="red">CFileDialog cDlg(true,NULL,NULL,OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT,strFilter,NULL);</FONT>
+<DT><FONT COLOR="red">if(cDlg.DoModal()!=IDOK){return;}</FONT>
+<DD>ファイルを開くダイアログ(コモンダイアログ)を開きます。ここでは詳しい説明はしませんが(さほど重要でもないので)、strFilterは、どのファイルを開くかの特定を行っています。またCFileDialogの第一引数がtrueの時は、ファイルを開く、falseの時はファイルに保存のコマンドになります。今回は別にファイルを開きたいわけではないのです。ただリンク先のファイル名のフルパスを取得するために過ぎません。
+<DT><FONT COLOR="red">strFilePath = cDlg.GetPathName();</FONT>
+<DD>先ほどのダイアログのメンバ関数GetPathName()から、リンクターゲットファイルのフルパスを取得します。
+<DT><FONT COLOR="red">strBasePath = pDoc->GetPathName();</FONT>
+<DD>CDocumentのメンバ関数GetPathName()から、現在操作中のドキュメントのフルパスを取得します。
+<DT><FONT COLOR="red">if(strBasePath.IsEmpty()){AfxMessageBox("ドキュメントを一度保存してください");return;}</FONT>
+<DD>ドキュメントが未保存であると相対リンクは作れないので、フルパスが空だったらドキュメントを保存するように促す。
+<DT><FONT COLOR="red">m_strUrl = GetRelativePath(strBasePath,strFilePath);</FONT>
+<DD>現在のドキュメントを基準にしたリンクターゲットの相対パスを求め、メンバ変数に格納します。
+<DT><FONT COLOR="red">UpdateData(false);</FONT>
+<DD>メンバ変数のあたいをすぐさま反映する関数です。
+</DL>
+では実行してみましょう。２つのHTMLファイルを使って相対パスが正しく作られているか確認してみてくださいね。同じファルダにあるファイルをリンクしようとするとエディットボックスの文字列は、ファイル名そのものになっているはずです。
+<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" WIDTH="100%">
+  <TR>
+    <TD WIDTH="100%" BGCOLOR="#000099">
+    <FONT COLOR="#ffffff" SIZE="+1">23.タグ生成コードを作成しよう</FONT></TD> 
+  </TR>
+</TABLE>
+最後は、リンクタグを作成するコードです。でも前回のフォントタグと比べたら非常に簡単だと思います。まずは、リンクタグを作成するメンバ関数とそれに必要なメンバ変数を追加していきます。
+<DL>
+<DT><FONT COLOR="red">1.DlgSetFont.hを開き、以下を追加</FONT>
+<DD>
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<PRE>class CDlgSetLink : public CDialog
+{
+<FONT COLOR="green">// コンストラクション</FONT>
+public:
+	void MakeTag(CString strIns);	<FONT COLOR="green">// ここを追加</FONT>
+	CString strTag;		<FONT COLOR="green">// ここを追加</FONT>
+	CDlgSetLink(CWnd* pParent = NULL);   <FONT COLOR="green">// 標準のコンストラクタ</FONT>
+
+<FONT COLOR="green">// ダイアログ データ</FONT>
+</PRE>
+</TD></TR>
+</TABLE>
+<DT><FONT COLOR="red">2.DlgSetFont.cppを開き、ファイルの末尾に以下を挿入</FONT>
+<DD>
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<PRE><FONT COLOR="green">// タグの生成</FONT>
+void CDlgSetLink::MakeTag(CString strIns)
+{
+	CString strTagA,strTagB;
+	strTagA = "&lt;A HREF=\"";
+	strTagA += m_strUrl;
+	strTagA += "\"&gt;";
+	strTagB = "&lt;/A&gt;";
+	strTag = strTagA + strIns + strTagB;
+}
+</PRE>
+</TD></TR>
+</TABLE>
+言うまでもありませんが、タグを生成するコードです。簡単なので説明は割愛させていただきます。ちょっと言い忘れてましたが、文字列の中に「"」ダブルクォーテーションを入れたい場合は、文字列を識別するダブルクォーテーションと区別するために、\を直前につける必要があります。
+<BLOCKQUOTE>
+strTagA += <FONT COLOR="red">"</FONT>\<FONT COLOR="green">"</FONT>&gt;<FONT COLOR="red">"</FONT>;
+</BLOCKQUOTE>
+つまるところ、上の赤い<FONT COLOR="red">"</FONT>が文字列を識別するダブルクォーテーションで、緑色の<FONT COLOR="green">"</FONT>は「"」そのものということになります。
+<DT><FONT COLOR="red">3.最後にCMyHtmlView::OnInsLink()関数を編集</FONT>
+<DD>
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<PRE><FONT COLOR="green">// リンク</FONT>
+void CMyHtmlView::OnInsLink() 
+{
+	CString strSel;
+ 	CDlgSetLink cDlg;
+ 	if(cDlg.DoModal()!=IDOK){return;}
+
+	CEdit& cEdt = GetEditCtrl();
+	cEdt.Copy();
+	strSel = GetClipBoard();
+	
+	cDlg.MakeTag(strSel);
+	PasteString(cDlg.strTag);
+	SetFocus();
+}
+</PRE>
+</TD></TR>
+</TABLE>
+<DD>実はフォントタグの時とあんまり変わってないですが^^;、実行してみましょう。うまくリンクでタグが挿入できましたか？
+</DL>
+さて、あとまだ実現できていない代表的なタグといえば・・・そうIMGタグですね。これに関しては、民さんに全部実装してほしいと思います。<BR>
+プログラミングの基本は、
+<DL>
+<DT><FONT COLOR="red">1.まず人の書いたプログラムをコピー</FONT>
+<DD>C言語だったら、printf("Hello C World\n");なんてコードを書いた覚えありますよね。
+<DT><FONT COLOR="red">2.少しずつ書き換えたりして、どんな働きになるか調べてみる</FONT>
+<DD>変数を変えてみたり,printfの書式を変えたりしていろいろ試したはずですよね。
+<DT><FONT COLOR="red">3.自分で書いてみる</FONT>
+<DD>そして自分でプログラムを1から書いてみます。
+</DL>
+だと思います。そこで本サイトではイメージタグの挿入に関しては解説しません。各自ご自由に作成してください。ちょっとヒントに私が作ったイメージタグ挿入のダイアログをお見せして、この章は終わりにしておきますね。では！<BR>
+<CENTER><IMG SRC="fig8_7.gif"></CENTER>
+※もう少しヒントですが、ファイルのリンクと画像のリンクも相対パスを使用する点は全く同じですよ！
+<BR><BR>
+<A HREF="proc9.html">[Next]</A><BR>
+<A HREF="proc7.html">[Previous]</A><BR>
+<A HREF="../index.html">[Home]</A><BR>
+</BODY>
+</HTML>

@@ -1,0 +1,26 @@
+<HTML>
+<TITLE>仮想関数(virtual function) </TITLE>
+<BODY bgcolor="#FFFFFF"><DIV ALIGN=CENTER><!--#geoguide--></DIV>
+<H2><FONT COLOR='red'>仮想関数(virtual function) </FONT></H2>
+<p>以下のクラス群を考えてほしい。<br>
+  CShape<font size="2">(形状クラス)</font><br>
+  　　├ CCircle<font size="2">(円クラス：<b>派生クラス</b>)</font><br>
+  　　└ CTriangle<font size="2">(正三角形クラス：<b>派生クラス</b>)</font><br>
+  CShapeは形状を表現するクラスであり、その派生クラスとして円を表現するクラスCCircleと正三角形のクラスCTriangleがある。CShapeにはShowという「形状を説明する」メンバ関数があり、CCircleやCTriangleにもShowと呼ばれるメンバ関数が定義(Showというメンバ関数がオーバーライド)されている。<br>
+  ここで以下のような操作をしたらどんな現象がおきるだろうか？<br>
+  ----------------------------------------------------------------- <br>
+  CShape* pShape;<br>
+  //白色で半径5の円を作り、そのポインタをpShapeに渡しているのだと思ってほしい。<br>
+  pShape = new CCircle(&quot;white&quot;,5); <br>
+  <font color="#FF0000"><b>pShape-&gt;Show();</b></font><br>
+  -----------------------------------------------------------------<br>
+  pShape-&gt;Show();でCCircleで定義した方のShow()する(というかこういうコードを書く以上そうあって欲しい)ような気がする。<br>
+  しかし実際にはCShape*がたとえCCircleオブジェクトを指していても、ポインタの型はあくまでCShape*であるために、CShapeで定義したShow（）が起動する。そこでC++では基本クラスのShowに<font color="#FF0000">virtual</font>という識別子をつけることで、Showが仮想関数にすることができる。この操作により、上のコードを実行すればpShape-&gt;Show();において確かにCCircleで定義したShowを実行することができる。<br>
+  <br>
+  仮想関数とは、<b>自分がどのような振舞うべきかを知っている関数</b>といえる。CShape*ポインタがCCircleオブジェクトを指している場合にはポインタの型がCShape*でありながら、CShape::ShowではなくCCircle::Showを実行し、CShape*ポインタがCTriangleオブジェクトを指している場合には、CTriangle::Showを実行する。仮想関数は実行時に呼び出されるべき関数が決定する(動的結合)のに対して、通常の関数はコンパイル時に呼び出すべき関数を決定する(静的結合)メカニズムである。<br>
+  <br>
+  仮想関数という概念のおかげで、CShapeから派生する新たな形状クラスを定義しても、CShapeに一切触れることなくプログラムを作成できる。いわゆる「1つのインターフェース、複数の実装」であるポリモーフィズムが実現できる。仮想関数は、MFCを使用する場合、非常に重要な概念であるので是非マスターして欲しい。なおJAVAでは全てのメソッドが仮想関数のように振舞う。<br>
+</p>
+</BODY>
+</HTML>
+

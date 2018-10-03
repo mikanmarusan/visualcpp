@@ -1,0 +1,374 @@
+<HTML>
+<HEAD>
+<META NAME="GENERATOR" CONTENT="Microsoft FrontPage 4.0">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html;CHARSET=utf-8">
+<TITLE>C/C++のちょっとしたこと </TITLE>
+<style type="text/css">
+  <!--
+		A:link { text-decoration:none;  color:#ff4500 }
+		A:visited { text-decoration:none;  color:#ff4500 }  
+		A:active { text-decoration:none;  color:#ff0000 }   
+		A:hover { color:#00008b }	
+	    -->
+</style>
+</HEAD>
+<BODY BGCOLOR="#CEFFFF" TEXT="#000099"><DIV ALIGN=CENTER><!--#geoguide--></DIV>
+<FONT SIZE="5"><I><B><font color="navy">C/C++</font><font size="5" color="navy">の</font><font color="navy">ちょっとしたこと 
+</font></B></I></FONT> 
+<HR>
+<p><a href="#q01">「&quot;error C2018: 文字 '0x81' は認識できません&quot;と&quot;error C2018: 
+  文字 '0x40' は認識できません&quot;の謎」</a><br>
+  <a href="#q02">「ポインタの動作の不安定」</a><br>
+  <a href="#q03">「文字列中で&quot;や\を使いたい」</a><br>
+  <a href="#q04">「配列の要素数を動的に求めたい」</a><br>
+  <a href="#q05">「前置・後置インクリメント演算子の違い」</a><br>
+  <a href="#q06">「コンマ演算子とは」</a><br>
+  <a href="#q07"> 「C++でasmという変数を使用するとエラーが出る」</a><br>
+  <a href="#q08">「アークタンジェント関数（atan）がうまく動作しない」</a><br>
+  <a href="#q09">「関数の引数におけるconst char* 〜とchar* const 〜の違い」</a><br>
+  <a href="#q10">「new/deleteを使用したときにエラーが出る」</a></p>
+<hr>
+<table border="0" cellspacing="3" cellpadding="0" width=100%
+height="92">
+  <tr> 
+    <td width="17%" height="25" align="CENTER" bgcolor="#000000"> 
+      <div align="left"><font color="#FFFFFF"><a name="q01"></a>「&quot;error C2018: 
+        文字 '0x81' は認識できません&quot;と&quot;error C2018: 文字 '0x40' は認識できません&quot;の謎」</font></div>
+    </td>
+  </tr>
+  <tr> 
+    <td width="17%" height="25" align="CENTER"> 
+      <div align="left"><img src="mail.gif" width="16" height="12"><font size="2">参考書を見ながらCのソースを書いたのですが、上のエラーが出てしまいました。どこをみてもコードに間違いはないと思うのですがエラーを回避する方法を教えてください。</font></div>
+    </td>
+  </tr>
+</table>
+<p><font color="#FF0000">解説</font><br>
+  　文字と文字の間隔をあけるスペースには、全角スペース(日本語入力でのスペース)と半角スペース(英語入力でのスペース)があります。VisualC++では、全角スペースを理解できないため、エラーが発生するようです。したがって全角スペースになっている部分を削除する必要があります。基本的にはどのような言語でも全角スペースではエラーが起こるものだと思ってもよいかもしれません。</p>
+<table border="0" cellspacing="3" cellpadding="0" width=100%
+height="92">
+  <tr> 
+    <td width="17%" height="25" align="CENTER" bgcolor="#000000"> 
+      <div align="left"><font color="#FFFFFF"><a name="q02"></a>「ポインタの動作の不安定」</font></div>
+    </td>
+  </tr>
+  <tr> 
+    <td width="17%" height="25" align="CENTER"> 
+      <div align="left"><img src="mail.gif" width="16" height="12"><font size="2">以下(左)のプログラムを作成したのですが、使用する変数を配列にした場合はうまく動作するのですが、ポインタを使用するとうまく動作しません。なぜでしょうか？</font></div>
+    </td>
+  </tr>
+</table>
+<p><font color="#FF0000">解説</font><br>
+  　このプログラムは、コンパイルが通るために間違いがないように見えますが、きわめて重大な間違いをしているということに気が付かなくてはなくてはいけません。それはポインタpchStringが指しているアドレスの位置が不明であるということです。ポインタとはメモリのどこを指しているのかだけを指示する変数であるため、アドレス以外のデータを格納することはできません。したがって、どこかデータを書き込むことが出来るメモリ空間が確保されていて、その先頭のアドレスをポインタが持っていることで、はじめてポインタが意味を持ちます。<br>
+  　この場合は、メモリを動的に確保すればよいのでmalloc関数で、ヒープ領域にメモリ空間を確保します。malloc関数の戻り値は確保したメモリの先頭アドレスなので、それをポインタの型でキャストして代入してあげれば(右)OKです。なお当然ですが、動的確保したメモリ空間は、ユーザが明示的に解放しなくてはいけません。</p>
+<table border="0" bgcolor="#FFFFFF" width="721" align="center">
+  <tr> 
+    <td width="327" valign="top" bgcolor="#000000"><font color="#FFFFFF" size="2">訂正前</font></td>
+    <td width="384" bgcolor="#000000"><font color="#FFFFFF" size="2">訂正後</font></td>
+  </tr>
+  <tr> 
+    <td width="327" valign="top"><font color="#000000"><font color="#0000FF" size="2">#include</font> 
+      <font size="2">&lt;stdio.h&gt;<br>
+      <font color="#0000FF">#include</font></font> <font size="2">&lt;stdlib.h&gt;<br>
+      <font color="#0000FF">#include</font></font> <font size="2">&lt;string.h&gt;<br>
+      <font color="#0000FF">int</font> main()<br>
+      {<br>
+      </font></font> 
+      <blockquote><font color="#000000" size="2"> <font color="#0000FF">char</font>* 
+        pchString;<br>
+        <font color="#0000FF">char</font>* pchTemp = &quot;VISUALC++&quot;;<br>
+        <br>
+        strcpy(pchString,pchTemp);<br>
+        printf(&quot;%s\n&quot;,pchTemp);<br>
+        printf(&quot;%s\n&quot;,pchString);<br>
+        <br>
+        <font color="#0000FF">return</font> 0;<br>
+        </font></blockquote>
+      <font color="#000000" size="2">}</font> </td>
+    <td width="384"><font color="#000000"><font color="#0000FF" size="2">#include</font> 
+      <font size="2">&lt;stdio.h&gt;<br>
+      <font color="#0000FF">#include</font></font> <font size="2">&lt;stdlib.h&gt;<br>
+      <font color="#0000FF">#include</font></font> <font size="2">&lt;string.h&gt;<br>
+      <font color="#0000FF">int</font> main()<br>
+      {<br>
+      </font></font> 
+      <blockquote><font color="#000000" size="2"> <font color="#0000FF">char</font>* 
+        pchString;<br>
+        <font color="#0000FF">char</font>* pchTemp = &quot;VISUALC++&quot;;<br>
+        <font color="#FF0000">pchString = (char *)malloc(strlen(pchTemp)+1);</font><br>
+        <br>
+        strcpy(pchString,pchTemp);<br>
+        printf(&quot;%s\n&quot;,pchTemp);<br>
+        printf(&quot;%s\n&quot;,pchString);<br>
+        <br>
+        <font color="#FF0000">free(pchString);</font><br>
+        <font color="#0000FF">return</font> 0;</font></blockquote>
+      <font color="#000000" size="2">}</font> </td>
+  </tr>
+</table>
+<br>
+<table border="0" cellspacing="3" cellpadding="0" width=100%
+height="92">
+  <tr> 
+    <td width="17%" height="25" align="CENTER" bgcolor="#000000"> 
+      <div align="left"><font color="#FFFFFF"><a name="q03"></a>「文字列中で&quot;や\を使いたい」</font></div>
+    </td>
+  </tr>
+  <tr> 
+    <td width="17%" height="25" align="CENTER"> 
+      <div align="left"><img src="mail.gif" width="16" height="12"><font size="2">ファイルのパスなどで\マークを使用したいのですが、うまく動きません。どうしたらよいでしょうか？</font></div>
+    </td>
+  </tr>
+</table>
+<p><font color="#FF0000">解説</font><br>
+  \や&quot;は特別な記号で、\はエスケープ文字列(\nは改行、\tはタブなど)をつくるための文字となり、&quot;は文字列の初めと終わりを指定する機能文字であるので、文字列の中にこれらを使用した場合、例えば</p>
+<p>&quot;\abcdef&quot;⇒ビープ音が1回鳴ってbcdefが表示される(\aがビープ音であるため)<br>
+  &quot;She says, &quot;I love you.&quot; &quot; ⇒エラー</p>
+<p>などと書いてこれらを表示しようとすると、うまく表示されなかったりコンパイルエラーになります。\や&quot;を文字列として認識させたい場合は、その前にもう1回\を書く、つまり</p>
+<p>&quot;\\abcedf&quot;<br>
+  &quot;She says, \&quot;I love you.\&quot; &quot; </p>
+<p>とすればよいです。</p>
+<table border="0" cellspacing="3" cellpadding="0" width=100%
+height="92">
+  <tr> 
+    <td width="17%" height="25" align="CENTER" bgcolor="#000000"> 
+      <div align="left"><font color="#FFFFFF"><a name="q04"></a>「配列の要素数を動的に求めたい」</font></div>
+    </td>
+  </tr>
+  <tr> 
+    <td width="17%" height="25" align="CENTER"> 
+      <div align="left"><img src="mail.gif" width="16" height="12"><font size="2">配列の要素数を計算したいのですが、どうすればよいでしょうか？</font></div>
+    </td>
+  </tr>
+</table>
+<p><font color="#FF0000">解説</font><br>
+  なぜ配列の要素数を計算することがあるのかと、疑問をもつ人も多いかもしれません。確かにCやC++では、配列の宣言において要素数は定数値でなくてはならないと定められているからです。しかし、線形リスト構造など何回も動的にメモリが確保され、配列の要素数が実行されるまで分からない時などに有効です。例えばこのような手法が考えられます。</p>
+<table border="0" bgcolor="#FFFFFF" width="316" align="center">
+  <tr> 
+    <td width="310" valign="top" bgcolor="#000000"><font color="#FFFFFF" size="2">配列要素数を動的に求める</font></td>
+  </tr>
+  <tr> 
+    <td width="310" valign="top"><font color="#000000"><font color="#0000FF" size="2">#include</font> 
+      <font size="2">&lt;stdio.h&gt;<br>
+      </font><font size="2"><br>
+      <font color="#0000FF">int</font> main()<br>
+      {<br>
+      </font></font> 
+      <blockquote><font color="#000000" size="2"> <font color="#0000FF">int</font> 
+        nArray[10];<br>
+        <font color="#0000FF">int</font> nNum;<br>
+        <br>
+        <font color="#FF0000">nNum = sizeof(nArray)/sizeof(nArray[0]);</font><br>
+        <br>
+        printf(&quot;%d\n&quot;nNum);<br>
+        <br>
+        <font color="#0000FF">return</font> 0;<br>
+        </font></blockquote>
+      <font color="#000000" size="2">}</font> </td>
+  </tr>
+</table>
+<p>赤いところを<font color="#FF0000">nNum = sizeof(nArray)/sizeof(int);</font>と変えてもOKです。</p>
+<table border="0" cellspacing="3" cellpadding="0" width=100%
+height="92">
+  <tr> 
+    <td width="17%" height="25" align="CENTER" bgcolor="#000000"> 
+      <div align="left"><font color="#FFFFFF"><a name="q05"></a>「前置・後置インクリメント演算子の違い」</font></div>
+    </td>
+  </tr>
+  <tr> 
+    <td width="17%" height="25" align="CENTER"> 
+      <div align="left"><img src="mail.gif" width="16" height="12"><font size="2">&quot;++i&quot;や&quot;i++&quot;など、違いが良く分からないので特に気を配っていないのですが、どのように使い分けたらいいのですか？</font></div>
+    </td>
+  </tr>
+</table>
+<font color="#FF0000">解説</font><br>
+  この質問のキーワードは、「式の評価」です。即ち、「計算式の結果」と「式の評価値」が一致するとは限らないのです。例えばこのインクリメント演算子の場合、
+<table border="0" bgcolor="#FFFFFF" width="399" align="center">
+  <tr> 
+    <td width="327" valign="top" bgcolor="#000000" height="17"><font size="2" color="#FFFFFF">コード</font></td>
+    <td width="62" bgcolor="#000000" height="17"><font color="#FFFFFF" size="2">結果</font></td>
+  </tr>
+  <tr> 
+    <td width="327" valign="top"><font size="2" color="#000000"> <font size="2" color="#0000FF">#include</font> 
+      &lt;stdio.h&gt;<br>
+      <font color="#0000FF">int main</font>(){<br>
+      <blockquote> <font color="#0000FF">int</font> x = 0;<br>
+        <font color="#0000FF">int</font> y = 0; <font size="2" color="#000000"> 
+        <br>
+        printf(&quot;%d\t%d\n&quot;,x++,++y);<br>
+        printf(&quot;%d\t%d\n&quot;,x++,++y);<br>
+        printf(&quot;%d\t%d\n&quot;,x++,++y);</font><br>
+        <br>
+        <font color="#0000FF">return</font> 0;<br>
+      </blockquote>
+      }</font> </td>
+    <td width="62" valign="top"><font size="2">0 1<br>
+      1 2<br>
+      2 3</font></td>
+  </tr>
+</table>
+<p>というコードを書いた場合、結果が異なることに気付きます。これはxもyも0の時に、 </p>
+<blockquote> <b>前置インクリメント</b> z = ++y; <font color="#FF0000">yをインクリメントし、それから++yの評価値である1をzに代入</font> 
+  <b><br>
+  後置インクリメント</b> w = x++; <font color="#FF0000">x++の評価値0をwに代入し、それからxをインクリメントする</font> 
+</blockquote>
+<p>という性質があるのです<font size="2">(この場合評価値というのはxやyの値そのものです)</font>。デクリメントも動作は同じです。</p>
+<table border="0" cellspacing="3" cellpadding="0" width=100%
+height="92">
+  <tr> 
+    <td width="17%" height="27" align="CENTER" bgcolor="#000000"> 
+      <div align="left"><font color="#FFFFFF"><a name="q06"></a>「コンマ演算子とは」</font></div>
+    </td>
+  </tr>
+  <tr> 
+    <td width="17%" height="25" align="CENTER"> 
+      <div align="left"><img src="mail.gif" width="16" height="12"><font size="2">プログラムでコンマで区切ったものがあるのですが、ただの区切りだと思ってもいいのですか？</font></div>
+    </td>
+  </tr>
+</table>
+<p><font color="#FF0000">解説</font><br>
+  ただの区切りのように見えますが、あれはコンマ演算子と呼ばれる演算子です。演算子の中でも一番優先度が低いことも特徴の1つだといえます。コンマ演算によって影響を受けるのが、「式の評価値」と「評価順序」でしょう。コンマ演算子は、</p>
+<p>op1,op2</p>
+<p>と記述され、op1,op2の順で実行されていき、式の評価値は最終ステートメント(op2)の値となります。例えば</p>
+<p>x++,4</p>
+<p>という文があった場合は式全体の評価値は4になります。</p>
+<table border="0" cellspacing="3" cellpadding="0" width=100%
+height="92">
+  <tr> 
+    <td width="17%" height="25" align="CENTER" bgcolor="#000000"> 
+      <div align="left"><font color="#FFFFFF"><a name="q07"></a>「C++でasmという変数を使用するとエラーが出る」</font></div>
+    </td>
+  </tr>
+  <tr> 
+    <td width="17%" height="25" align="CENTER"> 
+      <div align="left"><img src="mail.gif" width="16" height="12"><font size="2">合計(sum)のa番目という意味でasmという変数名をつけたのですが、エラーや警告が出ます。どうしてですか？</font></div>
+    </td>
+  </tr>
+</table>
+<p><font color="#FF0000">解説</font><br>
+  普通のプログラムを組んでいる場合には滅多に使うことはないのですが、asmというのはアセンブラコードを記述するための予約語なので、変数名として使用できません。</p>
+<table border="0" cellspacing="3" cellpadding="0" width=100%
+height="92">
+  <tr> 
+    <td width="17%" height="40" align="CENTER" bgcolor="#000000"> 
+      <div align="left"><font color="#FFFFFF"><a name="q08"></a>「アークタンジェント関数（atan）がうまく動作しない」</font></div>
+    </td>
+  </tr>
+  <tr> 
+    <td width="17%" height="25" align="CENTER"> 
+      <div align="left"> 
+        <p><img src="mail.gif" width="16" height="12"><br>
+          <font size="2">y=x*tan(θ)という式からθを求めたいので、以下のように考えてみました。<br>
+          y/x =tan(θ)<br>
+          <font color="#FF0000">θ=arctan(y/x)</font><br>
+          したがってアークタンジェント関数atanを使用し、<font color="#FF0000">atan(y/x)</font>と計算したのですが値によってはうまく動作しません。なぜですか？</font></p>
+        </div>
+    </td>
+  </tr>
+</table>
+<p><font color="#FF0000">解説</font><br>
+  　実は数学的な問題になります。<font color="#FF0000">x=0の時,y/xの値は保証されていません</font>。 数学的には、x=0のときy/xは無限大になるため、atan(y/x)の値はπ/2[rad]になるはずですが、コンピュータでは0の割り算を行うと何が行われるか予想できないために、この関数をむやみに使うのは危険です。そこで、<font color="#FF0000">θ=arctan(y/x)</font>を求めるため<b>だけ</b>に、mathライブラリに<b>atan2</b>という関数が用意されています。</p>
+<p>atan2(y,x)</p>
+<p>と実行すれば、θ=arctan(y/x)が計算できます。</p>
+<table border="0" cellspacing="3" cellpadding="0" width=100%
+height="92">
+  <tr> 
+    <td width="17%" height="25" align="CENTER" bgcolor="#000000"> 
+      <div align="left"><font color="#FFFFFF"><a name="q09"></a>「関数の引数におけるconst 
+        char* 〜とchar* const 〜の違い」</font></div>
+    </td>
+  </tr>
+  <tr> 
+    <td width="17%" height="43" align="CENTER"> 
+      <div align="left"><img src="mail.gif" width="16" height="12"><font size="2">strcpy関数 
+        <font color="#FF0000">char* strcpy(char* a , const char* b)</font> の引数に、<font color="#FF0000">const 
+        char* 〜</font>があるのですが、なにか特別な意味があるのでしょうか？また参考書などではこれと似たものに、<font color="#FF0000">char* 
+        const〜</font> というものがありました。上記のものとの違いはなんでしょうか？</font></div>
+    </td>
+  </tr>
+</table>
+<p><font color="#FF0000">解説</font><br>
+  　関数の引数にポインタを記述する参照渡しは、関数内部でデータが書き換えることができるという利点がありますが、それは同時に関数内部でデータが書き換えれてしまうということです。しかし配列や文字列を関数に渡したいが、関数内で書き換えたくない場合があるはずです。しかし配列や文字列を渡す時は参照渡しになってしまいます。そこで<font color="#FF0000">const 
+  char* 〜</font>という形にすると、値を書き換えることができなくなります。しかし、データ自体を変更することは出来ませんが、ポインタ(アドレス)は変更することが出来ます。(左下)</p>
+<p>　char* const〜というのは、参照渡しには変わらないので値を変更することはできますが、ポインタ(アドレス)の値を変更することはできなくなります。</p>
+<table border="0" bgcolor="#FFFFFF" width="721" align="center">
+  <tr> 
+    <td width="352" valign="top" bgcolor="#000000"><font color="#FFFFFF" size="2">const 
+      char* 〜</font></td>
+    <td width="359" bgcolor="#000000"><font color="#FFFFFF" size="2">char* const 
+      〜</font></td>
+  </tr>
+  <tr> 
+    <td width="352" valign="top"><font color="#000000"><font size="2"> <font color="#0000FF">void</font> 
+      func1(<font color="#0000FF">const char*</font> pchstr){<br>
+	  <blockquote> <font color="#0066CC">// strcpy(pchstr,&quot;MFC&quot;);文字列を変更するとエラー</font><br>
+      pchstr = NULL;<br>
+	  </blockquote>
+      }</font></font></td>
+    <td width="359"><font color="#000000"><font size="2" color="#0000FF">void</font><font size="2"> 
+      func2(<font color="#0000FF">char* const</font> pchstr){<br>
+	  <blockquote>
+      strcpy(pchstr,&quot;MFC&quot;);<br>
+        <font color="#0066CC">// pchstr = NULL;ポインタを変更するとエラー</font><br>
+	  </blockquote>
+      }</font></font></td>
+  </tr>
+</table>
+<p>&nbsp;</p><table border="0" cellspacing="3" cellpadding="0" width=100%
+height="92">
+  <tr> 
+    <td width="17%" height="25" align="CENTER" bgcolor="#000000"> 
+      <div align="left"><font color="#FFFFFF"><a name="q10"></a>「new/deleteを使用したときにエラーが出る」</font></div>
+    </td>
+  </tr>
+  <tr> 
+    <td width="17%" height="43" align="CENTER"> 
+      <div align="left"><img src="mail.gif" width="16" height="12"><font size="2">文字列を使用するために、new演算子で文字数を考えてメモリの動的確保(左下)を行ったのですが、deleteするときなぜかエラーが出てプログラムが不正終了してしまうのです。何が原因なのでしょうか？</font></div>
+    </td>
+  </tr>
+</table>
+<p><font color="#FF0000">解説</font><br>
+  　これは、C/C++の文字列の特性をしっかり把握していないときに起こしてしまう典型的なエラーです。&quot;VISUALC++&quot;という文字列の文字数は確かに9文字なので、9byte(char型は1byte)のメモリを確保すればいいような気がしますが、文字列には、その終わりを示すNULL文字(\0)を付加して上げなくてはならないので、実際は<font color="#FF0000">文字バイト数+1</font>のメモリを確保しなくてはならないので、delete時にエラーが起こるようです。これはC言語における、malloc/freeでも同じですから注意してください。<br>
+</p>
+<table border="0" bgcolor="#FFFFFF" width="721" align="center">
+  <tr> 
+    <td width="327" valign="top" bgcolor="#000000"><font color="#FFFFFF" size="2">失敗例</font></td>
+    <td width="384" bgcolor="#000000"><font color="#FFFFFF" size="2">訂正後</font></td>
+  </tr>
+  <tr> 
+    <td width="327" valign="top"><font color="#000000"><font size="2"><font color="#0000FF">int</font> 
+      main()<br>
+      {<br>
+      </font></font> 
+      <blockquote>
+        <p><font color="#000000" size="2"> <font color="#0000FF">char</font>* 
+          pchstr = &quot;VISUALC++&quot;;<br>
+          char* pchstrA = <font color="#0000FF">new</font> char[strlen(pchstr)];<br>
+          <br>
+          strcpy(pchstrA,pchstr);<br>
+          <br>
+          <font color="#0000FF">delete</font> [] </font><font color="#000000" size="2">pchstrA<br>
+          <br>
+          <font color="#0000FF">return</font> 0;</font></p>
+        </blockquote>
+      <font color="#000000" size="2">}</font> </td>
+    <td width="384"><font color="#000000"><font size="2"><font color="#0000FF">int</font> 
+      main()<br>
+      {<br>
+      </font></font> 
+      <blockquote> 
+        <p><font color="#000000" size="2"> <font color="#0000FF">char</font>* 
+          pchstr = &quot;VISUALC++&quot;;<br>
+          char* pchstrA = <font color="#0000FF">new</font> char[<font color="#FF0000">strlen(pchstr)+1</font>];<br>
+          <br>
+          strcpy(pchstrA,pchstr);<br>
+          <br>
+          <font color="#0000FF">delete</font> [] </font><font color="#000000" size="2">pchstrA<br>
+          <br>
+          <font color="#0000FF">return</font> 0;</font></p>
+      </blockquote>
+      <font color="#000000" size="2">}</font> </td>
+  </tr>
+</table>
+<p>&nbsp;</p>
+</BODY>
+</HTML>

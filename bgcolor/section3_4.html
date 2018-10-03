@@ -1,0 +1,467 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+   
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+  <title>コントロールの背景色を変更する--コントロール別背景色変更[ボタン]</title>
+      
+  <link rel="stylesheet" href="style.css" type="text/css">
+</head>
+  <body text="#336666" bgcolor="#c2d1ed" link="#0000ee" vlink="#551a8b" alink="#0000ee"><DIV ALIGN=CENTER><!--#geoguide--></DIV>
+<P align=left><label><FONT size=2>←Back［<A href="section3_3.html" >ボタンコントロール(1)</A>］ -- Up［<A 
+href="index.html">コントロールの背景色を変更する</A>］ --  Forward［***］→ 
+</FONT></label></P>
+<H2 align=center>コントロール別背景色変更<BR>［ボタンコントロール（２）］</H2>
+<DIV align=center>最終更新日［2002.03.25］</DIV>
+ 
+<hr width="100%" size="2"> 
+<blockquote>   
+  <p> 
+   
+  　ボタンの背景色の変更が，他のコントロールのそれと多少異なるために，プログラマとしては非常に厄介であることは，前節も述べたとおりである．本節では，実際にCButtonクラスの派生クラスを作り，動的サブクラス化を実装することで，ボタンの描画色を変更していく．</p>
+   </blockquote>
+ 
+                      <table cellspacing="0" cellpadding="0" width="100%" border="1">
+      <tbody>
+                          <tr>
+     <td valign="top" bgcolor="#339999"><big><font color="#ffffff">●派生クラスを作ってみる</font></big></td>
+                          </tr>
+                        </tbody>
+                      </table>
+ 
+                      <h4>■　派生クラスをつくった経験は？</h4>
+<BLOCKQUOTE>
+ 
+                      <p>　C++，JAVA，C#などは，オブジェクト指向プログラミング言語と言われるが，オブジェクト指向プログラミング<SUP>※1</SUP>において「継承」という言葉を知らないプログラマはいないだろう．そもそもオブジェクト指向におけるの３つのキーワードは，「継承」，「カプセル化」，「ポリモーフィズム」であるだろう．これらに関しては詳しく述べないが，それぞれを１行で述べるとするならば，</p>
+  <DL>
+    <DT>
+ 
+                      <div><STRONG>継承</STRONG></div>
+    <DD>
+ 
+                      <div>あるクラスを元にして，新しいクラスを作る，ソフトウェア再利用のメカニズム．</div>
+    <DT>
+ 
+                      <div><STRONG>カプセル化</STRONG></div>
+    <DD>
+ 
+                      <div>データ（プロパティ）とデータを操作するコード（メソッド）を関連づけるメカニズム．</div>
+    <DT>
+ 
+                      <div><STRONG>ポリモーフィズム</STRONG></div>
+    <DD>
+ 
+                      <div>ひとつのインターフェース，複数の実装を実現するメカニズム．</div></DD></DL>
+ 
+                      <p>　JAVAや，C++（クラスに関するもの以降の内容）などオブジェクト指向プログラミングを経験している人であれば，サンプルプログラムなどで派生クラス（サブクラス）を作成したことがあるかもしれないが，実際のプログラミング（実践編）として作成したことがないかもしれない．そこでここで１から派生クラスを作る方法を解説していく．</p></BLOCKQUOTE>
+ 
+                      <h4>■　派生クラスを作る準備</h4>
+<BLOCKQUOTE>
+ 
+                      <p>　派生クラスを記述するためのファイルを作成していこう．</p>
+  <OL>
+ 
+                      <li>［ファイル］--［新規作成］でヘッダファイル（*.h）を作成する．<BR>・ ファイル名： 
+    <STRONG>colorbtn.h</STRONG> <BR>・ 
+    プロジェクトへ追加をチェック<BR>（チェックしなくても，クラスビューで上記ファイルをプロジェクトに追加することができるので心配しなくてもよいが，面倒なのでチェックを）                                 
+ 
+                      <li>［ファイル］--［新規作成］でソースファイル(*.cpp)を作成する．<BR>・ ファイル名： 
+    <STRONG>colorbtn.cpp</STRONG><BR>・ プロジェクトへ追加をチェック</li></OL>
+ 
+                      <p>もしも良くわからなかったらこの図を参照にしてほしい．（<A 
+  href="fig3_17.jpeg">figure3.17</A>）<BR>以上で準備は終わる．</p></BLOCKQUOTE>
+ 
+                      <h4>■　派生クラスのインターフェースを定義する（colorbtn.hの実装）</h4>
+<BLOCKQUOTE>
+ 
+                      <p>　先ほど作成したcolorbtn.hを開いてほしい．真っ白なファイルが開くはずである．以下に記述されているコードを上から順に打ち込んでいけばよい．解説をじっくり読んでいただければ幸いである．</p>
+    <P><TEXTAREA style="OVERFLOW: hidden" name=1 wrap=off cols=24>#ifndef ___CCOLORBTN_H_
+#define ___CCOLORBTN_H_
+</TEXTAREA><BR><FONT 
+    size=2>　これはアプリケーションから，このヘッダファイルが複数回インクルードされないようにするためのコードである．もし複数回インクルードされてしまうと，クラス宣言がも複数回行われてしまうからである．一種のおまじないだと思ってもいいかもしれない．ちなみに___CCOLORBTN_H_というのは別に決まっているわけでは無いので何でもよいのであるが，ヘッダファイルと似たような名前にするほうが普通である．</FONT></P>
+ 
+                      <dt>
+    <P><TEXTAREA style="OVERFLOW: hidden" name=2 wrap=off cols=36>class CColorButton : public CButton
+{
+</TEXTAREA><BR><FONT size=2>　これが新しく作る派生クラスCColorButtonクラス定義部である．後ろの : public 
+    CButton 
+    というのは，CColorButtonクラスは，「CButtonクラスを公開(public)派生する」ということを宣言していることを指す．</FONT> 
+    </P>
+    <P><TEXTAREA style="OVERFLOW: hidden" name=3 rows=1 wrap=off cols=39>	DECLARE_DYNAMIC(CColorButton)
+</TEXTAREA><BR>　<FONT 
+    size=2>これは，動的生成機能を実現せよという意味である。したがって実行時にCColorButtonクラスのオブジェクトを作成することになる．これについて詳しく解説するとランタイムクラスなどかなり複雑なものになってしまうのでここでは割愛する．これは動的サブクラス化のための一種のおまじないだと思っていただければよい．</FONT></P>
+    <P><TEXTAREA style="OVERFLOW: hidden" name=4 rows=4 wrap=off cols=78>private:
+	COLORREF	coltext;		// キャプションカラー(通常時)
+	COLORREF	colbackground;	// 背景色
+	COLORREF	coldisabled;	// ボタンが無効時のキャプションカラー
+</TEXTAREA><BR><FONT 
+    size=2>　このクラスが持つメンバ変数を定義する．基本的にメンバ変数は，外部クラスから隠蔽されなくてはならないので（なぜかにうちてはオブジェクト指向を勉強してほしい），公開してはならないため，私的（private）宣言にしている．ここではキャプション（ボタン上の文字列）の色，ボタン背景色，ボタンが無効時の時のキャプションの色を定義する．ちなみにprivate/protected/publicをアクセス指定子という．</FONT></P>
+    <P><TEXTAREA style="OVERFLOW: hidden" name=5 rows=4 wrap=off cols=61>public:
+	// コンストラクタ・デストラクタ
+	CColorButton(); 		// コンストラクタ
+	virtual ~CColorButton();	// デストラクタ
+</TEXTAREA><BR><FONT 
+    size=2>　コンストラクタとはオブジェクトを作るためのメンバ関数である．この関数が呼ばれることで，インスタンスが背生成される．またデストラクタは，オブジェクトを消滅させるためのメンバ関数である．デストラクタの前にvirtualと書かれているが，これはデストラクタが仮想関数として定義されているという意味．派生クラスのデストラクタは仮想関数として定義されるべきといわれているからそうしているだけであるが，実際は「ポリモーフィズム」のためであるというのが正しいかもしれない．</FONT></P>
+    <P><TEXTAREA style="OVERFLOW: hidden" name=6 rows=8 wrap=off cols=121>	// メンバ関数
+	BOOL AutoLoad(const UINT nID, CWnd* pParent);				// ボタンをCColorButtonにアタッチ
+	void SetTextColor(const COLORREF color){coltext = color;}		// キャプションカラー設定
+	void SetBackGroundColor(const COLORREF color){colbackground = color;}	// 背景色設定
+	void SetDisabledColor(const COLORREF color){coldisabled = color;}	// ボタン無効時のキャプションカラー設定
+	COLORREF GetTextColor() { return coltext; }				// キャプションカラー取得
+	COLORREF GetBackGroundColor() { return colbackground; }		// 背景色取得
+	COLORREF GetDisabledColor() { return coldisabled; }			// ボタン無効時のキャプションカラー取得
+</TEXTAREA><BR>　<FONT 
+    size=2>ここでは様々なメンバ関数を定義している．これらの関数の中でAutoLoad関数以外は，関数の実体までも記述している．このような記述を「インライン関数」というが，これは実行効率をあげるための手法である．詳しくはC++を勉強してほしい．<BR><STRONG>BOOL AutoLoad(const UINT nID, CWnd* 
+    pParent);<BR></STRONG>　サブクラスを実現する関数．その内容については実装時に解説する．引数として，背景色を変更したいボタンのIDとボタンを持つコントロールの親ウィンドウ（ダイアログ）をとる．<BR><STRONG>void SetTextColor(const COLORREF color){coltext 
+    = color;}<BR></STRONG>　キャプションカラーを設定するための関数．関数の中身の通り，引数をメンバ変数に渡しているだけである． 
+    <STRONG>void SetBackGroundColor(const COLORREF color){colbackground = 
+    color;}</STRONG><BR>　背景色を設定するための関数．<BR><STRONG>void SetDisabledColor(const 
+    COLORREF color){coldisabled = 
+    color;}</STRONG><BR>　ボタンが無効状態のときのキャプションカラーを設定するための関数．<BR><STRONG>COLORREF 
+    GetTextColor() { return coltext; 
+    }</STRONG><BR>　キャプションカラーとして設定した色を返却するための関数である．本コーナでは使用しないが，後で使用するかもしれないということで作っておいた．<BR><STRONG>COLORREF 
+    GetBackGroundColor() { return colbackground; 
+    }</STRONG><BR>　背景色として設定した色を返却するための関数．<BR><STRONG>COLORREF GetDisabledColor() 
+    { return coldisabled; 
+    }</STRONG><BR>    
+      ボタンが無効状態のときのキャプションカラーとして設定した色を返却するための関数 </FONT>       
+     </P>
+    <P><TEXTAREA style="LEFT: 51px; OVERFLOW: hidden; TOP: 2902px" name=7 rows=4 wrap=off cols=117>protected:
+	virtual void DrawItem(LPDRAWITEMSTRUCT lpDIS);				// ボタンのオーナー描画
+	void DrawBkGround(CDC *pDC, CRect rect,const COLORREF color);			// 背景色描画
+	void DrawCaption(CDC *pDC, CRect rect,const COLORREF color,const CString&amp; str);	// キャプション描画
+</TEXTAREA><BR><FONT 
+    size=2>　protectedという記述は，これより以下に記述されるメンバ関数が，すべて保護される（基本的には非公開）という意味．先ほどまで定義していたメンバ関数はすべてpublic(公開)宣言であったが，それはそれらのメンバ関数が外部クラスで使われることを前提に作られているからである．ここでは３つの関数を保護(protected)宣言している．それは，描画に関する関数が，直接外部クラスに影響されてはならないためである．<BR><STRONG>virtual 
+    void DrawItem(LPDRAWITEMSTRUCT lpDIS);</STRONG> 
+    <BR>　ボタンのオーナー描画を行う関数．この関数は自作したわけではなく，CButtonクラスの関数をオーバーライドしたものである．<BR>　オーナー描画のボタンの表示上の外観が変化すると（即ち，描画色を変更させようとするとき）、フレームワークがこの関数を呼び出すことになっている．したがってプログラマがこの関数を外部から呼ぶことは無い。故にこの関数内部に，一連のボタン描画色変更コードを記述しておけば，後はこの関数をフレームワークが呼び出してくれるので描画色を変更することができる．<BR>　引数は，<FONT>オーナー描画コントロールを塗りつぶす方法などが格納された構造体（DRAWITEMSTRUCT）へのポインタである．この情報を元に描画を行っていく．</FONT><BR><STRONG>void 
+    DrawBkGround(CDC *pDC, CRect rect,const COLORREF 
+    color);</STRONG><BR>　背景を描画するための関数．これは自作の関数である．<BR><STRONG>void 
+    DrawCaption(CDC *pDC, CRect rect,const COLORREF color,const CString&amp; 
+    str);</STRONG> <BR>　キャプションを記述するための関数．これも自作の関数である．</FONT></P>
+    <P><TEXTAREA style="OVERFLOW: hidden" name=8 wrap=off cols=6>};
+#endif
+</TEXTAREA><BR><FONT 
+    size=2>}；は，クラスの定義終了の括弧．<BR>#endifは，#ifndefの適用をここまでにするという意味である．これら２つは対で使用しなくてはならないので，当然記述しないとエラーになるから要注意．</FONT></P></dt>
+    </BLOCKQUOTE>
+<H4>■　派生クラスの実現部を作成する（colorbtn.cppの実装）．</H4>
+<BLOCKQUOTE>
+  <P>　先ほどは，派生クラスのインターフェースを作った．インターフェースである程度関数の実体を記述したものの，実体が定義されていないものもある．実体がまだ定義されていない関数は，<BR><STRONG>コンストラクタとデストラクタ<BR>BOOL AutoLoad(const UINT nID, 
+  CWnd* pParent)</STRONG><BR><STRONG>virtual void 
+  DrawItem(LPDRAWITEMSTRUCT lpDIS);<BR>void DrawBkGround(CDC *pDC, CRect 
+  rect,const COLORREF color); <BR>void DrawCaption(CDC *pDC, CRect rect,const 
+  COLORREF color,const CString&amp; str); 
+  <BR></STRONG>である．これらの中身を実装していく．colorbtn.cppを開いてほしい．当然真っ白なファイルが開くはずである．</P>
+
+<P><TEXTAREA style="OVERFLOW: hidden" name=1 wrap=off cols=22>#include "stdafx.h"
+#include "colorbtn.h"
+</TEXTAREA><BR>　<FONT 
+  size=2>ヘッダファイルのインクルードstdafx.hはMFCを利用するために，colorbtn.hは無いと意味がない．</FONT></P>
+
+
+
+<P><TEXTAREA style="OVERFLOW: hidden" name=2 rows=5 wrap=off cols=36>#ifdef _DEBUG
+#define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
+#endif
+</TEXTAREA><BR>　<FONT size=2>これに関しては「おまじない」だと思ってよい（説明も割愛する）．</FONT></P>
+
+
+
+<P><TEXTAREA style="OVERFLOW: hidden" name=3 rows=1 wrap=off cols=41>IMPLEMENT_DYNAMIC(CColorButton, CButton)
+</TEXTAREA><BR>　<FONT size=2>厳密に言うと，（フレームワークが）実行時にクラス名やクラス階層でのクラスの位置を知るために 
+  CObject クラスの動的派生オブジェクトに必要な C++ 
+  のコードを生成するために，記述する．第一引数は派生クラス（このクラス：CColorButton），第二引数は基本クラス（CButton）をとる．わからない人は，ヘッダファイルに，DECLARE_DYNAMIC(CColorButton)というのを書いたが，それと対で記述するものだと思ってもほぼ間違いではない．またこのステートメントにはセミコロン"；"が不要である．別に間違っているわけではない．</FONT></P>
+
+
+
+<P><TEXTAREA style="OVERFLOW: hidden" name=4 rows=7 wrap=off cols=64>CColorButton::CColorButton() 
+{
+	// ディフォルトカラー
+	coltext = RGB(0, 0, 0);		// #0x00,0x00,0x00
+	colbackground = RGB(192, 192, 192);	// #0xC0,0xC0,0xC0
+	coldisabled = RGB(128, 128, 128);	// #0x80,0x80,0x80
+}
+</TEXTAREA><BR><FONT 
+  size=2>　コンストラクタのインプリメンテーション．一般的に，コンストラクタでメンバ変数を初期化するものとされている．それは，クラスのオブジェクト（インスタンス）が作成されるときには，コンストラクタが呼ばれるからである．<BR>ここでは，メンバ変数にディフォルトのカラーを設定している．ここでいうディフォルトカラーは，ウィンドウズのディフォルトに似た（テキスト：黒　背景：グレー　無効状態テキスト：淡いグレー）ものである．</FONT></P>
+
+ 
+
+<P><TEXTAREA style="OVERFLOW: hidden" name=5 rows=1 wrap=off cols=32>CColorButton::~CColorButton(){}
+</TEXTAREA><BR><FONT 
+  size=2>　デストラクタのインプリメンテーション．オブジェクトが破棄されるときにこれが呼ばれるが，特に何もする必要はないだろう．</FONT></P>
+
+ 
+
+<P><TEXTAREA style="OVERFLOW: hidden" name=6 rows=9 wrap=off cols=59>// ボタンをCColorButtonアタッチにする
+BOOL CColorButton::AutoLoad(const UINT nID, CWnd* pParent)
+{
+	// ダイナミックサブクラス化
+	if (!SubclassDlgItem(nID, pParent))
+		return false;
+
+	return true;
+}
+</TEXTAREA><BR><FONT 
+  size=2>　AutoLoad関数のインプリメンテーション．ここで動的サブクラス化を行う．動的サブクラス化によって，ディフォルトでCButtonクラスとなってしまうボタンコントロールを，CButtonクラスのサブクラスであるCColorButtonクラスとして使用する（アタッチする）ことができる．<BR><STRONG>［引数］</STRONG><BR><STRONG>const 
+  UINT nID</STRONG>：　サブクラス化して使用するボタンコントロールのリソースID<BR><STRONG>CWnd* 
+  pParent</STRONG>：　そのボタンコントロールの親ウィンドウ（通常はダイアログ）へのポインタ<BR><STRONG>［内部］</STRONG><BR>　SubclassDlgItem（nID,pParent）：　ダイアログ上のコントロールを"動的サブクラス化" 
+  し、CWnd 
+  オブジェクトに結び付ける関数．この関数が成功すると，nIDで指定されているボタンコントロールは，CButtonクラスではなく，その派生クラスCColorButtonとして使用されることになる．<BR>　SubclassDlgItemが正常終了したときのみ，AutoLoad関数がtrueを返すような設計にしている．</FONT></P>
+
+ 
+
+<P><TEXTAREA style="OVERFLOW: hidden" name=7 wrap=off cols=52>// オーナー描画する
+void CColorButton::DrawItem(LPDRAWITEMSTRUCT lpDIS){
+</TEXTAREA><BR>　<FONT 
+  ><FONT 
+  size=2>DrawItem関数のインプリメンテーション．これはCButtonクラスのDrawItem関数のオーバーライド関数である．またこの関数は，ボタンの外観が変更されようとするときに，フレームワークが呼び出すので，プログラマが外部クラスで明示的に呼び出すことは無い．「書いておけば勝手に実行してくれる」感覚で捕らえてもらえばよいだろう．<BR><STRONG>［引数］</STRONG><BR><STRONG>LPDRAWITEMSTRUCT 
+  &nbsp;lpDIS</STRONG>：DRAWITEMSTRUCT構造体へのポインタ．<BR>DRAWITEMSTRUCT構造体には，オーナー描画の際に必要なデータが格納されている（このデータはフレームワークが持ってくるので，プログラマは使うだけである）．DRAWITEMSTRUCT構造体は，次の形式を持つ．<BR><TEXTAREA id=TEXTAREA1 style="OVERFLOW: hidden; BACKGROUND-COLOR: pink" name=TEXTAREA1 rows=11 cols=80>typedef struct tagDRAWITEMSTRUCT {
+	UINT	CtlType;		//コントロールの種類です
+	UINT	CtlID;		//ボタンのコントロールID
+	UINT	itemID;		//（ボタンには関係なし）
+	UINT	itemAction;	//要求される描画動作を定義します
+	UINT	itemState;	//状態フラグ
+	HWND	hwndItem;		//コントロールのウィンドウハンドル
+	HDC	hDC;		//デバイス コンテキストハンドル
+	RECT	rcItem;		//描画されるコントロールの境界を定義する四角形
+	DWORD	itemData;		//（ボタンには関係なし）
+} DRAWITEMSTRUCT;
+</TEXTAREA>
+ </FONT>
+  
+     
+   
+   
+   
+   
+   
+   
+   
+   
+   
+ 
+
+  </FONT></P>
+
+
+<P><TEXTAREA style="OVERFLOW: hidden" name=8 wrap=off cols=49>	CDC* pDC = CDC::FromHandle(lpDIS-&gt;hDC);
+	CString strCaption;
+</TEXTAREA><BR><FONT 
+  size=2>　引数lpDISのメンバhDCをCDCクラスのFromHandleメンバ関数で，CDCクラスのオブジェクトのポインタに変換し，その値をpDCに保持しておく．またボタンのキャプションを保持しておく．</FONT></P>
+
+
+
+<P><TEXTAREA style="OVERFLOW: hidden" name=9 rows=4 wrap=off cols=45>	UINT nState = lpDIS-&gt;itemState; 
+	CRect focusRect, btnRect;
+	focusRect.CopyRect(&amp;lpDIS-&gt;rcItem);
+	btnRect.CopyRect(&amp;lpDIS-&gt;rcItem);
+</TEXTAREA><BR><FONT 
+  size=2>１行目で，引数lpDISのメンバitemStateをnStateに保持する．<BR>２行目以降では，CRectクラス（矩形クラス）変数（focusRect,btnRect）を２つ定義し，引数lpDISのメンバrcItemを変数にコピーしておく．rcItemは，ボタンの領域である．</FONT></P>
+
+ 
+
+<P><TEXTAREA style="OVERFLOW: hidden" name=10 rows=5 wrap=off cols=37>	// フォーカス矩形領域の作成
+	focusRect.left += 4;
+	focusRect.right -= 4;
+	focusRect.top += 4;
+	focusRect.bottom -= 4;
+</TEXTAREA><BR><FONT 
+  size=2>　focusRectは，ボタンがフォーカスを得たときに，ボタンの内側に表示される点線の領域である．先ほどfocusRectに，ボタンの領域を格納したので，focusRectを4ポイントずつ上下左右狭くしていると考えればよい．結局focusRectにはフォーカス領域，btnRectにはボタン領域が格納されることになる．</FONT></P>
+
+
+
+<P><TEXTAREA style="OVERFLOW: hidden" name=11 wrap=off cols=39>	// ボタンのキャプションを取得
+	GetWindowText(strCaption);
+</TEXTAREA><BR><FONT 
+  size=2>　ボタンのキャプションを取得する．GetWindowTextはCWndクラスのメンバであるが，CButtonがCWndの派生クラスであるために，ボタンのキャプションを得ることにも使用できるのである．キャプションは，先ほど定義したstrCaptionに格納しておく．</FONT></P>
+
+
+
+<P><TEXTAREA style="OVERFLOW: hidden" name=12 rows=4 wrap=off cols=65>	// ボタンの描画(背景色、エッジ、キャプション)
+	DrawBkGround(pDC, btnRect, GetBackGroundColor()); 
+  	DrawCaption(pDC, btnRect, GetTextColor(),strCaption);
+	pDC-&gt;DrawEdge(btnRect,EDGE_RAISED,BF_RECT);
+</TEXTAREA><BR><FONT 
+  size=2>　DrawBkGroundとDrawCaptionは後で説明する自作の関数で，背景色と文字列の描画を行う．<BR>　pDC-&gt;DrawEdgeは，ボタンの境界部分を描画するCDCクラスの関数．第２引数にEDGE_RAISEDを指定することで，ボタンが押されていない状態として描画する．<BR>これは，ボタンがフォーカスを得ず，かつ無効状態ではない標準の状態の描画である．</FONT></P>
+
+
+
+<DIV><TEXTAREA style="OVERFLOW: hidden" name=13 rows=14 wrap=off cols=83>	// フォーカスを得たときや選択されているとき
+	if (nState &amp; ODS_FOCUS)
+	{
+		if (nState &amp; ODS_SELECTED)
+		{ 
+			pDC-&gt;DrawEdge(btnRect,EDGE_SUNKEN,BF_RECT);
+		}
+		pDC-&gt;DrawFocusRect(focusRect);
+	}// ボタンが無効であるとき
+	else if(nState &amp; ODS_DISABLED)
+	{
+  		DrawCaption(pDC, btnRect, GetDisabledColor(), strCaption);
+    	}
+}
+</TEXTAREA><BR>　<FONT 
+  size=2>ここではフォーカスを得たり，選択されているとき，そして無効状態にあるときのボタンの外観を描画している部分である．先ほど引数からボタンの状態をnStateに得たが，それとビット操作をしてボタンが選択されているのかどうかなどを調べている．<BR><STRONG>ODS_FOCUS：</STRONG>ボタンがフォーカスを得ているとき（ボタンを押しているときは当然フォーカスを得ていることに注意）<BR><STRONG>ODS_SELECTED：</STRONG>ボタンが選択（押されている）されている時<BR><STRONG>ODS_DISABLED：</STRONG>ボタンが無効状態の時<BR><BR>上記のコードを良く眺めてもらえればわかるが，ボタンの状態別に何が実行されるかを以下に解説する．<BR></FONT>
+  <TABLE cellSpacing=1 cellPadding=1 width="75%" border=1 
+  align=center>
+    
+    <TR>
+      <TD style="BACKGROUND-COLOR: #339999"><FONT size=2 
+        color=white><STRONG>フォーカスのみを得ている時</STRONG></FONT></TD></TR>
+    <TR>
+      <TD><FONT 
+        size=2><STRONG>pDC-&gt;DrawFocusRect(focusRect)</STRONG><BR>フォーカスを描画するCDCクラスメンバ</FONT></TD></TR>
+    <TR>
+      <TD style="BACKGROUND-COLOR: #339999"><FONT size=2 
+        color=white><STRONG>ボタンが押されている時</STRONG></FONT></TD></TR>
+    <TR>
+      <TD><FONT size=2><STRONG>pDC-&gt;DrawEdge(btnRect,EDGE_SUNKEN,BF_RECT);</STRONG><BR>ボタンの境界部分を描画するCDCクラスの関数．第２引数にEDGE_SUNKENを指定することで，ボタンが押されている場合として描画される．<BR><STRONG>pDC-&gt;DrawFocusRect(focusRect)<BR></STRONG>フォーカスを描画するCDCクラスメンバ</FONT></TD></TR>
+    <TR>
+      <TD style="BACKGROUND-COLOR: #339999"><FONT size=2 
+        color=white><STRONG>ボタンが無効状態の時</STRONG></FONT></TD></TR>
+    <TR>
+      <TD><FONT size=2>DrawCaption(pDC, btnRect, GetDisabledColor(), 
+        strCaption);<BR>無効状態のキャプションを描画．引数にGetDisableColor（）を使用して無効状態のキャプション色を使用していることに注目．</FONT></TD></TR></TABLE><BR><FONT 
+  size=2>　上の表だけで実現できるのは，ifステートメントの前に，フォーカスの無いボタンの背景色やキャプションの描画がなされているためであることは言うまでも無い．動作が良くわからない場合は，デバッグをするなりして各自検討してみてほしい．<BR></FONT></DIV>
+
+
+
+<P><TEXTAREA style="LEFT: 48px; OVERFLOW: hidden; TOP: 7408px" name=14 rows=6 wrap=off cols=75>// 背景色描画
+void CColorButton::DrawBkGround(CDC *pDC, CRect rect,const COLORREF color)
+{ 
+	CBrush brush(color);
+	pDC-&gt;FillRect(rect, &amp;brush);
+}
+</TEXTAREA><BR>　<FONT 
+  size=2>DrawBkGround関数のインプリメンテーション．ボタンの背景を描画する．実体は非常に簡単で，引数で渡されるカラーのブラシを作り，デバイスコンテキストを介してボタン領域をブラシで塗りつぶしているだけである．<BR><STRONG>［引数］</STRONG><BR><STRONG>CDC 
+  *pDC：</STRONG>ボタンのデバイスコンテキスト<BR><STRONG>CRect rect 
+  ：</STRONG>ボタン領域<BR><STRONG>COLORREF color：</STRONG>ボタンの背景色</FONT></P>
+
+
+
+<P><TEXTAREA style="LEFT: 51px; OVERFLOW: hidden; TOP: 7978px" name=15 rows=8 wrap=off cols=93>// キャプション描画
+void CColorButton::DrawCaption(CDC *pDC, CRect rect,const COLORREF color,const CString&amp; str)
+{
+	COLORREF oldcolor = pDC-&gt;SetTextColor(color);
+	pDC-&gt;SetBkMode(TRANSPARENT);
+	pDC-&gt;DrawText(str,rect,DT_CENTER|DT_VCENTER|DT_SINGLELINE);
+	pDC-&gt;SetTextColor(oldcolor);
+}
+</TEXTAREA><BR>　<FONT 
+  size=2>DrawCaption関数のインプリメンテーション．ボタンのキャプションを描画する．まずデバイスコンテキストにキャプションカラーを持たせる．このとき戻り値にそれまで持っていたテキストカラーが返るので保持しておく．その後，CDCクラスのメンバDrawText関数で，ボタン領域内に，キャプションを描画する．pDC-&gt;DrawTextの第３引数の意味は，上下左右真ん中でかつ１行のキャプションを描画するという意味．最後に保持しておいたテキストをまた持ち直している．<BR>　引数であるキャプションカラーを変えることで，通常のボタンと無効状態のボタンが同じ関数でキャプション描画できる．<BR><STRONG>［引数］</STRONG><BR><STRONG>CDC 
+  *pDC：</STRONG>ボタンのデバイスコンテキスト<BR><STRONG>CRect 
+  rect：</STRONG>ボタン領域<BR><STRONG>const COLORREF 
+  color：</STRONG>キャプションカラー<BR><STRONG>const CString&amp; 
+  str：</STRONG>キャプション</FONT></P>
+
+
+
+<P>　ここまで記述したら，実行してほしい．ビルドに成功しても何も起きないが，良く見るとClass 
+  ViewにCColorButtonクラスが追加されていることに気づくはずである．うまく実行できない方や全ソースコードが見たい方は<A 
+  href="section3_4_src.html">こちら</A> 
+  を参照してほしい．</P>
+
+
+
+<P align=center><IMG alt=figure3.18 src="fig3_18.jpeg" 
+  ><BR><FONT size=2><STRONG>figure3.18 
+  クラスビューを見ると</STRONG></FONT></P>
+
+
+
+<P>&nbsp;さてカラーボタンを作るためのクラスライブラリは作成した．あとはこのライブラリを使用して実際にボタンをカラフルにしてみよう！</P>
+
+
+</BLOCKQUOTE>
+
+
+
+<H4>■　ついに！ボタンの背景色を変えていく．</H4>
+<BLOCKQUOTE>
+
+
+
+<P>　クラスライブラリCColorButtonを使って，ボタンの描画色を変えていく．といってもクラスライブラリを使うだけなので，実際記述するものは非常に少ない．またクラスライブラリにしたということは，バグの管理が比較的簡単である．ということも指す．</P>
+
+
+
+<P>まずは，CColorButtonクラスをソース内で利用できるようにヘッダファイルを追加する．ファイルビューを開き，ColCtrlDlg.hとColCtrlDlg.cppに<BR><code>&nbsp;#include 
+  "colorbtn.h"</code><BR>
+  として追加する．ここで重要なのは，インクルードする順番である．上記の２つのファイルには，<BR><code>&nbsp;#include 
+  "stdafx.h"</code><BR>とstdafx.hがインクルードされているが，このファイルよりも下の位置でインクルードしなくてはならない．なぜならば，colorbtn.hではCButtonクラスやCWndクラスなどのMFCクラスを使用しているが，MFCクラスがロードされるのはstdafx.hをインクルードした後だからである．正しくインクルードされれば，実行時につまづくことはないだろう．</P>
+
+
+
+<P>　次に，これまで記述されていたボタンの描画関連のコードを全て削除する．具体的には以下のようにしてほしい．まずCColCtrlDlgの定義部(colctrldlg.h)において，ボタンのブラシを削除し，その代わりに先ほど作成したカラーボタンクラスの変数m_colBtnを追加しておく．</P>
+  <P><TEXTAREA id=TEXTAREA2 style="LEFT: 51px" name=TEXTAREA2 rows=9 cols=80>/////////////////////////////////////////////////////////////////////////////
+// CColCtrlDlg ダイアログ
+
+class CColCtrlDlg : public CDialog
+{
+// 構築
+public:
+	CBrush		m_brDlg;	// ダイアログの背景色ブラシ
+	CColorButton	m_colBtn;	// カラーボタンクラス
+
+	CColCtrlDlg(CWnd* pParent = NULL);	// 標準のコンストラクタ</TEXTAREA></P>
+  <P>OnCtlColor関数では，ボタンに関するコーディングを全て削除する．ダイアログに関するコードのみ残して置けばよい．</P>
+  <P><TEXTAREA id=TEXTAREA3 name=TEXTAREA3 rows=9 cols=70>HBRUSH CColCtrlDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor) 
+{
+	switch(nCtlColor){
+	case CTLCOLOR_DLG:
+		return (HBRUSH) m_brDlg;
+	default:
+		return CDialog::OnCtlColor(pDC, pWnd, nCtlColor);
+	}
+}
+</TEXTAREA></P>
+  <P>OnInitDialog関数の最後を以下のように書き換えてほしい．</P>
+  <P><TEXTAREA id=TEXTAREA4 name=TEXTAREA4 rows=10 cols=80>	// TODO: 特別な初期化を行う時はこの場所に追加してください。
+
+	////////////////////////////////////////////////////////////
+	// 背景色の設定
+
+	// ダイアログ
+	m_brDlg.CreateSolidBrush(RGB(255,  0,  0));	// 背景(赤)
+	
+	return TRUE;  // TRUE を返すとコントロールに設定したフォーカスは失われません。
+}
+</TEXTAREA></P>
+  <P>　ここまで記述して実行してみよう．エラーは出ないはずであるが，ボタンの背景色は変更されていないはずである．うまく実行できていない方は，ヘッダファイルが正しく追加されているか，よく確認してほしい．</P>
+  <P>　次にボタンの描画色を決めるコーディングをOnInitDialog関数内部で行う．以下描画色を設定するボタンのリソースIDをIDC_BUTTON1として話をすすめていく．</P>
+  <P><TEXTAREA id=TEXTAREA5 name=TEXTAREA5 rows=12 cols=80>	////////////////////////////////////////////////////////////
+	// 背景色の設定
+
+	// ダイアログ
+	m_brDlg.CreateSolidBrush(RGB(255,  0,  0));	// 背景(赤)
+	// ボタン
+	m_colBtn.AutoLoad(IDC_BUTTON1,this);
+	m_colBtn.SetBackGroundColor(RGB(  0,  0,  0));
+	m_colBtn.SetTextColor(RGB(255,255,255));
+	
+	return TRUE;  // TRUE を返すとコントロールに設定したフォーカスは失われません。
+}</TEXTAREA></P>
+  <P>追加したのはボタンに関するコードの3行である．<BR><STRONG>m_colBtn.AutoLoad(IDC_BUTTON1,this);　</STRONG><BR>　この関数を実行すると，サブクラス化が実行され，IDC_BUTTON1をCColorButtonクラスとして使用することができるようになる．第2引数は，ボタンの親ウィンドウになる，ダイアログ自身を引数として渡している．<BR><STRONG>m_colBtn.SetBackGroundColor(RGB( 
+  0, 0, 
+  0));</STRONG><BR>ボタンの背景色を設定する．ここでは黒にした．<BR><STRONG>m_colBtn.SetTextColor(RGB(255,255,255));</STRONG><BR>ボタンのキャプションカラーを設定する．ここでは白にした．<BR>　これらの関数の実体は，作成したCColorButtonの中身を見ればわかるはずなので，ここでは詳しく説明しない．ちなみに無効状態のキャプション色を設定していないが，設定しなくてもコンストラクタで設定したディフォルトカラーが設定されているから心配する必要は無い．</P>
+  <P>ここで実行してみよう．以下のようになれば大成功である．</P>
+  <P align=center><IMG alt=figure3.19 src="fig3_19.jpeg" 
+  ><BR><STRONG><FONT size=2>figure3.19 
+  ボタン背景色が変更できた！</FONT></STRONG></P>
+  <P>　オーナー描画せよ！というメンバ関数DRAWITEM関数を呼び出さなくても，ボタンの描画色が変更されているだろう．これはボタンの外観を変える必要が出てきたとき，フレームワークが勝手に呼んでくれるためである．ぜひ，いろいろな色を試して見てほしい．また作成したCColorButtonクラスには，エラー処理がなされていないので，各自つけてみることをお勧めする．</P>
+
+
+</BLOCKQUOTE>
+<HR style="LEFT: 10px; TOP: 6763px">
+
+<P><FONT 
+size=2>※1　これからのプログラミングスタイルはこのオブジェクト指向プログラミングになっていくだろうと作者は考える．ソフトウェアの再利用（階層性）性や情報隠蔽や多態性などを考えると，従来の関数型プログラミングでは，複雑なソフトウェアに対して対処できなくなってくるからである．Microsoftの「.NET」構想は，オブジェクト指向言語であるJAVAに対抗するために提供されていくだろう．</FONT></P>
+
+<P align=center><FONT size=2>←Back［<A 
+href="section3_3.html">ボタンコントロール(1)</A>］ -- Up［<A 
+href="index.html">コントロールの背景色を変更する</A>］ -- Forward［***］→</FONT></P>
+<P align=right>VisualC++でソフトを作ろう　(c) 藤門千明</P>
+     
+</body>
+</html>

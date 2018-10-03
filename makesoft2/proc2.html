@@ -1,0 +1,102 @@
+<HTML>
+<HEAD>
+<TITLE>BitmapLoader〜第2週〜</TITLE>
+<style type="text/css">
+  <!--
+		A:link { text-decoration:none;  color:#ff4500 }
+		A:visited { text-decoration:none;  color:#ff4500 }  
+		A:active { text-decoration:none;  color:#ff0000 }   
+		A:hover { color:#00008b }	
+	    -->
+</style>
+</HEAD>
+<BODY BGCOLOR="#ffffff"><DIV ALIGN=CENTER><!--#geoguide--></DIV>
+<I><font color="red" size="6">BitmapLoader〜メモリデバイスコンテキスト〜</font></I> 
+<HR>
+<p>　今回は、メモリデバイスコンテキストを学習します。通常のデバイスコンテキストと同じ形を持ったデバイスコンテキストをメモリ上に作成するために、「メモリデバイスコンテキスト」と言うのですが、参考書によっては「裏メモリ」や「裏画面」とも言います。まずはこのメモリデバイスコンテキストについて説明すると共に、実際にそれを作成してみたいと思います。</p>
+<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" WIDTH="100%">
+  <TR>
+    <TD WIDTH="100%" BGCOLOR="#000099"> <font color="#ffffff" size="+1">4.メモリデバイスコンテキストとは何か？</font></TD> 
+  </TR>
+</TABLE>
+<p><b>デバイスコンテキスト</b><br>
+  　デバイスコンテキストとは「デバイス-描画プログラム間の中継ぎ」だと思えば簡単だと思います。つまり同一の描画プログラムを記述することによって、ディスプレイやプリンタなどユーザによって異なる出力デバイスであっても同じように出力できるようにした中継ぎ機構です。このデバイスコンテキストを使用することで、プログラマはユーザのデバイスそしてデバイスを動かすためのドライバを特に意識することなく、画一的に描画を行うことが可能になります。<br>
+  　「デバイスコンテキストは<font color="#FF0000">6つの手(マニュピレータ)</font>を持っている」と考えると分かりやすいと思います。6つの手にはそれぞれ、GDIオブジェクトという描画に必要な道具を<b>1種類につき1つずつ</b>持っています。GDIオブジェクトには以下の種類があります。</p>
+  
+<blockquote> CPen(ペン)<br>
+  CBrush(ブラシ)<br>
+  CFont(フォント)<br>
+  CBitmap(ビットマップ)<br>
+  CPalette(パレット)<br>
+  CRgn(リージョン)<br>
+</blockquote>
+<p>　デバイスコンテキストはただの「手」に過ぎないので、描画道具の性質を決めるのはGDIオブジェクトです。したがって<font color="#FF0000">赤い太いペン</font>という性質はGDIオブジェクトが保存しており、デバイスコンテキストはそれを持たされているというと思えばイメージはつかみやすいでしょう。そしてそれぞれのGDIオブジェクトを持つ手は決まっていて1つずつしかないので、白いブラシと赤いブラシを同時に持つことは出来ません。<br>
+  　全てのウィンドウは、そのウィンドウ専用のデバイスコンテキストを持ちます。ですからあるウィンドウに何かを描画したい時には、そのウィンドウ専用のデバイスコンテキストに指示を出せばよいということになります。このデバイスコンテキストを扱うために、MFCではCDCクラスというものが用意されています。</p>
+<p><b>メモリデバイスコンテキスト</b><br>
+  　メモリデバイスコンテキストは、決して特別なものではありません。通常のデバイスコンテキストはウィンドウと結びついてるだけで、ウィンドウから切り離してしまえば、メモリデバイスコンテキストと同じ物だと思っても特に支障はないでしょう。それは通常のデバイスコンテキストも、メモリデバイスコンテキストも、MFCではCDCクラスのインスタンスであることからも容易に想像は出来るでしょう。ただ、メモリ・・・というだけあって、通常のデバイスコンテキストが実際に見せるためのものだとしたら、メモリデバイスコンテキストは見せないものです。したがって、これらが表裏一体となって使用されることで意味を持ちます。</p>
+<table border="0" cellspacing="0" cellpadding="0" width="100%">
+  <tr> 
+    <td width="100%" bgcolor="#000099"> <font color="#ffffff" size="+1">5.デバイスコンテキストの基本的な使い方（重要）</font></td>
+  </tr>
+</table>
+<p>　ここではデバイスコンテキストの基本的な使い方を説明します。通常のデバイスコンテキストはもちろん、メモリデバイスコンテキストでも使い方は同じです。そしてこの節は非常に重要なので必ず目を通しておいてください。</p>
+<p>デバイスコンテキスト(以下DCと記述します)は、6つのGDIオブジェクトを持つ「手」が存在し、それぞれ1つの種類のGDIオブジェクトしか持つことができないとあっさり言いましたが、実際に描画する時は、同じGDIオブジェクトの道具を持ちたいときがあります(例えば赤いペンと白いペンを交互に使いたい時など)。でも制約上赤いペンか白いペンかどちらか１つしか持つことができません。したがって<b><font color="#FF0000">持ち変える</font></b>という作業を行います。人間が赤いペンを持っているときに、黒いペンで何かを書きたいときには、ペンを持ちかえるのと同じことです。ところで、デバイスコンテキストは必ず6つのGDIオブジェクトを持っていなくてはならないといいましたが、<u>持ち変えるときにそれまで持っていたGDIオブジェクトを必ず保存しておかなくてはなりません。そして持ち替えたGDIオブジェクトを利用してデバイスコンテキストの操作が終わったら、保存しておいたGDIオブジェクトをまた持たせて挙げなくてはなりません</u>。これがMFCによるデバイスコンテキストの利用の掟です。</p>
+<p>この掟は実生活でもおこりうることです。<br>
+  <b><font color="#000000" size="2">ある仲良し兄弟が、同じ電動ハブラシを使っているとします。(当然取り外しできるハブラシで、ハブラシは個々のものを使っています）。弟が歯を磨こうとしたら兄の赤色ハブラシが本体にとりつけられたままでした。弟は兄のハブラシを取り外し、自分の青のハブラシを取り付けて使用しました。歯磨きが終わったので、弟は自分のハブラシを元に戻し、兄のハブラシをまたとりつけてあげました。</font></b></p>
+<table border="0" bgcolor="#FFFFFF" width="316" align="center">
+  <tr> 
+    <td width="310" valign="top" bgcolor="#000000"><font size="2" color="#FFFFFF">Fig2_1.jpg 
+      ある兄弟による電動ハブラシの使用</font></td>
+  </tr>
+  <tr> 
+    <td width="310" valign="top"><img src="fig2_1.jpg" width="465" height="174"></td>
+  </tr>
+</table>
+<p> 　メモリデバイスコンテキストの実際の作成については次章で詳しく行います。最後にデバイスコンテキストの動作を確かめるためにも、簡単なプログラムを組んで見ましょう。</p>
+<table border="0" bgcolor="#FFFFFF" width="598" align="center">
+  <tr> 
+    <td width="592" valign="top" bgcolor="#000000"><font size="2" color="#FFFFFF">以下のプログラムを組んで見ましょう。(BmpLoaderView.cpp)</font></td>
+  </tr>
+  <tr> 
+    <td width="592" valign="top"><font size="2" color="#0000FF">void</font><font size="2"> 
+      CBmpLoaderView::OnDraw(CDC* pDC)<br>
+      {<br>
+      <blockquote> CBmpLoaderDoc* pDoc = GetDocument();<br>
+        ASSERT_VALID(pDoc);<br>
+        <br>
+        CPen cBluePen(PS_SOLID,1,RGB(0,0,255));<font color="#006666">//青いペンを作成する</font><br>
+        CPen* pOldPen;<font color="#006666">// ペンをストックしておく変数</font><br>
+        <br>
+        pDC-&gt;MoveTo(100,10);<font color="#006666">//線を引く</font><br>
+        pDC-&gt;LineTo(100,100);<br>
+        <br>
+        pOldPen = pDC-&gt;SelectObject(&amp;cBluePen);<font color="#006666">//青いペンに持ちかえ、持っていたペンをストック</font><br>
+        <br>
+        pDC-&gt;MoveTo(200,10);<font size="2" color="#006666">//線を引く</font><br>
+        pDC-&gt;LineTo(200,100);<br>
+        <br>
+        pDC-&gt;SelectObject(pOldPen);<font color="#006666">//古いペンに戻す。</font><br>
+        <br>
+        pDC-&gt;MoveTo(300,10);<font size="2" color="#006666">//線を引く</font><br>
+        pDC-&gt;LineTo(300,100); </blockquote>
+      }</font></td>
+  </tr>
+</table>
+<table border="0" bgcolor="#FFFFFF" width="598" align="center">
+  <tr> 
+    <td width="592" valign="top" bgcolor="#000000"><font size="2" color="#FFFFFF">実行結果</font></td>
+  </tr>
+  <tr> 
+    <td width="592" valign="top"><img src="fig2_2.jpg" width="419" height="212"><br>
+      <font color="#FF0000">処理</font><br>
+      <font size="2">初め持っていたディフォルトのペンで線を引く(左)<br>
+      ペンを青に持ち替えて、ディフォルトのペンをストックしておき、線を引く(中央)<br>
+      ストックされていたディフォルトのペンに持ち替えて線を引く(右)</font></td>
+  </tr>
+</table>
+<p><A HREF="proc3.html">[Next]</A><BR>
+  <A HREF="proc1.html">[Previous]</A><BR>
+  <A HREF="../index.html">[Home]</A><BR>
+</p>
+</BODY>
+</HTML>

@@ -1,0 +1,238 @@
+<HTML>
+<HEAD>
+<TITLE>コントロール１--EditBoxとStatic</TITLE>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html;CHARSET=utf-8">
+<style type="text/css">
+  <!--
+		A:link { text-decoration:none;  color:#ff4500 }
+		A:visited { text-decoration:none;  color:#ff4500 }  
+		A:active { text-decoration:none;  color:#ff0000 }   
+		A:hover { color:#00008b }	
+	    -->
+</style>
+</HEAD>
+<BODY BGCOLOR="white" TEXT="black"><DIV ALIGN=CENTER><!--#geoguide--></DIV>
+
+<I><FONT COLOR="red" SIZE="6">EditBoxとStaticの使い方</FONT></I><HR>
+前々回に、Dialogのコーナーで簡単なButtonとUpdateDataによるダイアログとプログラム間でのデータ通信、背景色の変更などちょっと目を引くものをやりましたが、肝心のコントロールそのものについてはあんまり深く触れてきませんでした。そこで、今回はコントロールの使い方を伝授？します。<BR><BR>
+
+<!-- セクションタイトル（始め） -->
+<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" WIDTH="100%">
+  <TR>
+    <TD WIDTH="100%" BGCOLOR="#000099">
+    <FONT COLOR="#ffffff" SIZE="+1">1. とりあえず使ってみる</FONT></TD> 
+  </TR>
+</TABLE>
+<!-- セクションタイトル（終わり） -->
+始めにこの2つのコントロールの説明をしておきますね。EditBox<IMG SRC="editbox.gif" ALIGN="BUTTOM" WIDTH="21" HEIGHT="21">は、ユーザが入力したり、結果を表示できる枠みたいなもので、よくホームページのアンケートにE-mailのアドレスを書き込むようなやつです。説明では分かりにくいですが、見たことがない人は多分いないでしょう。Static
+<IMG SRC="static.gif" ALIGN="BOTTOM" WIDTH="21" HEIGHT="20">とは、ダイアログ上に書かれる文字列のことです。ここではStaticについては特に説明しません。ただ、スタティックのプロパティのキャプションを変更するだけだからです。<BR><BR>
+
+とりあえず、「EditBoxを配置し、そこに文字列を表示する」程度から始めてみます。新規作成で<BR>
+<!-- インデントリスト（始め） -->
+<DL>
+<DT><FONT COLOR="red">1.プロジェクトでMFC AppWizard（exe）を選択し、プロジェクト名は、DlgTestとしておく</FONT><BR>
+<FONT COLOR="red">2.「作成するアプリケーションの種類」はダイアログベースを選択</FONT><BR>
+<FONT COLOR="red">3.Step 2/4で、ダイアログのタイトルを変更したい人はしておく</FONT><BR>
+<DD>ダイアログのタイトルは、後でも変更ができるので別に気にしなくてOK。別にこだわらない人は、ここはSkipしていいです。ちなみにこのタイトル記入欄がEditBoxです。
+<DT><FONT COLOR="red">4.終了してOK</FONT>
+</DL>
+<!-- インデントリスト（終わり） -->
+
+さて、ダイアログを編集します。この作業はリソースを変更すると言ったのですね。
+<!-- インデントリスト（始め） -->
+<DL>
+<DT><FONT COLOR="red">1.ワークスペースのリソースタブをクリック</FONT><BR>
+<FONT COLOR="red">2.DlgTestリソースのDialogフォルダをダブルクリック</FONT><BR>
+<FONT COLOR="red">3.IDD_DIALOG1を開く</FONT><BR>
+<FONT COLOR="red">4.以下の図のように編集する。</FONT>
+<DD>OKボタンは残しておいて、キャンセルボタンと”Todo：ダイアログのコントロールをここに配置”というスタティックは消す。「選択してDeleteキー」でコントロールは消去できます。EditBoxのIDは<FONT COLOR="blue">IDC_EDIT1</FONT>です。<BR>
+<DT><FONT COLOR="red">5.ビルド--実行を行う</FONT><BR>
+<DD>実行結果も図にしておきました。まだEditBoxに何も書かれていないことに気付きます。ここに命令を書く方法を次に述べます。
+</DL>
+<!-- インデントリスト（終わり） -->
+<CENTER><IMG SRC="fig1_1_1.gif" WIDTH="315" HEIGHT="160">&lt;--(編集内容)<IMG SRC="fig1_1_2.gif" WIDTH="276" HEIGHT="99">&lt;--(実行結果)<BR></CENTER><BR>
+
+<!-- セクションタイトル（始め） -->
+<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" WIDTH="100%">
+  <TR>
+    <TD WIDTH="100%" BGCOLOR="#000099">
+    <FONT COLOR="#ffffff" SIZE="+1">2.EditBoxに文字を表示する方法</FONT></TD> 
+  </TR>
+</TABLE>
+<!-- セクションタイトル（終わり） -->
+今度は文字を表示させる方法について述べます。方法はいろいろありますが、ここでは簡単な2通りの方法を説明します。1つは、「汎用性が少なく、ただ文字を出力する」タイプのもの。もう1つは、EditBoxに対応したある変数（メンバ変数）を定めて、その変数に対して文字を割り当て、EditBoxを通して表示させる方法。前者がダイレクトなのに対して、後者はワンテンポ置いていると言ったところです。後者は変数の方によって、文字を表示させたり、数字を表示させたりできる点で、多少汎用性があるかな？と思うわけです。<BR><BR>
+とはいえ、どのタイミングで表示させるかも重要です。この場合、プログラムが開始し、ダイアログが表示される前に、EditBoxに文字を割り当てなくてはなりません。（あくまでこの場合ですけどね）<BR>
+言わば、EditBoxの初期化として文字を出力させるのですから、初期化をする関数内で表示作業を行えば◎です。この初期関数は、OnInitDialogと言う関数です。長い説明はよしとして、さっさとコードを説明することにします。<BR><BR>
+<BIG><FONT COLOR="red">１．SetDlgItemText関数を使う方法</FONT></BIG><BR>
+<!-- センターテーブル（始め） -->
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<FONT COLOR="red">DlgTestDlg.cpp内部（OnInitDialog関数）</FONT><BR>
+<!-- インデントリスト（始め） -->
+<DL>
+<DD>
+<DT>BOOL&nbsp; CDlgTestDlg::OnInitDialog(&nbsp;)<BR>
+{
+<DD>CDialog::OnInitDialog(&nbsp;);<BR><BR>
+・・・<BR><BR>
+<FONT COLOR="green">// このダイアログ用のアイコンを設定します。フレームワークはアプリケーションのメイン<BR>
+// ウィンドウがダイアログでない時は自動的に設定しません。</FONT><BR><BR>
+SetIcon(m_hIcon, TRUE);			<FONT COLOR="green">// 大きいアイコンを設定</FONT><BR>
+SetIcon(m_hIcon, FALSE);		<FONT COLOR="green">// 小さいアイコンを設定</FONT><BR><BR>
+<FONT COLOR="green">// TODO: 特別な初期化を行う時はこの場所に追加してください。</FONT><BR>
+<FONT COLOR="red">SetDlgItemText(IDC_EDIT1,"VisualC++");//これを挿入</FONT><BR><BR>
+<FONT COLOR="blue">return</FONT>&nbsp; TRUE;  <FONT COLOR="green">// TRUE を返すとコントロールに設定したフォーカスは失われません。</FONT>
+<DT>}
+</DL>
+<!-- インデントリスト（終わり） -->
+</TD></TR>
+</TABLE>
+<!-- センターテーブル（終わり） -->
+
+ここで、SetDlgItemText関数の解説を簡単にしておきます。<BR>
+<!-- センターテーブル（始め） -->
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<BIG><FONT COLOR="red">SetDlgItemText関数</FONT></BIG><BR>
+この関数は、<U>指定されたダイアログ ボックス内のコントロールのキャプションまたはテキストを設定する</U>ものです。コントロールはID指定するので、キャプションやテキストを変更したいIDとその文字列を引数として送ればOKです。簡単でしょ！さっきは、EditBoxのテキストを設定したのです。でも定義に書いてある通り、キャプションも変更できるので、先ほどの変更点の直後に、
+<!-- インデントリスト（始め） -->
+<DL>
+<DD><FONT COLOR="green">// TODO: 特別な初期化を行う時はこの場所に追加してください。</FONT><BR>
+SetDlgItemText(IDC_EDIT1,"VisualC++");<BR>
+SetDlgItemText(IDOK,"Control");//IDOKはOKボタンのID
+</DL>
+<!-- インデントリスト（終わり） -->
+と書くと、ボタンのキャプションもしっかり変更されていることが分かります。<BR><BR>
+<CENTER><IMG SRC="fig1_2.gif" WIDTH="276" HEIGHT="99">ボタンがOKからControlに！</CENTER><BR>
+</TD></TR>
+</TABLE><BR>
+<!-- センターテーブル（終わり） -->
+<BIG><FONT COLOR="red">２．メンバ変数に文字を割り当てる方法</FONT></BIG><BR>
+この方法は、「EditBoxにある型の変数(メンバ変数)を指定し、その変数に値を代入してあげる」と言う方法です。これも実践してみます。<BR>
+<!-- インデントリスト（始め） -->
+<DL>
+<DT><FONT COLOR="red">1.ClassWizardを実行する。</FONT><BR>
+<FONT COLOR="red">2.以下のように選択する</FONT>
+<DD>プロジェクト：DlgTest<BR>
+クラス名：CDlgTest<BR>
+オブジェクトID：IDC_EDIT1
+<DT><FONT COLOR="red">3.メンバ変数のタブをクリック</FONT><BR>
+<FONT COLOR="red">4.IDC_EDIT1を選択し変数の追加を押す</FONT><BR>
+<DD>「メンバ変数の追加」ダイアログが開いたら成功です。
+<DT><FONT COLOR="red">5.以下のように設定してあげればOK</FONT>
+<DD>メンバ変数：m_edit<BR>
+カテゴリ：値<BR>
+変数のタイプ：CString<BR>
+「m_editはCStirng型の値をもつ変数ですよ」と宣言したことになるのです。
+<DT><FONT COLOR="red">6.OKボタンを押す。</FONT>
+</DL>
+<!-- インデントリスト（終わり） -->
+あとはプログラム中で、m_editに文字を代入すればいいので、全体のコードはこんな感じになるでしょう。<BR>
+
+<!-- センターテーブル（始め） -->
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<FONT COLOR="red">DlgTestDlg.cpp内部（OnInitDialog関数）</FONT><BR>
+<!-- インデントリスト（始め） -->
+<DL>
+<DD>
+<DT>BOOL&nbsp; CDlgTestDlg::OnInitDialog(&nbsp;)<BR>
+{
+<DD>CDialog::OnInitDialog(&nbsp;);<BR><BR>
+・・・<BR><BR>
+<FONT COLOR="green">// このダイアログ用のアイコンを設定します。フレームワークはアプリケーションのメイン<BR>
+// ウィンドウがダイアログでない時は自動的に設定しません。</FONT><BR><BR>
+SetIcon(m_hIcon, TRUE);			<FONT COLOR="green">// 大きいアイコンを設定</FONT><BR>
+SetIcon(m_hIcon, FALSE);		<FONT COLOR="green">// 小さいアイコンを設定</FONT><BR><BR>
+<FONT COLOR="green">// TODO: 特別な初期化を行う時はこの場所に追加してください。</FONT><BR>
+<FONT COLOR="red">m_edit="Hello!!";//以下2行を挿入</FONT><BR>
+<FONT COLOR="red">UpdateData(false);</FONT><BR><BR>
+<FONT COLOR="blue">return</FONT>&nbsp; TRUE;  <FONT COLOR="green">// TRUE を返すとコントロールに設定したフォーカスは失われません。</FONT>
+<DT>}
+</DL>
+<!-- インデントリスト（終わり） -->
+</TD></TR>
+</TABLE>
+<!-- センターテーブル（終わり） -->
+2行目の<FONT COLOR="blue">UpdateData(false);</FONT>は、メンバ変数の値をダイアログに反映する関数です。この関数の引数をtrueにすれば、ダイアログの値をメンバ変数に書き込むことができます。このことは前回もやりましたよね。実行したら、やはり以下のような期待した結果になりました。<BR>
+<CENTER><IMG SRC="fig1_3.gif" WIDTH="276" HEIGHT="99"></CENTER><BR>
+<!-- セクションタイトル（始め） -->
+<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" WIDTH="100%">
+  <TR>
+    <TD WIDTH="100%" BGCOLOR="#000099">
+    <FONT COLOR="#ffffff" SIZE="+1">Editコントロールへの各種アクセス</FONT></TD> 
+  </TR>
+</TABLE>
+<!-- セクションタイトル（終わり） -->
+さっきの2つは、「ダイレクトに文字を書き込む方法」と「メンバ変数に代入する方法」でした。でもMFCにはもう1つのアクセス方法があります。（<U>今回はEditに対してアクセスしたい時を前提としてお話ししていきます</U>）それは、<FONT COLOR="red">Editコントロールの「型」である、CEditクラスのポインタ(居場所)を定義して、そのポインタにEditのIDを結び付ける手法です</FONT>。なんかとてつもなく難しそうな気がしてきますが、別にどうってことではないですよ。とりあえず実践あるのみです。（さきほどと同じくOnInitDialog関数内でのお話になります。）<BR>
+実際その宣言はこれだけで終わります。<BR><BR>
+<CENTER>CEdit*&nbsp;pedt = (CEdit*)GetDlgItem(IDC_EDIT1);<FONT COLOR="green">//IDC_EDIT1はポインタpedtで指定できるようになった</FONT></CENTER><BR>
+これは定石です。GetDlgItem関数は、ダイアログから引数のIDのコントロールを引き出す関数です。今、IDC_EDIT1はCEdit型なので上のような指定を行いました。<BR><BR>
+
+この方法を使用しておけば、あとはCEdit型のメンバ関数をフルに活用できるのです。何故か?それはメンバ関数を使う時に、先ほどのポインタpedtを使用して、<BR><BR>
+<CENTER>pedt->メンバ関数</CENTER>
+<BR>と書いてあげるだけで、IDC_EDIT1の操作が可能になるからです。今回はCEdit型のメンバ関数の一部とその使い方を紹介します。<BR><BR>
+<HR>
+<!-- インデントリスト（始め） -->
+<DL>
+<DT><FONT COLOR="blue">LimitText(int&nbsp;n);</FONT>
+<DD>テキストに入力できる文字数を制限できる。制限文字数を引数とする。<BR>
+--使用例--<BR>
+<FONT COLOR="red">半角10文字以降の入力は禁止</FONT><BR>
+<!-- LimitTextの使用方法 -->
+<DL>
+<DD>CEdit*&nbsp;pedt = (CEdit*)GetDlgItem(IDC_EDIT1);<BR>
+pedt->LimitText(10);<FONT COLOR="green">//10文字以上入力できなくした</FONT>
+</DL>
+<!-- LimitTextの使用方法 -->
+<DT><BR><FONT COLOR="blue">SetSel(int n,int m,FALSE);</FONT>
+<DD>n文字目からm文字目までを選択する。(ただし始めの文字を0文字目をカウントする) 最後まではmを-1にすればよい。ただし、選択されたと言っても、ダイアログには何も表示されないのでご了承を。
+<DT><BR><FONT COLOR="blue">ReplaceSel(CString&nbsp; str,&nbsp;FALSE);</FONT>
+<DD>SetSel関数で文字列が選択されているならば、選択されている文字列とstrを置換する。<BR>
+
+--使用例--<BR>
+<FONT COLOR="red">2文字目から最後まで選択し、ReplaceSel関数を使って置換</FONT><BR>
+<!-- ReplaceSelの使用方法 -->
+<DL>
+<DD>CEdit*&nbsp;pedt = (CEdit*)GetDlgItem(IDC_EDIT1);<BR>
+m_edit="Hello!!";<FONT COLOR="green">//Helloと出力しておく</FONT><BR>
+UpdateData(false);<FONT COLOR="green">//Dialogの更新</FONT><BR><BR>
+
+pedt->SetSel(2,-1,FALSE);<FONT COLOR="green">//2文字目前から最後まで選択</FONT><BR>
+pedt->ReplaceSel("aven",FALSE);<FONT COLOR="green">//Helloの"llo"の部分をavenに変更する</FONT><BR>
+<FONT COLOR="blue">出力がHeaven（天国）になったらOKです。</FONT><BR>
+</DL>
+<!-- Replaceの使用方法 -->
+<DT><BR><FONT COLOR="blue">Clear(&nbsp;);</FONT>
+<DD>SetSel関数で文字列が選択されているならば、その文字列を消去する。<BR>
+--使用例--<BR>
+<FONT COLOR="red">最初から最後まで選択し、Clear関数を使って削除</FONT><BR>
+<!-- Clearの使用方法 -->
+<DL>
+<DD>CEdit*&nbsp;pedt = (CEdit*)GetDlgItem(IDC_EDIT1);<BR>
+m_edit="Hello!!";<FONT COLOR="green">//Helloと出力しておく</FONT><BR>
+UpdateData(false);<FONT COLOR="green">//Dialogの更新</FONT><BR><BR>
+
+pedt->SetSel(0,-1,FALSE);<FONT COLOR="green">//最初から最後まで選択</FONT><BR>
+pedt->Clear(&nbsp;);<FONT COLOR="green">//削除</FONT><BR>
+<FONT COLOR="blue">何も表示されなくなったらOKです</FONT>
+</DL>
+<!-- ClearSelの使用方法 -->
+<DT><BR><FONT COLOR="blue">SetReadOnly(TRUE);</FONT>
+<DD>Editコントロールを読み取り専用にする。引数をFALSEにすると「読み取り専用解除」になる。<BR>
+--使用例--<BR>
+<FONT COLOR="red">Editコントロールを読み取り専用にする</FONT><BR>
+<!-- SetReadOnlyの使用方法 -->
+<DL>
+<DD>CEdit*&nbsp;pedt = (CEdit*)GetDlgItem(IDC_EDIT1);<BR>
+pedt->SetReadOnly(TRUE);<FONT COLOR="green">//読み取り専用</FONT><BR>
+<IMG SRC="fig1_4.gif" WIDTH="276" HEIGHT="99">(読み取り専用はこんな感じ)<BR>
+</DL>
+<!-- SetReadOnlyの使用方法 -->
+</DL>
+<!-- インデントリスト（終わり） -->
+<HR>
+今回はEditコントロールについて学びました。メンバ関数はまだ腐るほどあるので、VisualC++のCD-ROMについているチュートリアルを熟読されれば、もっとたくさんのメンバ関数を入手できます。次回はButtonです。Buttonを使ってアクションを起す一連の流れや、ButtonをBitmapにする方法など、情報いっぱいでお送りしたいと思います。<BR><BR>
+<A HREF="../index.html">Back to Index</A>
+</BODY>
+</HTML>

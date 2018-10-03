@@ -1,0 +1,339 @@
+<HTML>
+<HEAD>
+<TITLE>コントロール4--ScrollBar</TITLE>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html;CHARSET=utf-8">
+<style type="text/css">
+  <!--
+		A:link { text-decoration:none;  color:#ff4500 }
+		A:visited { text-decoration:none;  color:#ff4500 }  
+		A:active { text-decoration:none;  color:#ff0000 }   
+		A:hover { color:#00008b }	
+	    -->
+</style>
+</HEAD>
+<BODY BGCOLOR="white" TEXT="black"><DIV ALIGN=CENTER><!--#geoguide--></DIV>
+<I><font color="red" size="6">ScrollBar(スクロールバー)の使い方</font></I> 
+<HR>
+さて今回はスクロールバーについて学んでいきます。スクロールバーとは、ウィンドウの下<img src="hscroll.gif" width="25" height="25">とか右<img src="vscroll.gif" width="24" height="25">にあるアレなんですが、今回はダイアログ上に設置してリアルタイムカラー表示？をして見たいと思います。<BR>
+<!-- セクションタイトル（始め） -->
+<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" WIDTH="100%">
+  <TR> 
+    <TD WIDTH="100%" BGCOLOR="#000099"> <FONT COLOR="#ffffff" SIZE="+1">1. ダイアログリソースの編集から始めましょう</FONT></TD>
+  </TR>
+</TABLE>
+<br>
+<img src="fig4_1.gif" width="276" height="159" align="left">今回作成するダイアログの概要をちょいとお見せいたしますと、左のようなダイアログになります。 
+これはダイアログ下部にあるRGBの三つのダイアログを動かすと、上のエディットボックスの背景色が変わるようなダイアログです。コントロールの章で<a href="../dialog/dialog3.html">「背景色」に関してのコーナー</a>がありましたが、そのコーナーを見てくだされば、このコーナーは比較的楽に読むことができるかもしれません。 
+<BR CLEAR="all">
+ではいつもの通りですが、ダイアログリソースの編集から初めていきましょうね。<br>
+<dl>
+  <dt> <font color="#FF0000">1.AppWizardでプロジェクトを作成する</font> 
+  <dd>プロジェクト名をColorにしてください(このときワークスペースは新規に作成するとしておきましょう)。作成するアプリケーションの種類をダイアログにします。あとはディフォルトでいいと思います。
+  <dt><font color="#FF0000">2.ダイアログリソースを開き編集する</font> 
+  <dd>配置図は上の図を参考にしてくださいね。閉じるボタンは消してしまっても構いません。 
+  <dd> 
+    <table border="0" width="243">
+      <tr> 
+        <td> 
+          <div align="center"><b>コントロール</b></div>
+        </td>
+        <td>　 
+          <div align="center"><b>ID</b></div>
+        </td>
+      </tr>
+      <tr> 
+        <td> 
+          <div align="center">スクロールバー(一番上：赤色)</div>
+        </td>
+        <td> 
+          <div align="center">ID_SCR_R</div>
+        </td>
+      </tr>
+      <tr> 
+        <td> 
+          <div align="center">スクロールバー(真ん中：緑色)</div>
+        </td>
+        <td> 
+          <div align="center">ID_SCR_G</div>
+        </td>
+      </tr>
+      <tr> 
+        <td> 
+          <div align="center">スクロールバー(一番下：青色)</div>
+        </td>
+        <td> 
+          <div align="center">ID_SCR_B</div>
+        </td>
+      </tr>
+      <tr> 
+        <td> 
+          <div align="center">エディットボックス</div>
+        </td>
+        <td> 
+          <div align="center">ID_EDIT</div>
+        </td>
+      </tr>
+    </table>
+  </dd>
+</dl>
+<p>ではスクロールバーについて少し説明していきましょう。スクロールバーとは、データをある範囲内で自由に変更するためのコントロールです。ここでいうある範囲というのもプログラマー側で指定します。例えば0〜100までの範囲を指定したら、バーの左に行くと0で右側の右に行くと100に近づくように設定されます。したがって、<u>まずスクロールバーがどの範囲の値を動くのかを指定する</u>必要があります。<br>
+  そのほか重要な点は、スクロールバーのバーが動かされるときには、<u>ウィンドウズからアプリの方にメッセージ</u>がやってきます。このメッセージを捕まえてなんらかの処理をすればいいわけですね。またスクロールバーには水平と垂直の二種類があって、スクロールバーとしては同じものなのですが、ウィンドウズから送られてくるメッセージは異なります。今回は水平に動かすスクロールバーになります。と・・・まぁ難しい話は置いておいてどんどん先にすすんでしまいましょう。<br>
+</p>
+<table border="0" cellspacing="0" cellpadding="0" width="100%">
+  <tr> 
+    <td width="100%" bgcolor="#000099"> <font color="#ffffff" size="+1">2. ダイアログメンバを追加と初期化</font></td>
+  </tr>
+</table>
+<p>　ここではヘッダファイルに色をつけるためのハケに相当するCBrushクラス変数とDWORD(非負整数型)の変数を追加します。DWORD型の変数は、RGBのそれぞれの値を保持するものです。RGB値は、それぞれの色の成分が0〜255の非負整数で表現されるためにintではなくDWORDにしておきました。別にunsigned 
+  intでもいいと思いますが、色変数であるCOLORREF構造体は(今回は使いませんが)、各成分の色をDWORD型で保持しているので、私もDWORD型の方で行こうと思います。ではヘッダファイルColorDlg.hを開いて以下のように編集してみましょう。</p>
+<PRE><FONT COLOR="green">/////////////////////////////////////////////////////////////////////////////</FONT>
+<FONT COLOR="green">// CColorDlg ダイアログ</FONT>
+
+class CColorDlg : public CDialog
+{
+<FONT COLOR="green">// 構築</FONT>
+public:
+	CBrush*		pBrush;		<FONT COLOR="green">// 背景色ブラシ(ここを追加)</FONT>
+	DWORD		dwColor[3];	<FONT COLOR="green">// RGB値(ここを追加)</FONT>
+	CColorDlg(CWnd* pParent = NULL);	<FONT COLOR="green">// 標準のコンストラクタ</FONT>
+</PRE>
+DWORD型の変数が三つの配列になっていますが、1番目がRの成分、2番目がGの成分、3番目がBの成分が入ります。ここまでは本当に簡単ですね。ここでコンストラクタ（ColorDlg.cpp）で変数の初期化をしておきます。 
+<PRE>CColorDlg::CColorDlg(CWnd* pParent <FONT COLOR="green">/*=NULL*/</FONT>)
+	: CDialog(CColorDlg::IDD, pParent)
+{
+	<FONT COLOR="green">//{{AFX_DATA_INIT(CColorDlg)</FONT>
+	<FONT COLOR="green">//}}AFX_DATA_INIT</FONT>
+	<FONT COLOR="green">// メモ: LoadIcon は Win32 の DestroyIcon のサブシーケンスを要求しません。</FONT>
+	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+
+	<FONT COLOR="green">// 初期背景色(白)</FONT>
+	dwColor[0] = 255;
+	dwColor[1] = 255;
+	dwColor[2] = 255;
+
+	<FONT COLOR="green">// ブラシのポインタ(NULL)</FONT>
+	pBrush = NULL;
+}
+</PRE>
+ここでは色を白:RGB(255,255,255)にしておき、ブラシのポインタをNULLに設定しておきます。
+<table border="0" cellspacing="0" cellpadding="0" width="100%">
+  <tr> 
+    <td width="100%" bgcolor="#000099"> <font color="#ffffff" size="+1">3. WM_HSCROLLメッセージの処理を行おう</font></td>
+  </tr>
+</table>
+<br>
+↑なんだか意味のわからない文字列WM_HSCROLLですが、水平スクロールバーが動かされた時にWindowsからアプリケーションの方に送られてくるメッセージのことです。今回はスクロールバーが動かされた時に、スクロールバーの値を読み取り、エディットボックスの背景色を変更しなければならないので、このメッセージを捕まえて実行する関数を作成する必要性があります。<br>
+このようにWindowsから送られてくるメッセージを捕まえて実行する関数を指定することを、メッセージマッピングと言います。CColorDlg.cpp内にこんな記述があります。<br>
+<PRE>BEGIN_MESSAGE_MAP(CColorDlg, CDialog)
+	<FONT COLOR="green">//{{AFX_MSG_MAP(CColorDlg)</FONT>
+	ON_WM_SYSCOMMAND()
+	ON_WM_PAINT()
+	ON_WM_QUERYDRAGICON()
+	<FONT COLOR="green">//}}AFX_MSG_MAP</FONT>
+END_MESSAGE_MAP()
+</PRE>
+これがメッセージマップの正体です。例えばWM_PAINTというメッセージがWindowsから送られてきた時には、メッセージを捕まえそのメッセージに対応した関数が実行されるようになっています。とはいいつつ、Windowsからのメッセージを対応する関数なんてわかりませんよね。そこでclasswizardでメッセージマップを行います。
+<dl>
+  <dt><font color="#FF0000">1.classwizardを開き、WM_HSCROLLのメッセージマッピングを行う </font>
+  <dd>クラス名：ColorDlg.cpp
+<dd>オブジェクトID：CColorDlg
+<dd>メッセージ：WM_HSCROLL
+<dd>を選択して、関数の追加を押す。するとOnHScroll関数が追加されるはずです。
+  <dt><font color="#FF0000">2.InitDialog関数を編集する</font> 
+  <dd>せっかくマッピングしたのですが、先にInitDialog関数を編集しておきます。
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<PRE>BOOL CColorDlg::OnInitDialog()
+{
+	(中略)
+	<FONT COLOR="green">// TODO: 特別な初期化を行う時はこの場所に追加してください。</FONT>
+
+	<FONT COLOR="green">// スクロールバーのポインタ取得</FONT>
+	CScrollBar* pRed = (CScrollBar*)GetDlgItem(IDC_SCR_R);
+	CScrollBar* pGreen = (CScrollBar*)GetDlgItem(IDC_SCR_B);
+	CScrollBar* pBlue = (CScrollBar*)GetDlgItem(IDC_SCR_G);
+	<FONT COLOR="green">// スクロールバーのレンジ設定</FONT>
+	pRed->SetScrollRange(0,255);
+	pGreen->SetScrollRange(0,255);
+	pBlue->SetScrollRange(0,255);
+	<FONT COLOR="green">// スクロールバーの初期位置設定</FONT>
+	pRed->SetScrollPos(dwColor[0]);
+	pGreen->SetScrollPos(dwColor[1]);
+	pBlue->SetScrollPos(dwColor[2]);
+	
+	(中略)
+}
+</PRE>
+</TD></TR>
+</TABLE>
+  <dd><font color="#0000FF">CScrollBar* pRed = (CScrollBar*)GetDlgItem(IDC_SCR_R);</font> 
+  <dd>Redのスクロールバー(IDC_SCR_R)のポインタを取得します。以下の操作を行うために必要になります。GetDlgItemは、コントロールのIDからそのコントロールのポインタを取得する関数です。
+  <dd><font color="#0000FF">pRed->SetScrollRange(0,255);</font> 
+  <dd>スクロールバーの取りうる値を設定します。この設定では左端が0、右端が255になるように設定します。RGB値は各成分の値が2<sup>8</sup>=256段階で表現されるためにこのレンジを設定します。
+  <dd><font color="#0000FF">pRed->SetScrollPos(dwColor[0]); </font>
+  <dd>コンストラクタで設定したRGB値のRの値をスクロールバーに設定します。ここで言う設定とは、バー自体を希望の位置にセットすることを指しています。コンストラクタでdwColor[0]=255と決めたので、IDC_SCR_Rのスクロールバーは、右端にセットされるはずです。
+  <dd><b>※この操作をRGB全てに関して行ったのが上のコードです。</b> 
+  <dt><font color="#FF0000">2.以下のコードを記述する。 </font>
+  <dd>やっと先ほど作成した関数にコードを記述します。
+<TABLE BORDER ALIGN="CENTER">
+<TR>
+        <TD BGCOLOR="white"> 
+          <PRE>void CColorDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 
+{
+	<FONT COLOR="green">// スクロール位置を取得</FONT>
+	int nNewpos = pScrollBar->GetScrollPos();
+	
+	switch(nSBCode){
+	case SB_LINEDOWN:	<FONT COLOR="green">// 右側ボタンを押された</FONT>
+		nNewpos++; break;
+	case SB_LINEUP:	<FONT COLOR="green">// 左側ボタンを押された</FONT>
+		nNewpos--; break;
+	case SB_PAGEDOWN:	<FONT COLOR="green">// スクロールバーの右側が押された</FONT>
+		nNewpos+=16; break;
+	case SB_PAGEUP:	<FONT COLOR="green">// スクロールバーの左側が押された</FONT>
+		nNewpos-=16; break;
+	case SB_THUMBTRACK:	<FONT COLOR="green">// マウスでつかんで動かした</FONT>
+		nNewpos = nPos; break;
+	default:
+
+		return;
+	}
+	
+	<FONT COLOR="green">// 最大・最少チェック</FONT>
+	if( nNewpos <  0) 		nNewpos = 0;
+	else if( nNewpos > 255)	nNewpos = 255;
+	else	;
+	
+	<FONT COLOR="green">// 現在位置にスクロールバー更新</FONT>
+	pScrollBar->SetScrollPos(nNewpos);
+	
+	CScrollBar* pRed = (CScrollBar*)GetDlgItem(IDC_SCR_R);
+	CScrollBar* pGreen = (CScrollBar*)GetDlgItem(IDC_SCR_G);
+	CScrollBar* pBlue = (CScrollBar*)GetDlgItem(IDC_SCR_B);
+	dwColor[0] = (DWORD)(pRed->GetScrollPos());
+	dwColor[1] = (DWORD)(pGreen->GetScrollPos());
+	dwColor[2] = (DWORD)(pBlue->GetScrollPos());	
+	
+	Invalidate(true);
+}
+</PRE>
+</TD></TR>
+</TABLE>
+</dl>
+この関数がこの章の一番重要なところなので詳しく解説していきたいと思います。まず関数の引数について説明していきましょう。<br>
+<dl> 
+  <dt><font color="#FF0000">nSBCode</font> 
+  <dd>スクロール要求の指示です。 どのスクロールがされたが分かります。
+  <dd><b>SB_LINELEFT</b> 左へスクロール。 
+  <dd><b>SB_LINERIGHT</b> 右へスクロール。 
+  <dd><b>SB_PAGELEFT</b> 1 ページ左へスクロール。 
+  <dd><b>SB_PAGERIGHT</b> 1 ページ右へスクロール。 
+  <dd><b>SB_THUMBTRACK</b> スクロールバーを指定位置へドラッグします。現在位置は引数 nPos で指定されます。 
+  <dt><font color="#FF0000">nPos</font> 
+  <dd>スクロールバーのコードが SB_THUMBTRACK の場合は、スクロール ボックスの位置を指定します。
+  <dt><font color="#FF0000">pScrollBar </font>
+  <dd>スクロールバーへのポインタを保持します。今回は三つのスクロールバーがありますが、あくまでスクロールされたスクロールバーのポインタのみです。
+</dl>
+<hr>
+引数も分かったところで、コードを最初から解説していきます。 
+<dl>
+  <dt><font color="#FF0000">int nNewpos = pScrollBar->GetScrollPos(); </font>
+  <dd>変更前のスクロールの位置を取得します。
+  <dt><font color="#FF0000">case SB_LINEDOWN: </font>
+  <dd><font color="#FF0000"> nNewpos++; break; </font>
+  <dd>右側をクリックされた時、nNewposを増加させます。
+  <dt><font color="#FF0000">case SB_LINEUP: </font>
+  <dd><font color="#FF0000"> nNewpos--; break; </font>
+  <dd>左側をクリックされた時、nNewposを減少させます。
+  <dt><font color="#FF0000">case SB_PAGEDOWN: </font>
+  <dd><font color="#FF0000"> nNewpos+=16; break; </font>
+  <dd>右側1ページスクロールが指定された時、nNewposを16増加させます。
+  <dt><font color="#FF0000">case SB_PAGEUP: </font>
+  <dd><font color="#FF0000"> nNewpos-=16; break; </font>
+  <dd>左側1ページスクロールが指定された時、nNewposを16減少させます。
+  <dt><font color="#FF0000">case SB_THUMBTRACK:</font> 
+  <dd>	nNewpos = nPos; break;
+<dd>マウスで位置を指定された時には、その位置nPosを現在位置に設定します。
+  <dt><font color="#FF0000">if( nNewpos < 0) nNewpos = 0; </font>
+  <dt><font color="#FF0000">else if( nNewpos > 255) nNewpos = 255; </font>
+  <dt><font color="#FF0000">else ; </font>
+  <dd>数値の最小と最大の判定をします。つまりnNewposがレンジを超えてはならないので、0〜255の間にあればよいことになります。 
+  <dt><font color="#FF0000">pScrollBar->SetScrollPos(nNewpos); </font>
+  <dd>先ほど作成した位置をスクロールバーに反映させます。この操作を行うことで、スクロールされているように見えるようになります。
+  <dt><font color="#FF0000">CScrollBar* pRed = (CScrollBar*)GetDlgItem(IDC_SCR_R); 
+    </font>
+  <dt><font color="#FF0000">CScrollBar* pGreen = (CScrollBar*)GetDlgItem(IDC_SCR_G); 
+    </font>
+  <dt><font color="#FF0000">CScrollBar* pBlue = (CScrollBar*)GetDlgItem(IDC_SCR_B); 
+    </font>
+  <dd>それぞれのスクロールバーのポインタを取得します。以下の操作に使用するためです。
+  <dt><font color="#FF0000">dwColor[0] = (DWORD)(pRed->GetScrollPos()); </font>
+  <dt><font color="#FF0000">dwColor[1] = (DWORD)(pGreen->GetScrollPos()); </font>
+  <dt><font color="#FF0000">dwColor[2] = (DWORD)(pBlue->GetScrollPos());</font> 
+  <dd>現在の位置をスクロールの位置を取得します。位置すなわち色成分データ変数dwColorはDWORD型なので、一応DWORD型でキャストしておいたほうが無難です。
+  <dt><font color="#FF0000">Invalidate(true);</font> 
+  <dd>ダイアログを更新します。
+</dl>
+この操作を通して理解していただきたいことは、&quot;スクロールバーはただ設置するだけでは動作しない&quot; ということです。まとめれば、スクロールバーがクリックされた時にWindowsからアプリに送られてくるメッセージに対応した関数OnHScrollで以下の作業を必要とします。<br><br>
+<b>1.変更前のスクロールバーの値を取得<br>
+2.スクロールバーに適用される操作に基づいて、新しいスクロールバーの位置を計算する<br>
+3.新しいスクロールバーの位置を、実際にスクロールバーに反映させる</b><br>
+<br>
+これをすればスクロールバーがはじめて動作しているように「見えます」。後はInvalidateでダイアログが更新される時に、背景色を変更するようなコードを追加してあげればいいのですね。ではラスト頑張っていきましょう。 
+<br>
+<table border="0" cellspacing="0" cellpadding="0" width="100%">
+  <tr> 
+    <td width="100%" bgcolor="#000099"> <font color="#ffffff" size="+1">4. WM_CTLCOLORメッセージの処理を行おう</font></td>
+  </tr>
+</table>
+<p>最後は、エディットボックスの背景色変更です。これは前にも紹介したとおり、WM_CTLCOLORメッセージが深く関わっているんでしたよね。まずメッセージマッピングを行っていきます。メッセージマッピングの方法は、先ほどのWM_HSCROLLでも紹介しましたが、まったく同じ操作でできます。<br>
+  <b>WM_CTLCOLOR</b>と<b>WM_DESTROY</b>のメッセージをマッピングしてください。マッピングできましたか？突然出てきた<b>WM_DESTROY</b>ですが、これはダイアログが破棄されたときに送られるメッセージです。ダイアログが破棄＝アプリの終了ですから、このWM_DESTROYで定義されたOnDestroy関数では、プログラムの後処理(お掃除)を行うのが適当ですが、これは以下のコードを見てもらえれば即分かりでしょう(笑)。では、マッピングによって追加された関数OnCtｌColorとOnDestroyを以下のように編集してください。</p>
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<PRE>HBRUSH CColorDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor) 
+{
+	HBRUSH hbr = CDialog::OnCtlColor(pDC, pWnd, nCtlColor);
+
+	switch(nCtlColor){
+	<FONT COLOR="green">/////////// エディットボックスorメッセージボックスの場合////////////</FONT>
+	case CTLCOLOR_EDIT:   
+	case CTLCOLOR_MSGBOX:
+		<FONT COLOR="green">// ブラシのポインタがNULLでない時メモリを解放</FONT>
+		if(pBrush != NULL){
+			delete pBrush;
+			pBrush = NULL;
+		}
+		<FONT COLOR="green">// 現在の色のブラシを作成</FONT>
+		pBrush = new CBrush(RGB(dwColor[0],dwColor[1],dwColor[2]));
+		<FONT COLOR="green">// ブラシのハンドルを返す</FONT>
+		return (HBRUSH)(pBrush->GetSafeHandle());
+
+	<FONT COLOR="green">/////////// そのほかのコントロールは何もしない/////////////////////	</FONT>
+	default:
+		break;
+	}
+	return hbr;
+}
+
+void CColorDlg::OnDestroy() 
+{	
+	<FONT COLOR="green">// メモリを解放</FONT>
+	delete 	pBrush;	
+}
+</PRE>
+</TD></TR>
+</TABLE>
+<p><br>
+  このOnCtlColor関数は、全てのコントロールの色を自由に変更することができます。 nCtlColorがどのコントロールの種類かを表しています。今はエディットコントロールの背景色を変えたいので、 
+  CTLCOLOR_EDIT の場合だけをピックアップすればよいのですね。ここで現在の色を使ってブラシを作成します。 このブラシのハンドルをリターンすれば背景色を変更することができます。たったこれだけで背景色が変更できます。<br>
+  <br>
+  上のコードではちょっと複雑なことをしているのですが、ブラシを作るときにnew演算子を使っているため、メモリをしっかり解放する作業を行わなければヤバイことになるのは分かりますか？つまりスクロールバーをぐりぐりっと動かすと、その分だけInvalidate関数が呼ばれるために、当然OnCtlColorが何回も呼ばれます。したがってnewでブラシを作成する前に、以前作成したブラシのポインタを確認して、メモリを動的確保していたらメモリを解放してあげなければリソースは一瞬でなくなり、即ハングアップ！です。まぁこの方法はあんまりよろしくない方法ですが、直感的でわかりやすい方法だと思います。<br>
+  <br>
+  <img src="fig4_2.gif" width="276" height="159" align="left">最後にOnDestroyでもメモリを解放しているのは、念のためでもあります。<br>
+  これで、背景色をリアルタイムに変更できるでしょう。<br>
+  <br>
+  言い忘れていましたが、垂直スクロールバーも全く同じ方法で実装できます。ただメッセージはWM_VSCROLLですから注意してくださいね。<br>
+  <br>
+  本コーナーのソースファイルは載せませんが、<a href="../download.html">ダウンロードのコーナー</a>に似たようなソフト＋ソースがあるのでそれを参考にしていただけたら幸いです！</p>
+</BODY>
+</HTML>

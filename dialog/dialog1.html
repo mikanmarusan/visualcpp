@@ -1,0 +1,138 @@
+<HTML>
+<HEAD>
+  <META NAME="GENERATOR" CONTENT="Adobe PageMill 3.0J Win">
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html;CHARSET=utf-8">
+  <TITLE>コントロール〜Buttonを作ってみよう〜</TITLE>
+<style type="text/css">
+  <!--
+		A:link { text-decoration:none;  color:#ff4500 }
+		A:visited { text-decoration:none;  color:#ff4500 }  
+		A:active { text-decoration:none;  color:#ff0000 }   
+		A:hover { color:#00008b }	
+	    -->
+</style>
+</HEAD>
+<BODY BGCOLOR="white" TEXT="black"><DIV ALIGN=CENTER><!--#geoguide--></DIV>
+<I><FONT COLOR="red" SIZE="6">Buttonを作ってアクションを起そう！</FONT></I><HR>
+プログラムの王道といえば、「Hello!」を表示するプログラムですが、これはOnDraw関数といってDC(デバイスコンテキスト)を本格的に学ぶところまで来てから学習した方がいいと思うので、今回は一番手っ取り早い、DialogでButtonの設置とアクションを行います。と、難しそうですが案外簡単なので気楽に行きましょう。<BR><BR>
+<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" WIDTH="100%">
+  <TR>
+    <TD WIDTH="100%" BGCOLOR="#000099">
+    <FONT COLOR="#ffffff" SIZE="+1">1.プロジェクトを作る</FONT></TD> 
+  </TR>
+</TABLE>
+　VisualC++でソフトを作るにはこの作業を避けることはできません。とはいえ、MFCアプリケーションウィザードというものが、新規プロジェクトを簡単に作ってくれるので楽勝だと思いますよ。<BR><BR>新規作成でプロジェクトを作成します。WIN32 MFC APPWIZARDを選択してください。プロジェクト名はCountにしておきます。(本当はなんでも結構ですけど…)。<BR>
+後はステップどおり選択していくだけです。<BR>
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD>
+STEP1：作成するアプリケーションの種類-->ダイアログベースにする<BR>
+STEP2：アプリケーションへ組み込む機能-->変更なし<BR>
+STEP3：ソースファイルのコメント-->した方がよい　：MFCライブラリとのリンク-->共有DLLにする<BR>
+STEP4：終了<BR> 
+</TD></TR>
+</TABLE>
+としておきましょう。あとはOKを押していけばよいです。念のため、ビルド-実行をしますと、ダイアログが開かれるはずです。今回はこれにButtonを設置していきます。<BR><BR>
+
+<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" WIDTH="100%">
+  <TR>
+    <TD WIDTH="100%" BGCOLOR="#000099">
+    <FONT COLOR="#ffffff" SIZE="+1">2.ダイアログリソースを編集する</FONT></TD> 
+  </TR>
+</TABLE>
+メモ帳の製作のところでもメニューをいじりましたが、そこでも出てきたリソースをまた変更します。このリソースはプログラムの「顔」なので奇麗に作りたいものですよね。<BR><BR>
+　リソースタブをクリックし、ResourceViewを表示します。ここでCountのDialogのなかのIDD_Count_DIALOGを選択します。これが、先ほど実行したときに表示されたダイアログそのものなのです。ここで、OKボタン以外のボタンやメッセージを削除します。削除は、消したいものをクリック（ハイライト）してDELキーを押せばOKです。<BR><BR>
+ここでダイアログ上に適当な大きさでいいので「エディットボックス」<img src="../control/editbox.gif" width="21" height="21">を作成します。このエディットボックスというのは、その名の通り、そのフィールドの中に文字列を書きこむことができるものですが、今回はそこに書く込む必要はなく、読みこむだけの機能にするのでプロパティのスタイルに読み取り専用というチェックボックスをチェックしておきます。IDはIDC_Edit1(ディフォルト)でいいです。すると図のようなものが出来上がりました。 
+<CENTER>
+  <img src="fig1_1.jpg" width="350" height="191">
+</CENTER><BR>
+　今度はボタン<img src="../control/button.gif" width="21" height="21">を作成します。適当な大きさの「ボタン」をボックス内に作成してください。ボタンを右クリックしてプロパティを開きます。（各種コントロールは右クリックでいろんな操作ができるんです。）ここでIDを決めます。ボタンをプログラム中では1つの「もの」として考えられます。だから人間と同じようにID番号を持っているのです。ここでは、IDを見ただけで何か分かるようにしておきたいので、IDはディフォルトのIDC_BUTTON1にしましょう。<BR>
+<BR>次にキャプションを決めます。これは実際に表示される文字で、OKボタンだったらOKです。ここでがキャプションを「Message」とでも書いてください(お好きなように。プログラムには影響しませんから)。ここで実行してもまだMessageのボタンは押しても何にも起こりません。それはまだボタンをプログラムが連携していなからです。<BR><CENTER>
+  <img src="fig1_4.jpg" width="350" height="202">
+</CENTER><BR>
+これでダイアログリソースの編集が終了しました。<BR>ここまではインターフェース作りです。これから実装に移ります。といっても全然大変じゃないから大丈夫です。<BR><BR>
+
+<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" WIDTH="100%">
+  <TR>
+    <TD WIDTH="100%" BGCOLOR="#000099">
+    <FONT COLOR="#ffffff" SIZE="+1">3.オブジェクト間のメッセージをつくる</FONT></TD> 
+  </TR>
+</TABLE><BR>
+　なんか堅苦しいタイトルですが、これがMFCの一番重要なところなんでしっかり勉強しましょう！逆に言えば、これをマスターすればVCの達人も遠くないかもしれません。MFCはオブジェクトに対してメッセージを送り、それに従った動作を別のオブジェクトがアクションを起すというものが基本です。<BR>今回はボタンをクリックした時に、ボタンは「クリックされたよ〜、Editボックスさん、あのコマンド実行してよ」と言い、Editボックスは「分かった、実行!　どうでぃ」という感じになります。ではそれをそうやってやるかは下に…。<BR><BR>
+<FONT COLOR="red"><B>１．「表示」の中にあるCLASSWIZARDを実行します。</B></FONT><BR>
+　まず、このEditボックスの名前を決めます。「おいさっきIDC_EDIT1って名前を決めたでしょ!」と言われる方もいるはずです。先ほどのIDはオブジェクトを区別するためにつけられた名前で、銀行でいう口座番号みたいなものです。<BR><BR>でも私たちが銀行で使うのは口座番号じゃないですよね。もちろん暗証番号です?口座番号はプログラムが一括管理するもので、今回つける名前(暗証番号みたいなもの)はプログラム中で私たちプログラマーが使う名前です。これをVCやC++ではメンバ変数と呼びます。以下にその変数の設定法を書きます。<BR><BR>
+<B><FONT COLOR="red">2.メンバ変数の設定方法(Editボックス)</FONT></B><BR>
+ClassWizardは開いていますか?ここでメンバ変数のタブをクリックします。プロジェクトは今作っているCount、クラス名はCCountDlgにします。そうするとコントロールIDに先ほど見なれたIDが並んでますね。これは先ほど作成したリソースのダイアログの中にあるオブジェクトたちです。<BR><BR>さて問題のエディットボックスIDC_EDIT1をクリックし、「変数の追加」ボタンを押してください。すると「メンバ変数の追加」ウィンドウが出てくるはずです。
+　メンバ変数をm_editとし、カテゴリをコントロールにします。m_editは値を持たないので。変数のタイプはCEditにしてください。OKを押せば完了です！ね、簡単でしょ。<BR><CENTER>
+  <img src="fig1_6.jpg" width="450" height="261">
+</CENTER><BR>この作業で私たちはエディットを自由に操ることができるようになりました。例えば、<BR>
+　　　　　<FONT COLOR="navy"><B>m_edit . SetWindowText("IDはIDC_EDIT1だよん");</B></FONT><BR>
+と書くとします。これは「m_editに対して"IDはIDC_EDIT1だよん"を表示させなさい」という命令です。プログラマーの操作が一段と楽になるわけです。<BR>ところで、今までやってきたことは、リソースをいじってプログラムの顔を作って、それぞれのコントロールに名前IDを付けた後、プログラマー用にEditボックスに変数名を与えたことです。ここまでは「したごしらえ」！この次でMFCで一番重要なメッセージを結び付けてボタンを意味のあるものにします。<BR><BR>
+<B><FONT COLOR="red">3.メッセージをバインド(結びつけ)します。</FONT></B><BR>
+メッセージを渡すといわれてもね・・・。以前僕もこれで頭を痛めました。でも要領さえ分かればこっちのものです。たいていのバイブルにはこのことは書かれていないので、必見(笑)！書いてあったとしても、<B>「BN_CLICKEDをバインドしてコードを記述」</B>としか書いてない本ばっかりですから、ここでばっちり覚えていってください。<BR>メッセージのやり取りを簡単に説明します。<BR><TABLE BORDER ALIGN="CENTER">
+<CAPTION>ボタンクリックからアクションまで</CAPTION>
+<TR><TD>
+①「ボタンがクリックされた」ことを知る<BR>
+②「ボタンがクリックされたときに実行する関数」を起動します。<BR>
+③適切な処理をしてからまたボタンが押されるのを待つ</TD></TR>
+</TABLE>実際の設定は以下のように行います。<BR><BR>
+クラスウィザードは起動していますよね。メッセージマップのタブをクリックします。プロジェクトはCount、クラス名はCCountDlgでオブジェクトはIDC_BUTTON1にしてください。ここでメッセージの欄のBN_CLICKEDをハイライトして、「関数の追加」ボタンを押します。メンバ関数名は「ON BUTTON1」(ディフォルト)です。すると下のメンバ関数という欄に「ON BUTTON1」という関数が加わります。<BR>このBN_CLICKEDは、「ボタンが押された」ときに関数ON BUTTON1を実行するメッセージなのです。
+　この関数の追加ボタンをクリックしたあとで、「コード編集」のボタンをクリックしてみてください。そうするとなにやらソースの画面が出てきますよね。これで終了です。あとはここにソースを書込んであげればいいのです。<BR><BR>
+<B><FONT COLOR="red">4. ソースコードを書きこみます。</FONT></B><BR>
+とりあえず関数OnButton1の中に、<BR>
+　　　　　AfxMessageBox("成功");<BR>
+と書込んでみてください。これで実行します。さあ、ボタンを押してみて、何やらウィンドウが出てきたら成功です。つまり、<U>「ボタンが押されたというメッセージをうけてOnButton1関数を起動した」</U>ことが確かめられました。これを実行すると以下のようになります。<BR><CENTER>
+  <img src="fig1_5.gif" width="329" height="164">
+</CENTER><BR>あとはこの関数でEditBoxに書込む命令を書けばいいのですね。<BR>
+以下のコードを書きます。<BR>
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+void CCountDlg::OnButton1(){<BR>
+　　　　static int i = 0;<BR>
+　　　　CString str,c;<BR>
+　　　　switch(i){<BR>
+　　　　　　　case 0:c="w";break;<BR>
+　　　　　　　case 1:c="we";break;<BR>
+　　　　　　　case 2:c="wel";break;<BR>
+　　　　　　　case 3:c="welc";break;<BR>
+　　　　　　　case 4:c="welco";break;<BR>
+　　　　　　　case 5:c="welcom";break;<BR>
+　　　　　　　case 6:c="welcome";break;<BR>
+　　　　　　　case 7:str.Format("少しずつ勉強しようね");<BR>
+　　　　　　　　　　　m_edit.SetWindowText(str); <BR>
+　　　　　　　　　　　i=0;<BR>
+　　　　　　　　　　　return;<BR>
+　　　　}
+　　　　str.Format(c);<BR>
+　　　　m_edit.SetWindowText(str);<BR>
+　　　　++i;<BR>
+} <BR>
+</TD></TR>
+</TABLE>
+ プログラムはクリックした回数を覚えていて、クリックした回数によって表示する文字列を変えているだけです。ここはもう普通のプログラミングの世界なので説明は省略しますね。でも大事な関数が2つあります。
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<B><FONT COLOR="red">SetWindowText( )関数</FONT></B><BR>
+***指定されたWindowのタイトルバーを引数の文字列などに書きかえたり、指定されたWindowが何かを制御している時、そのオブジェクトのコントロールを変更する***<BR><BR>
+　m_editというメンバ変数を作ったときを思い出してみてください。たしかカテゴリをコントロールにしましたよね。それがここで反映されているのです。実際はm_edit.SetWindowText(str) は、「m_editコントロールにstrを書きなさい」という命令を送っています。<BR><BR>プログラムでは1回目はstrは"w"なのでEditBoxには"w"が表示され、2回目のクリックでstrが"we"になるのでEditBoxも"we"が表示されていたのです。
+</TD></TR>
+</TABLE>
+<BR>
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<B><FONT COLOR="red">Format( )関数</FONT></B><BR>
+***各引数 が、リソース識別子文字列で指定された対応する書式仕様に従って変換され出力される***<BR>
+今回はchar*型の変数cを定義し、それに文字列を随時代入してそれをCString型にFormat(初期化)しています。簡単に言うと、MFCの文字列操作はすべてCStringクラスで行っているので、例えばChar型とかChar*型はなるべく使いたくありません。そこでFormatでぜーんぶCStringクラスに変更できてしまいます。<BR><BR>例えば、数字をWindowで表示したい時はこうします。<BR>
+CString str;<BR>
+int i = 9;<BR>
+str.Format("%d",i);<BR>
+AfxMessageBox(str);<BR>
+とやれば、"9"と表示されます。<BR>
+</TD></TR>
+</TABLE>
+
+
+これでソースが完成しました。後はビルドと実行です。実行できるでしょうか？できなかったらソースをよく見なおしてください。実行できたらボタンをクリックしてみてください。何回か押せば表示が変わることが分かるでしょう。今回はEDITボックスとボタンを学習しましたがどうでしたか？そんなに難しくはないと思います。ダイアログベースの基本は上の3つから成り立っているのでよく理解してくださいね!
+
+<BR><BR><A HREF="../index.html">Back to Index</A>
+</BODY>
+</HTML>

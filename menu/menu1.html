@@ -1,0 +1,105 @@
+<HTML>
+<HEAD>
+  <META NAME="GENERATOR" CONTENT="Adobe PageMill 3.0J Win">
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html;CHARSET=utf-8">
+  <TITLE>Special Tips</TITLE>
+<style type="text/css">
+  <!--
+		A:link { text-decoration:none;  color:#ff4500 }
+		A:visited { text-decoration:none;  color:#ff4500 }  
+		A:active { text-decoration:none;  color:#ff0000 }   
+		A:hover { color:#00008b }	
+	    -->
+</style>
+</HEAD>
+<BODY BGCOLOR="white" TEXT="black"><DIV ALIGN=CENTER><!--#geoguide--></DIV>
+<I><FONT COLOR="navy" SIZE="5">メニューの追加の方法</FONT></I><BR>
+<SMALL>意外にこの質問が多いので、（この質問だけで結構なメールがやってきます）UPしてしまうことにしました。メニュー追加は、順序を追って行えば大丈夫だと思います。CALSSWIZARDの基本的使い方とも言えるので是非マスターしておきたいところです。</SMALL>
+<HR>
+<!-- セクションタイトル（始め） -->
+<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" WIDTH="100%">
+  <TR>
+    <TD WIDTH="100%" BGCOLOR="#000099">
+    <FONT COLOR="#ffffff" SIZE="+1">リソースを編集してIDとキャプションを決定する</FONT></TD> 
+  </TR>
+</TABLE>
+<!-- セクションタイトル（終わり） -->
+
+<!-- インデントリスト（始め） -->
+<DL>
+<DT><FONT COLOR="red">1.リソースビューでメニューリソースを開く</FONT>
+<DT><FONT COLOR="red">2.メニューを追加したい場所で右クリック　→　プロパティ</FONT>
+<DD><CENTER><IMG SRC="fig1_1.gif" WIDTH="362" HEIGHT="178"></CENTER>
+<DT><FONT COLOR="red">3.プロパティダイアログのIDとキャプションを以下のように<SMALL>(別に違う名前でもOKですよ)</SMALL>決定する。</FONT>
+<DD><B>ID</B>::ID_VIEW_MESSAGE
+<DD><B>キャプション</B>::Message(&amp;M)
+<DD><CENTER><IMG SRC="fig1_2.gif" WIDTH="466" HEIGHT="153"></CENTER>
+<DT><FONT COLOR="red">4.プロパティダイアログを閉じる<SMALL>(閉じても設定は残っているのでご安心を)</SMALL></FONT>
+</DL>
+<!-- インデントリスト（終わり） -->
+
+<!-- セクションタイトル（始め） -->
+<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" WIDTH="100%">
+  <TR>
+    <TD WIDTH="100%" BGCOLOR="#000099">
+    <FONT COLOR="#ffffff" SIZE="+1">IDと関数をバインド(結び付け)する</FONT></TD> 
+  </TR>
+</TABLE>
+<!-- セクションタイトル（終わり） -->
+<!-- インデントリスト（始め） -->
+<DL>
+<DT><FONT COLOR="red">5.先ほど作ったメニュー「Message」を右クリックしCLASSWIZARDを実行する。</FONT>
+<DT><FONT COLOR="red">6.以下の図の通りのことを行う。</FONT>
+<DD>ID_VIEW_MESSAGEをハイライト
+<DD>commandをハイライト
+<DD>「関数の追加」を押す
+<DT><CENTER><IMG SRC="fig1_3.gif" WIDTH="651" HEIGHT="375"></CENTER><BR>
+<DD>関数の追加を押すと下のダイアログが表示されます(以下はVC++6.0の場合の図)。
+<DD>関数名はディフォルトのままで結構です。
+<DT><CENTER><IMG SRC="fig1_4.gif" WIDTH="339" HEIGHT="118"></CENTER><BR>
+<DT><FONT COLOR="red">7.するとCLASSWIZARDの画面は以下のようになるのでチェックしてください。<SMALL>(MESSAGEのスペルがMESSEAGEとなっていますが、MESSAGEが正しいです)</SMALL></FONT><BR>
+<CENTER><IMG SRC="fig1_5.gif" WIDTH="649" HEIGHT="375"></CENTER>
+</DL>
+<!-- インデントリスト（終わり） -->
+
+<!-- セクションタイトル（始め） -->
+<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" WIDTH="100%">
+  <TR>
+    <TD WIDTH="100%" BGCOLOR="#000099">
+    <FONT COLOR="#ffffff" SIZE="+1">コードを編集して実行する</FONT></TD> 
+  </TR>
+</TABLE>
+<!-- セクションタイトル（終わり） -->
+<!-- インデントリスト（始め） -->
+<DL>
+<DT><FONT COLOR="red">8.コード編集ボタンを押します</FONT>
+<DT><FONT COLOR="red">9.以下のコードを記述します。</FONT>
+<DD>コードは自由ですが、今回は分かりやすいようにMessageBox関数を実行してWindowを表示する事にしました
+</DL>
+<!-- インデントリスト（終わり） -->
+<!-- センターテーブル（始め） -->
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<!-- インデントリスト（始め） -->
+<FONT COLOR="black"><DL>
+<DT><FONT COLOR="blue">void</FONT> CMainFrame::OnViewMessage() 
+<DT>{
+<DD>MessageBox("メニュー追加！","Message",MB_ICONINFORMATION );
+<DT>}
+</DL>
+</FONT><!-- インデントリスト（終わり） -->
+</TD></TR>
+</TABLE>
+<!-- センターテーブル（終わり） -->
+<!-- インデントリスト（始め） -->
+<DL>
+<DD>ビルドして実行すると以下のようになるでしょう
+<DT><CENTER><IMG SRC="fig1_6.gif" WIDTH="158" HEIGHT="114"></CENTER>
+</DL>
+<!-- インデントリスト（終わり） -->
+<BR>
+
+<A HREF="../index.html">Back to Index </A>
+
+</BODY>
+</HTML>

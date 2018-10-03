@@ -1,0 +1,102 @@
+<HTML>
+<HEAD>
+<TITLE>HTMLエディタ〜第2週〜</TITLE>
+<style type="text/css">
+  <!--
+		A:link { text-decoration:none;  color:#ff4500 }
+		A:visited { text-decoration:none;  color:#ff4500 }  
+		A:active { text-decoration:none;  color:#ff0000 }   
+		A:hover { color:#00008b }	
+	    -->
+</style>
+</HEAD>
+<BODY BGCOLOR="#ffffff"><DIV ALIGN=CENTER><!--#geoguide--></DIV>
+
+<I><FONT COLOR="red" SIZE="6">HTMLエディタ〜メモ帳の基盤を作ろう 〜</FONT></I><HR>
+HTMLエディタですから、まずは編集機能をつける必要があります。そこでメモ帳のような編集機能(コピー、カット、貼り付けなどを)追加します。また本ソフトはHTMLファイルのみ編集することを前提としているために、ファイルのオープンやセーブでhtml形式ファイルのみを扱えるようにします。また、編集機能(コピー、カット、貼り付けなど)は、既存のコードを使用してしまいます。
+<BR>
+
+
+<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" WIDTH="100%">
+  <TR>
+    <TD WIDTH="100%" BGCOLOR="#000099">
+    <FONT COLOR="#ffffff" SIZE="+1">２.プロジェクトを作成する</FONT></TD> 
+  </TR>
+</TABLE>
+では先ほどの設計を基にプロジェクトを作成します。<BR>
+<DL>
+<DT><FONT COLOR="red">1.[ファイル]-[新規作成]</FONT>
+<DT><FONT COLOR="red">2.[プロジェクト]タブをクリックし以下を設定</FONT>
+<DD>MFC AppWizard(exe)をハイライト
+<DD>プロジェクト名：MyHtml
+<DD>「ワークスペースを新規に作成する」を選択
+<DT><FONT COLOR="red">3.Step1〜作成するアプリケーションの種類〜</FONT>
+<DD>SDI(Single Document Interface)を選択して[次へ]
+<DT><FONT COLOR="red">4.Step2〜Step5までは[次へ]</FONT>
+<DT><FONT COLOR="red">5.Step6〜AppWizardで作成されるアプリケーションクラス〜</FONT>
+<DD>CMyHtmlViewをハイライト
+<DD>基本クラスをCViewからCEditViewに変更
+<DD><IMG SRC="fig2_1.jpg">
+</DL>
+これで設計どおりのSDI形式のプロジェクトが作成されました。では実行してみましょう。クライアント領域で文字が入力できればOKです。<BR><BR>
+
+<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" WIDTH="100%">
+  <TR>
+    <TD WIDTH="100%" BGCOLOR="#000099">
+    <FONT COLOR="#ffffff" SIZE="+1">３.保存、開く形式を設定する</FONT></TD> 
+  </TR>
+</TABLE>
+ファイルのセーブとオープンの形式をhtmlに限定する操作を行います。といってもこの作業はテキストエディタを作ったときに少し行ったんですけどね(笑)<BR>
+<DL>
+<DT><FONT COLOR="red">1.[ResourceView]タブをクリック</FONT>
+<DT><FONT COLOR="red">2.MyHtmlリソースのString Tableを開く</FONT>
+<DD>ID、値、キャプションなどの欄のある表が出る
+<DT><FONT COLOR="red">3.右クリックでIDR_MAINFRAME(値128)のプロパティを開</FONT>
+<DD>キャプションを以下のように書き換える
+<DD>MyHtml\nUntitled\n\nhtml files(*.html)\n.html\n
+<DD><IMG SRC="fig2_2.jpg">
+<DT><FONT COLOR="red">4.実行する</FONT>
+<DD>[開く][名前を付けて保存する]を実行し、htmlファイルを参照していればOK
+<DT>***
+<DT>先ほどの付けた謎のキャプションですが、下の図のように対応しています。
+<DD><IMG SRC="fig2_3.jpg">
+</DL><BR>
+<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" WIDTH="100%">
+  <TR>
+    <TD WIDTH="100%" BGCOLOR="#000099">
+    <FONT COLOR="#ffffff" SIZE="+1">４.メモ帳ライクな編集機能を追加する</FONT></TD> 
+  </TR>
+</TABLE>
+さて、メモ帳のような編集機能を付けるのですが、ここでは編集の処理をCEditView(CEdit)のディフォルト関数に任せてしまいます。任せるといっても、プログラマーはこのディフォルト関数を呼んであげなくてはなりません。以前も説明していると思いますが、WindowsというOSは、ある決められたメッセージをプログラムと送受して処理を行っています。ということは例えば、エディターのコピー機能をつかさどるメッセージをOSに送ればコピーが可能になるわけです。なんだか難しそうですが、ある決められたIDのメニューを実行すればよいんです。これはメモ帳を作成するときにやりましたよね！<BR>
+<BR>
+<FONT COLOR="red">1.ワークスペースのリソースのタブをクリック</FONT><BR>
+<FONT COLOR="red">2.メニューフォルダを選択</FONT><BR>
+<FONT COLOR="red">3.IDR_MAINFRAMEをダブルクリック</FONT><BR>
+<FONT COLOR="red">4.開かれたウィンドウの「編集」をクリック(図1)</FONT><BR>
+<FONT COLOR="red">5.書いていないところをハイライト→右クリック→プロパティ(図2)</FONT><BR>
+<CENTER><IMG SRC="fig2_4.gif">(図1)<IMG SRC="fig2_5.gif">(図2)</CENTER><BR>
+<FONT COLOR="red">7.IDと操作を書込む</FONT><BR>
+-->ここでは「削除」コマンドを作るとして話を進めていきます。プロパティの中に以下の項目を書きます。
+<DL>
+<DT><U>キャプション</U><BR>
+<DD>削除(&D)<BR>
+<DT><U>ID</U><BR>
+<DD>ID_EDIT_CLEAR<BR>
+</DL>
+キャプションは、メニューに表示される文字列です。ここでIDのID_EDIT_CLEARはプログラムで指定されているIDで、このIDを書けば「削除して〜」というメッセージが送られることになります。だからユーザはただIDの指定だけ行えばいいのです。<BR>
+IDを書くと、自動的にプロンプトが書込まれます。(プロンプトはいじらない方がいいと思います。)<BR><BR>
+-->ここで実行してみます。しっかり削除できますか?できたら次です。今度は検索と置換メニューを入れたいのですが、先ほどのコマンドが直接編集するコマンドだったのに対して、今度は検索と置換だからちょっと編集の雰囲気が違いますね。こういう時にセパレータ(水平線)というものを入れます。<BR><BR>
+
+<FONT COLOR="red">8.何もないところをハイライトしてプロパティを開く</FONT><BR>
+<FONT COLOR="red">9.セパレータにチェックを入れる</FONT><BR>
+-->そうすると水平線が入りました。たったこれだけです。<BR><BR>
+詳しくは、<A HREF="../text/text.html" TARGET="_blank">ここ</A>の３章「メニューコマンドの操作」を参照してください<BR><BR>
+そして実行してみましょう！HTML形式のみ作業できるメモ帳になっていればOKです！
+
+<BR><BR>
+<A HREF="proc3.html">[Next]</A><BR>
+<A HREF="proc1.html">[Previous]</A><BR>
+<A HREF="../index.html">[Home]</A><BR>
+
+</BODY>
+</HTML>

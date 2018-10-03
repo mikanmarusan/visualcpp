@@ -1,0 +1,201 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+   
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+  <title>コントロールの背景色を変更する--ダイアログの背景色の変更</title>
+      
+  <link rel="stylesheet" href="style.css" type="text/css">
+</head>
+  <body text="#336666" bgcolor="#c2d1ed" link="#0000ee" vlink="#551a8b" alink="#0000ee"><DIV ALIGN=CENTER><!--#geoguide--></DIV>
+<P><FONT size=2>←Back［<A 
+href="section1.html">背景色の変更のフレームワーク</A>］ -- Up［<A 
+href="index.html">コントロールの背景色を変更する</A>］ -- Forward［<A 
+href="section3_1.html">スタティックコントロール</A>］→</FONT></P>
+<DIV align=center>
+<H2>ダイアログの背景色の変更</H2>
+最終更新日［2002.03.25］</DIV>
+ 
+<hr width="100%" size="2"> 
+
+	<blockquote>   
+	
+	<p>前節では，描画色の変更の流れについて解説した．本節ではダイアログの背景色を変更する具体的な方法について解説する．本節を読むにあたっては，「<A 
+  href="section1.html">背景色変更のフレームワーク</A> 」を一読されることを願う．</p>
+	</blockquote>
+ 
+    <table cellspacing="0" cellpadding="0" width="100%" border="1">
+      <tbody>
+        <tr>
+     <td valign="top" bgcolor="#339999"><big><font color="#ffffff">●ダイアログの背景色を変更する</font></big></td>
+        </tr>
+      </tbody>
+    </table>
+ 
+    <h4>■　プロジェクトを作成する</h4>
+ 
+    <blockquote> 
+      <p>　「コントロールの背景色を変更する」で共通に使用するプロジェクトを新規に作成する．</p>
+ 
+      <ol>
+   <li>   
+          [新規作成]-[MFC App    Wizard]を選択．<br>
+プロジェクト名：ColCtrl，"新規にワークスペースを作成する"を選択．<br>
+OKボタンを押す．
+        <li>   
+          "作成するアプリケーションの種類"でダイアログベースを選択．<br>
+次へボタンを3回押す．
+        <li>   
+          作成されるアプリケーションクラスがCColCtrlApp，CColCtrlDlgであることを確認．<br>
+終了ボタンを押し，OKボタンをおす．
+        <li>   
+          Resourceタブをクリック．<br>
+Dialogの中の<strong>IDD_COLCTRL_DIALOG</strong>をダブルクリックで開く．(初期状態で開かれているはず．)
+        <li>   
+          OKボタンのみを残し，他のコントロールは全て削除．<br>
+[ビルド]-[実行]を押すと，以下のようなものが表示される．
+        </li>
+      </ol>
+   
+      <p align="center"><IMG id=IMG1 alt=figure2.1 src="fig2_1.jpeg">
+      <br>
+      <strong><font size="2">figure2.1    実行結果</font></strong></p>
+ 
+      <p>実行結果を見れば分かるが，何もしていないので背景色が変更されるはずがない．</p>
+      </blockquote>
+ 
+      <h4 dir="ltr">■　WM_CTLCOLORメッセージハンドラを追加する．</h4>
+ 
+      <blockquote> 
+        <p dir="ltr">　描画色を変更するためには，ウィンドウから送られてくる<strong>WM_CTLCOLOR</strong>
+メッセージをつかまえればよいと述べた．このメッセージが送られてきたときに実行される関数（ハンドラ）を定義する．</p>
+   
+        <ol dir="ltr">
+   <li>   
+            <div>[表示]-[ClassWizard]を選択．</div>
+          <li>   
+            <div>プロジェクト：ColCtrl　クラス名：CColCtrlDlg　オブジェクトID：CColCtrlDlg　を選択．</div>
+          <li>   
+            <div>メッセージでWM_CTLCOLORを選択．<br>
+"関数の追加"ボタンを押す．<br>
+"コード編集"ボタンを押す(ソース画面に切り替わる)．</div>
+          </li>
+        </ol>
+   
+        <p>　するとOnCtlColorという関数が追加されたであろう．アプリが<strong>WM_CTLCOLOR</strong> 
+  メッセージを取得するとこの関数が呼ばれることになる．この関数がブラシハンドルを返却していることに気づいただろうか？この関数の中で<U>デバイスコンテキストpDCに関して何らかの変更を加えたとしても，その変更が認識されるかは全くの別問題</U>
+である．認識させるためには，背景のペイントに使われるブラシのハンドルを返す必要がある．（そのように設計されているので仕方がない）．</p>
+   
+        <p>　とりあえず以下のように編集しておく．CDialogクラスのOnCtlColor関数を呼び，その戻り値をこの関数の戻り値としていることがわかる．オブジェクト指向プログラミングを熟知している方ならお分かりだと思うが，CColCtrlColorはCDialogクラスのサブクラスであり，CColCrtlColor::OnCtlColor関数は，CDialog::OnCtlColorのオーバーライドである．</p>
+   
+        <p><TEXTAREA id=CODE1 style="OVERFLOW: hidden" name=CODE1 rows=4 readOnly cols=72>HBRUSH CColCtrlDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor) 
+{
+	return CDialog::OnCtlColor(pDC, pWnd, nCtlColor);
+}
+</TEXTAREA></p>
+それでは，OnCtlColor関数の引数について説明する．    
+        <dl>
+        <dt><strong>CDC&nbsp;*pDC</strong>
+          <dd>コントロールのデバイスコンテキストへのポインタ．(これがコントロールを描画するためのDCである． 故にこれを変更することで描画色変更が可能になる．) 
+            <dt><strong>CWnd&nbsp;*pWnd</strong>
+              <dd>カラーを調べるコントロールへのポインタ．(これがなぜ必要かについては，後で述べることにする．) 
+                <dt><strong>UINT&nbsp;nCtlColor</strong>
+                  <dd>コントロールのタイプを指定する、次のいずれかの値．この値を調べることでどのコントロールかが判別できる．<br>
+     <li><b>CTLCOLOR_BTN</b> &nbsp; ボタン 
+    コントロール 
+                    <li><b>CTLCOLOR_DLG</b> &nbsp; ダイアログ 
+    ボックス 
+                    <li><b>CTLCOLOR_EDIT</b> &nbsp; 
+    エディット コントロール 
+                    <li><b>CTLCOLOR_LISTBOX</b> &nbsp; 
+    リスト ボックス コントロール 
+                    <li><b>CTLCOLOR_MSGBOX</b> &nbsp; 
+    メッセージ ボックス 
+                    <li><b>CTLCOLOR_SCROLLBAR</b> &nbsp; 
+    スクロール バー コントロール 
+                    <li><b>CTLCOLOR_STATIC</b> &nbsp; スタティック コントロール </li>
+                    </dd>
+                    </dl>
+     
+                    <div>と長々説明してもよくわからないと思うので，実際ダイアログの背景色を変更していこう．</div>
+                    </blockquote>
+ 
+                    <h4>■　ダイアログの背景色を変える．</h4>
+ 
+                    <blockquote> 
+                      <p>　それではダイアログの背景を変えていこう．先ほど述べたことをふまえると，背景となるブラシを作成し，OnCtlColorで返せばよいことになるが，OnCtlColor関数を呼び出したのがどのコントロールやダイアログかを判定しなければならないが，その情報は，引数であるnCtlColorに格納されているので，これを使用すればよい．</p>
+ 
+                      <p>　まずは，メンバ変数を定義する(ColCtrlDlg.hにて)．</p>
+ 
+                      <p><TEXTAREA id=CODE2 style="OVERFLOW: hidden" name=CODE2 rows=10 readOnly cols=77>/////////////////////////////////////////////////////////////////////////////
+// CColCtrlDlg ダイアログ
+
+class CColCtrlDlg : public CDialog
+{
+// 構築
+public:
+	CBrush m_brDlg;		// ダイアログの背景色ブラシ(ここを追加する)
+	CColCtrlDlg(CWnd* pParent = NULL);	// 標準のコンストラクタ
+</TEXTAREA></p>
+ 
+                      <p>　メンバ変数を定義してもブラシが作成されたわけではない．ColCtrlDlg.cpp内のOnInitDialog関数で，さきほど追加したメンバ変数のブラシを作成する．ブラシは赤色にする．</p>
+ 
+                      <p><TEXTAREA id=CODE3 style="OVERFLOW: hidden" name=CODE3 rows=11 readOnly cols=85>BOOL CColCtrlDlg::OnInitDialog()
+{
+	(中略)
+	
+	// TODO: 特別な初期化を行う時はこの場所に追加してください。
+	
+	// 赤色のブラシを作成する．
+	m_brDlg.CreateSolidBrush(RGB(255,0,0));
+	
+	return TRUE;  // TRUE を返すとコントロールに設定したフォーカスは失われません。
+}
+</TEXTAREA></p>
+ 
+                      <p>　OnCtlColor関数を以下のように修正する．</p>
+ 
+                      <p><TEXTAREA id=CODE4 style="OVERFLOW: hidden" name=CODE4 rows=10 readOnly cols=77>HBRUSH CColCtrlDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor) 
+{
+	switch(nCtlColor){
+	case CTLCOLOR_DLG:
+		return (HBRUSH) m_brDlg;
+	default:
+		break;
+	}
+	return CDialog::OnCtlColor(pDC, pWnd, nCtlColor);
+}
+</TEXTAREA></p>
+   
+                      <p>　ここまで記述したら実行してみよう．するとダイアログの背景色が赤色になるはずである．OnCtlColorにおいて，呼び出したウィンドウまたはコントロールがダイアログであれば赤色のブラシを返し，それ以外のコントロールであったら通常のブラシを返すように指定しているためである．したがって，OKボタンが通常の色のままになっているだろう．</p>
+   
+                      <p align="center"><IMG id=IMG2 alt=figure2.2 src="fig2_2.jpeg">
+                      <br>
+                      <strong><font size="2">figure2.2    ダイアログの背景色を赤に</font></strong></p>
+  <P>　するどい人はもう分かったかと思うが，”コントロールの背景色”というと何かの「色」を想像するのだが，実際は"指定されたブラシで塗りつぶす"のであるから，変わったブラシを指定することでいろいろな背景色(背景模様)のダイアログを作成できる．以下に一例を示す．</P>
+  <TABLE id=TABLE1 cellSpacing=0 cellPadding=0 width="75%" border=1>
+    
+    <TR>
+      <TD style="WIDTH: 50%" width="50%"><STRONG><FONT 
+        size=2>m_brDlg.CreateSolidBrush(RGB(0,0,255));</FONT><BR></STRONG>青色の純色のブラシ</TD>
+      <TD style="WIDTH: 50%" width="50%"><STRONG><FONT 
+        size=2>m_brDlg.CreateHatchBrush(HS_CROSS,RGB(0,255,0));</FONT><BR></STRONG>緑色で水平と垂直の格子ハッチブラシ</TD></TR>
+    <TR>
+      <TD style="WIDTH: 50%" width="50%"><IMG id=IMG3 alt=figure2.3 
+src="fig2_3.jpeg"><BR><STRONG><FONT 
+        size=2>figure2.3 ダイアログの背景色変更例1</FONT></STRONG></TD>
+      <TD style="WIDTH: 50%" width="50%"><IMG id=IMG4 alt=figure2.4 
+    src="fig2_4.jpeg"><BR><STRONG><FONT 
+        size=2>figure2.4 ダイアログの背景色変更例2</FONT></STRONG></TD></TR></TABLE>
+  <P>余計なお世話かもしれないが，スタティックテキストを見づらくなるという危険性もあるので，背景色はできるだけ純色であることをお勧めする．</P>
+                      </blockquote>
+<hr width="100%" size="2">
+
+<P align=center><FONT 
+size=2>←Back［<A 
+href="section1.html">背景色の変更のフレームワーク</A>］ -- Up［<A 
+href="index.html">コントロールの背景色を変更する</A>］ -- Forward［<A 
+href="section3_1.html">スタティックコントロール</A>  ］→</FONT></P>
+<P align=right>VisualC++でソフトを作ろう　(c) 藤門千明</P>
+</body>
+</html>

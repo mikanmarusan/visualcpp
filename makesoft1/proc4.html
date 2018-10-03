@@ -1,0 +1,159 @@
+<HTML>
+<HEAD>
+<TITLE>HTMLエディタ〜第4週〜</TITLE>
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html;CHARSET=utf-8">
+<style type="text/css">
+  <!--
+		A:link { text-decoration:none;  color:#ff4500 }
+		A:visited { text-decoration:none;  color:#ff4500 }  
+		A:active { text-decoration:none;  color:#ff0000 }   
+		A:hover { color:#00008b }	
+	    -->
+</style>
+</HEAD>
+<BODY bgcolor="#FFFFFF"><DIV ALIGN=CENTER><!--#geoguide--></DIV>
+<I><FONT COLOR="red" SIZE="6">表示フォントの変更を行おう</FONT></I>
+<HR>
+MFCのディフォルトでは、フォントは"System"フォントが使われるようになっていますが、ウィンドウズのメモ帳などは、"MS ゴシックP"など日本語フォントが指定されているために、非常に見やすいフォントになっています。そこでフォントを変更できるようにしてみましょう。
+<BR>
+<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" WIDTH="100%">
+  <TR>
+    <TD WIDTH="100%" BGCOLOR="#000099">
+    <FONT COLOR="#ffffff" SIZE="+1">9.初期フォントを決める(LOGFONT構造体)</FONT></TD> 
+  </TR>
+</TABLE>
+ここでいう初期フォントとは、初めて起動した時に表示されるフォントのことです。ここでLOGFONT構造体を知らなくてはなりません。以下にLOGFONT構造体の定義を書いておきます。<BR><BR>
+<FONT SIZE=4 COLOR="red">LOGFONT構造体</FONT>
+<DL>
+<DT>typedef struct tagLOGFONT { 
+<DD>LONG lfHeight; 
+<DD>LONG lfWidth; 
+<DD>LONG lfEscapement; 
+<DD>LONG lfOrientation; 
+<DD>LONG lfWeight; 
+<DD>BYTE lfItalic; 
+<DD>BYTE lfUnderline; 
+<DD>BYTE lfStrikeOut; 
+<DD>BYTE lfCharSet; 
+<DD>BYTE lfOutPrecision; 
+<DD>BYTE lfClipPrecision; 
+<DD>BYTE lfQuality; 
+<DD>BYTE lfPitchAndFamily; 
+<DD>TCHAR lfFaceName[LF_FACESIZE]; 
+<DT>} LOGFONT, *PLOGFONT; 
+</DL>
+とわけのわからない定義が出てきましたが、これがフォントの属性を決めています。例えば、lfHeightは、デバイス単位でのフォントの高さだったりします。これに関してはまた後で述べたいと思います。またMFCにはCFontクラスというものがあって、フォントの変更や設定はこのクラスの変数を使用しますが、このクラスではFontの属性をいじれません。LOGFONT構造体変数をCFontオブジェクトが読み込むことによってフォントを作成します。では実際に行ってみましょう。
+<DL>
+<DT><FONT COLOR="red">1.メンバ変数を追加する。</FONT>
+<DD>CMyHtmlViewクラスに以下の変数を追加する。(追加の仕方は…わかりますよね。)これらの変数はViewのメンバとなります。
+<TABLE BORDER>
+<TR ALIGN="center"><TD>変数のタイプ</TD><TD>変数名</TD><TD>アクセス制御</TD></TR>
+<TR><TD>CFont</TD><TD>cViewFont</TD><TD>public</TD></TR>
+<TR><TD>LOGFONT</TD><TD>lfInit</TD><TD>public</TD></TR>
+</TABLE>
+<DT><FONT COLOR="red">2.lfInitを初期化する。</FONT>
+<DD>lfInitつまりメンバ変数の初期化といったらコンストラクタですね。ということで、コンストラクタCMyHtmlView::CMyHtmlView()に以下のコードを記述します。
+<TABLE BORDER>
+<TR><TD BGCOLOR="white">
+<FONT COLOR="red">LOGFONTの初期化</FONT><BR>
+CMyHtmlView::CMyHtmlView()<BR>
+{<BR>
+	lfUnit.lfHeight = 18;<BR>
+	lfUnit.lfHeight	= 18;<BR>
+	lfUnit.lfWidth	= 8;<BR>
+	lfUnit.lfEscapement	= 0;<BR>
+	lfUnit.lfOrientation = 0;<BR>
+	lfUnit.lfWeight	= 400;<BR>
+	lfUnit.lfItalic	= 0;<BR>
+	lfUnit.lfUnderline	= 0;<BR>
+	lfUnit.lfStrikeOut	= 0;<BR>
+	lfUnit.lfCharSet	= 128;<BR>
+	lfUnit.lfOutPrecision	= 1;<BR>
+	lfUnit.lfClipPrecision	= 2;<BR>
+	lfUnit.lfQuality	= 2;<BR>
+	lfUnit.lfPitchAndFamily	= 2;<BR>
+	strcpy(lfUnit.lfFaceName,"FixedSys");<BR>
+}<BR>
+</TD></TR>
+</TABLE>
+<DD>でこれは何？と思われるかもしれませんが、一般的なフォントの属性を設定した結果です。詳しくはMSDNなどを参照してください。ここではフォント名にFixedSysを設定しています。このフォントはVisucalC++での基本フォントと同じです。ちなみに私はこれが一番見やすいと思っています。忘れていましたが、このViewの基本クラスはCEditViewクラスなので、一部のフォントのみを変更することはできません。つまりフォントの変更ができてもView全てのフォントが変更されることに注意してください。(もし一部のフォントを変更するにはCRichEditViewクラスを使う必要があります。)
+<DT><FONT COLOR="red">3.起動時にフォントを設定するコードを書き込む</FONT>
+<DD>いま行っていることは、Viewの初期フォントの設定ですから、Viewがアタッチされる関数で記述すればいいのですね。ここでは、CMyHtmlView::OnInitialUpdate()に記述します。
+<DD><TABLE BORDER>
+<TR><TD BGCOLOR="white">
+<FONT COLOR="red">初期フォントの設定</FONT><BR>
+void CMyHtmlView::OnInitialUpdate(){<BR>
+	CEditView::OnInitialUpdate();<BR>
+<BR>	
+	cViewFont.DeleteObject();<BR>
+	if(cViewFont.CreateFontIndirect(&lfUnit))<BR>	
+		SetFont(&cViewFont);<BR>
+}<BR>
+</TD></TR>
+</TABLE>
+<DD><FONT COLOR="red">cViewFont.CreateFontIndirect(&lfUnit);</FONT>
+<DD>LOGFONT 構造体で与えられた特性で CFont オブジェクトを初期化します。この関数では、Fontの属性を確保する際に動的なメモリを使用するので、失敗する可能性を秘めています。失敗するとこの関数はfalseを返すので、それをifで判定しています。
+<DD><FONT COLOR="red">SetFont(&cViewFont);</FONT>
+<DD>フォントができたらこれをViewのフォントに設定し、再描画します。
+</DL>
+これで実行すると、SystemフォントからVC++でおなじみのフォントに変更できるでしょう。
+<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" WIDTH="100%">
+  <TR>
+    <TD WIDTH="100%" BGCOLOR="#000099">
+    <FONT COLOR="#ffffff" SIZE="+1">10.フォント変更ダイアログを使おう</FONT></TD> 
+  </TR>
+</TABLE>
+このサイトでも何回か出てきているコモンダイアログ。コモンダイアログとはwindowsで通常使われているようなファイルのオープン・クローズ、カラー、フォルダなどのダイアログですが、フォントの変更のダイアログも実はコモンダイアログとして用意されているので、実装は非常に簡単です。
+<DL>
+<DT><FONT COLOR="red">1.メニューにフォント変更を追加する。</FONT>
+<DD>メニューの[表示]の中に、以下の図のようにしてフォントの変更を追加する。
+<DD><CENTER><IMG SRC="fig4_1.gif"></CENTER>
+<DT><FONT COLOR="red">2.クラスウィザードを立ち上げID_VIEW_FONTに対するコマンドを作る。</FONT>
+<DD>関数名はOnViewFont()とでもしておいたほうが無難ですね。ちなみにコマンドの作り方が分からない場合には(是非とも分かっていてほしいのですが)、<A HREF="../menu/menu1.html">ココ</A>を参照ください。
+<DT>3.次のコードを記述する
+<DD><TABLE BORDER>
+<TR><TD BGCOLOR="white">
+<FONT COLOR="red">フォントの変更</FONT><BR>
+void CMyHtmlView::OnViewFont(){<BR>
+	LOGFONT   lf;<BR>	
+ 	cViewFont.GetLogFont(&lf);<BR>
+ 	
+	<FONT COLOR="green">//フォントダイアログの作成</FONT><BR>
+ 	CFontDialog   cDlg(&lf, CF_SCREENFONTS|CF_INITTOLOGFONTSTRUCT);<BR>
+ 	
+	<FONT COLOR="green">//ダイアログのオープン</FONT><BR>
+ 	if (cDlg.DoModal() != IDOK){return ;}<BR>
+	
+	<FONT COLOR="green">//現在のフォントの削除</FONT><BR>
+ 	cViewFont.DeleteObject();<BR>
+
+	<FONT COLOR="green">//フォントの作成</FONT><BR>
+ 	if(cViewFont.CreateFontIndirect(&lf))<BR>	
+ 		SetFont(&cViewFont);<BR>	
+}<BR>
+</TD></TR>
+</TABLE>
+</DL>
+では解説していきましょう。
+<DL>
+<DT><FONT COLOR="red">LOGFONT lf;</FONT>
+<DD>LOGFONT構造体変数を定義します。
+<DT><FONT COLOR="red">cViewFont.GetLogFont(&lf);</FONT>
+<DD>現在のフォントの属性を、先ほど定義したLOGFONT変数に書き込みます。なぜこのような操作をするかは、次の命令に関係があります。
+<DT><FONT COLOR="red">CFontDialog cDlg(&lf, CF_SCREENFONTS|CF_INITTOLOGFONTSTRUCT);</FONT>
+<DD>フォントダイアログを作成します。このとき、現在のフォントのLOGFONT構造体を初期選択しているように設定するために、先ほどの操作が必要だったのです。ちなみにLOGFONT変数lfは、ダイアログの初期選択に使うほかに、ダイアログで設定された内容が書き込まれるのでlfは参照渡しする必要があります。
+<DT><FONT COLOR="red">if (cDlg.DoModal() != IDOK){return ;}</FONT>
+<DD>作成したダイアログをモーダルモードとして開きます。
+<DT><FONT COLOR="red">cViewFont.DeleteObject();</FONT>
+<DD>現在のフォントオブジェクトを初期化します。CreateFontIndirect関数を使ってフォントを作るときには、動的にメモリを確保してフォント属性を保持するので、メモリを初期化する必要があるのです。
+<DT><FONT COLOR="red">if(cViewFont.CreateFontIndirect(&lf))</FONT>
+<DD><FONT COLOR="red">SetFont(&cViewFont);</FONT>
+<DD>先ほど設定された内容が入っているLOGFONT変数lfを使ってフォントを作成します。フォントの作成に成功したならば、Viewにこのフォントを割り当て、再描画します。
+</DL>
+実行すると、フォント変更ダイアログでフォントの変更が可能になっているはずです。
+<BR><BR>
+<A HREF="proc5.html">[Next]</A><BR>
+<A HREF="proc3.html">[Previous]</A><BR>
+<A HREF="../index.html">[Home]</A><BR>
+</BODY>
+</HTML>

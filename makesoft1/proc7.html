@@ -1,0 +1,421 @@
+<HTML>
+<HEAD>
+<TITLE>HTMLエディタ〜第7週〜</TITLE>
+<style type="text/css">
+  <!--
+		A:link { text-decoration:none;  color:#ff4500 }
+		A:visited { text-decoration:none;  color:#ff4500 }  
+		A:active { text-decoration:none;  color:#ff0000 }   
+		A:hover { color:#00008b }	
+	    -->
+</style>
+</HEAD>
+<BODY bgcolor="#FFFFFF"><DIV ALIGN=CENTER><!--#geoguide--></DIV>
+<I><FONT COLOR="red" SIZE="6">フォントタグを実現しよう</FONT></I>
+<HR>
+第6週が終了する頃には、少しはタグによるHTMLエディタらしくなってきていると思います。各自、よく使用するであろうと思われるタグを挿入するコードのコーディングはできているはずです。しかしリンクタグ、フォントタグ、イメージタグだけはただ挟み込むだけじゃないタグなのでまだコーディングできていないはずです。(厳密に言うと改行&lt;BR&gt;や水平線&lt;HR&gt;タグも挟み込むだけじゃないいんですけどね)これらのタグは、タグの間にオプションを書き込むことによって、意味を成します。例えばリンクタグ&lt;A HREF&gt;は、リンク先の指定を行わないと意味がないですしね。<BR>そこでそこで今回は、フォントタグのコーディングを行っていこうと思います。
+<BR>
+<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" WIDTH="100%">
+  <TR>
+    <TD WIDTH="100%" BGCOLOR="#000099">
+    <FONT COLOR="#ffffff" SIZE="+1">18.フォントの種類、色、大きさを指定するダイアログ、ダイアログクラスを作成する。</FONT></TD> 
+  </TR>
+</TABLE>
+<IMG SRC="fig6_5.gif" ALIGN="right">手っ取り早く言ってしまえば、第6-2章の最後でもお見せした、右のダイアログを作成してしまいます。このダイアログを作ることによって、こんなことが可能になります。<BR>
+<DL>
+<DT><FONT COLOR="red">1.文字の色や大きさを指定したい文字列をハイライト(選択)する。</FONT>
+<DT><FONT COLOR="red">2.メニューで[挿入]-[フォント]を押す。</FONT>
+<DT><FONT COLOR="red">3.ダイアログが開く</FONT>
+<DD>ユーザが色やフォントの種類、文字の大きさなどを指定します。
+<DT><FONT COLOR="red">4.指定されたオプションに基づいてタグを生成する。</FONT>
+<DT><FONT COLOR="red">5.できたタグで挟み込んで終了</FONT>
+</DL>
+このようにすることでよりユーザインタフェースの高いものになることが分かりますね。ユーザは、文字の色などを指定するだけで、あとはPCがタグを全て打ち込んでくれるので非常に便利になります。<BR>
+それでは早速リソースを編集していきましょう。
+<DL>
+<DT><FONT COLOR="red">1.ダイアログを新規追加する。</FONT>
+<DD>IDは、IDD_DLG_FONTなどとしておきます。
+<DT><FONT COLOR="red">2.以下の図のようにコントロールを配置します。</FONT>
+<DD><IMG SRC="fig7_1.gif">
+<DD>IDは自由ですが、今回は図のようなIDで説明していきます。
+<DT><FONT COLOR="red">3.IDC_FONT_EDT_COL、IDC_FONT_EDT_FONT、IDC_FONT_EDT_SIZEを読み取り専用に設定する。
+</FONT>
+<DD>コントロールを右クリックし、プロパティを表示させます。[スタイル]の読み取り専用をチェックします。こうすることでエディットボックスが灰色になります。
+</DL>
+ダイアログベース(MDIやSDI形式でないもの)のリソースを編集して実行すると、すぐに反映されますが、今回のソフトのようにSDI形式でダイアログを追加しただけでは、このダイアログは使用することすらできません。(使うこともできなくはないですが、非常に使いにくいためです)<BR>
+ではどうやって使用するか…ということになりますが、このダイアログを操作するためのclassを作成すれば、普通のMFCクラスのように使用することができそうです。<BR>
+でもクラスを最初から作るのは面倒ですし、大体ダイアログを作成するクラスなんてそう簡単に作れるわけがないし…。そこでC++の<B>継承</B>という概念を使ってクラスを作ります。継承とは、<B>あるクラスを丸ごと含んだ新しいクラスを作成すること</B>です。話し込むとかなり長くなるので、ここではダイアログを例にとって説明します。MFCには、ダイアログを作成・管理するクラスとしてCDialogクラスが用意されていますが、私たちが作成するダイアログクラスには、このCDialogクラスの機能はもちろん、この自作クラスだけの独自の機能(関数)があるのが望ましいでしょう。そこで新しく作るダイアログはCDialogを継承すると非常に便利です。<BR>
+継承の基になるクラス(例でいうとCDialogクラス)を基本クラス、そして継承によって作成したクラスを継承(後継)クラスなどと言います。<BR>
+変なたとえ話ですが、自分は攻撃魔法の使える魔法使いだとします。ここで転職して、格闘家になるとします。するとこの格闘家は、攻撃魔法の使える格闘家になりますよね。継承とはこんな感じを指します。<BR><BR>
+話は長くなりましたが、ダイアログのクラスを作成します。
+<DL>
+<DT><FONT COLOR="red">1.リソースタブのIDD_DLG_FONTをハイライトする。</FONT>
+<DT><FONT COLOR="red">2.ClassWizardを起動する。</FONT>
+<DD>2.メニューの[表示]-[ClassWizard]で行えます。
+<DT><FONT COLOR="red">3.メッセージが出てくるが、新規にクラスを作成するほうを選ぶ。</FONT>
+<DT><FONT COLOR="red">4.クラスの新規作成をする。</FONT>
+<DD>クラス名：CDlgSetFont(フォント設定ダイアログクラスの意味です)
+<DD>基本クラス：CDialog
+<DT><FONT COLOR="red">5.ワークスペースのClassViewにCDlgSetFontができていれば○。</FONT>
+</DL>
+ダイアログを追加して、コーディングに使えるようにするためには、ダイアログをクラスにしておく必要があるのを忘れてはいけません。これは要チェックです。
+<BR>
+<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" WIDTH="100%">
+  <TR>
+    <TD WIDTH="100%" BGCOLOR="#000099">
+    <FONT COLOR="#ffffff" SIZE="+1">19.メンバ変数を割り当てる</FONT></TD> 
+  </TR>
+</TABLE>
+先ほど作成したダイアログのコントロールを使いやすくするために、メンバ変数を割り当てます。メンバ変数を割り当てることで、コーディングの際に、割り当てられたコントロールを使用することができるからです。
+<DL>
+<DT><FONT COLOR="red">1.クラスウィザードを起動し、メンバ変数タブをクリック</FONT>
+<DD>このとき、CDlgSetFontクラスが選択されていることを確認してください。
+<DT><FONT COLOR="red">2.コントロールIDのIDC_FONT_CHECK_COLを選択し、変数の追加を押す</FONT>
+<DD>こんな画面が出てくるので、図のように入れてみてください。
+<DD><IMG SRC="fig7_2.gif">
+<DT><FONT COLOR="red">3.２の操作を繰返し行う。</FONT>
+<DD>つけるべき変数名は、図を参考にしてください。(変数名は自由に変えても構いませんが、図の変数名をつけたとして以下は進めていきます)
+<DD><IMG SRC="fig7_3.gif">
+<DD><B>--変数名のつけ方--</B>
+<DD>メンバだと分かるように"m_"をつけ、変数の型が分かるようにしておく(BOOL型だったらbをつけたり、整数型だったらn、CString型だったらstr)のが一般的です。
+<DT><FONT COLOR="red">4.dlgsetfont.hを開き、以下のコードを追加する</FONT>
+<DD>
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<PRE><FONT COLOR="green">/////////////////////////////////////////////////////////////////////////////</FONT>
+<FONT COLOR="green">// CDlgSetFont ダイアログ</FONT>
+
+class CDlgSetFont : public CDialog
+{
+<FONT COLOR="green">// コンストラクション</FONT>
+public:
+	BOOL	m_bColor;	<FONT COLOR="green">// ここを追加</FONT>
+	BOOL	m_bFont;	<FONT COLOR="green">// ここを追加</FONT>
+	BOOL	m_bSize;	<FONT COLOR="green">// ここを追加</FONT>
+	
+	CDlgSetFont(CWnd* pParent = NULL);   <FONT COLOR="green">// 標準のコンストラクタ</FONT> 
+</PRE>
+</TD></TR>
+</TABLE>
+<DD>これらは、ダイアログの中のコントロールに割り当てるのではなく、ダイアログクラス内部で使用するメンバ変数です。チェックボタンの状態を示すものです。(選択されているときにはtrue、チェックされていないときはfalseの値を持つようにあとでコーディングします)。
+<DT><FONT COLOR="red">5.メンバの初期値を決める</FONT>
+<DD>dlgsetfont.cppのコンストラクタを以下のように書き換える。
+<DD>
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<PRE>CDlgSetFont::CDlgSetFont(CWnd* pParent <FONT COLOR="green">/*=NULL*/</FONT>)
+	: CDialog(CDlgSetFont::IDD, pParent)
+{
+	m_bColor = false;
+	m_bFont = false;
+	m_bSize = false;
+	<FONT COLOR="green">//{{AFX_DATA_INIT(CDlgSetFont)</FONT>
+	m_strColor = _T("");
+	m_strFont = _T("");
+	m_nFontSize = 4;
+	<FONT COLOR="green">//}}AFX_DATA_INIT</FONT>
+}
+</PRE>
+</TD></TR>
+</TABLE>
+</DL>
+<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" WIDTH="100%">
+  <TR>
+    <TD WIDTH="100%" BGCOLOR="#000099">
+    <FONT COLOR="#ffffff" SIZE="+1">19.ダイアログの動作を決める</FONT></TD> 
+  </TR>
+</TABLE>
+ここではチェックボックスをによるコントロールの制御について考えていきます。具体的に言うと、<U>チェックが入っていない場合に、ボタンやスピンコントロールを押しても動作させない</U>ような動作にします。
+<DL>
+<DT><FONT COLOR="red">1.クラスウィザードを起動し、メッセージマップタブをクリック</FONT>
+<DT><FONT COLOR="red">2.IDC_FONT_CHECK_COLを選択し、メッセージにBN_CLICKEDを選択、関数の追加を押す。</FONT>
+<DT><FONT COLOR="red">3.同様のことをIDC_FONT_CHECK_SIZEとIDC_FONT_CHECK_FONTに関して行う。</FONT>
+<DD>追加した関数は、チェックボックスをクリック(すなわちチェックをつけたり消したりする)瞬間に呼ばれる関数です。
+<DT><FONT COLOR="red">4.コードの編集で以下をコーディングする</FONT>
+<DD>
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<PRE>void CDlgSetFont::OnFontCheckCol() 
+{
+	CEdit* pEdt = (CEdit*)GetDlgItem(IDC_FONT_EDT_COL);
+	if(!m_bColor){
+		pEdt->SetReadOnly(false);
+		m_bColor = true;
+	}
+	else{
+		m_bColor = false;
+		pEdt->SetReadOnly(true);
+	}
+
+}
+
+void CDlgSetFont::OnFontCheckFont() 
+{
+	if(!m_bFont)	
+		m_bFont = true;
+	else
+		m_bFont = false;
+}
+
+void CDlgSetFont::OnFontCheckSize() 
+{
+	if(!m_bSize)
+		m_bSize = true;
+	else
+		m_bSize = false;
+}
+</PRE>
+</TD></TR>
+</TABLE>
+</DL>
+まずはOnFontCheckFont()とOnFontCheckSize()から見ていきましょう。構文を見れば分かる通り、チェックボックスが押されたときに、現在のフラグm_b****を反転させているだけですね。これらのフラグの値によって、対応するボタンが押された時の処理を決めることで、ボタンを制御していきます。<BR>
+
+OnFontCheckCol()の方は、少し複雑ですが、OnFontCheckFont()関数と似たようなことをやっているのはお気づきでしょうか？違うところは、<B>pEdt->SetReadOnly(***);</B>という関数があることですね。これらについてちょっと解説します。
+<DL>
+<DT><FONT COLOR="red">CEdit* pEdt = (CEdit*)GetDlgItem(IDC_FONT_EDT_COL);</FONT>
+<DD>これは、IDからそのIDのクラス(ここではエディットボックス)のポインタを取得する関数です。これによって、コントロールのクラスを操作することができます。ここではCEditクラスのポインタを取得していますが、これは次に説明するSetReadOnly関数を実行するために使用します。
+<DT><FONT COLOR="red">pEdt->SetReadOnly(false);</FONT>
+<DD>エディットボックスを読み取り専用にするかしないかを決めます。引数がtrueの時は、読み取り専用に、falseの時は通常の状態にします。コードを見れば分かると思いますが、チェックしたときのみ色指定のエディットボックスは、書き込むことができるようになるという仕組みです。
+</DL>
+これでエディットボックスと現在の選択フラグの設定はできました。後はボタンの制御ができればいいですね。
+<DL>
+<DT><FONT COLOR="red">1.クラスウィザードを起動する</FONT>
+<DD>このときCDlgSetFontが選択されているか確認しましょう
+<DT><FONT COLOR="red">2.IDC_FONT_BTN_COLORを選択し、メッセージにBN_CLICKEDを指定し、関数の追加をする</FONT>
+<DT><FONT COLOR="red">3.IDC_FONT_BTN_FONTにも同様のことを行う</FONT>
+<DT><FONT COLOR="red">4.コードの編集で以下をコーディングする</FONT>
+<DD>
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<PRE>void CDlgSetFont::OnSetFont() 
+{
+	if(!m_bFont){return;}
+ 	CFontDialog   cDlg(NULL, CF_SCREENFONTS|CF_INITTOLOGFONTSTRUCT,NULL,NULL);<FONT COLOR="green">//FONTダイアログ</FONT>
+ 	if (cDlg.DoModal() != IDOK){return ;}
+	
+	m_strFont = cDlg.GetFaceName();
+	UpdateData(false);
+}
+
+void CDlgSetFont::OnSetColor() 
+{
+	if(!m_bColor){return;}
+
+	m_strColor = GetColorString();
+	UpdateData(false);
+}
+</PRE>
+</TD></TR>
+</TABLE>
+</DL>
+二つの関数において注目すべき点は、if(!m_bFont){return;}とif(!m_bColor){return;}です。つまり<U>フラグが立っていない(trueでない)時は、何もしないで関数を抜ける</U>という操作を行っています。これでチェックボックスでボタンをコントロールすることができていることが分かります。<BR><BR>
+またUpdateData(false);についてはお分かりだと思いますが、メンバ変数に保持されているデータを、割り当てられているコントロールに反映する関数です。<BR><BR>
+
+なんだか懐かしい関数GetColorString()が出てきましたね。この関数の動作確認がまだでしたね。ではこの関数とダイアログ全体の動作確認をしてみたいと思います。
+<DL>
+<DT><FONT COLOR="red">1.リソースのメニューの[挿入]に、フォントを追加する。(リソースを編集)</FONT>
+<DD>もうリソースの編集方法はお分かりですね。リソースIDは、ID_INS_FONTとしておきましょう。
+<DT><FONT COLOR="red">2.クラスウィザードを起動する。</FONT>
+<DD>このとき、クラスにCMyHtmlViewを選択してください。
+<DT><FONT COLOR="red">3.ID_INS_FONTにメッセージBN_CLICKEDをバインド(選択して関数の追加をすること)する</FONT>
+<DT><FONT COLOR="red">4.以下のコードを記述する</FONT>
+<DD>
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<PRE><FONT COLOR="green">// インクルードファイル　←インクルードしておく</FONT>
+#include "DlgSetFont.h"
+
+<FONT COLOR="green">//フォントの設定ダイアログ</FONT>
+void CMyHtmlView::OnInsFont() 
+{
+	CDlgSetFont cDlg;
+	if(cDlg.DoModal()!=IDOK){return ;}
+}
+</PRE>
+</TD></TR>
+</TABLE>
+</DL>
+動作確認をしてみましょう。チェックボタンがうまく動作していますか？そしてチェックボタンの状態によってカラーのエディットボックスが白・灰色に変化するでしょうか？またカラーボタンもうまく色が選択できますか？例えば黒だったら#000000が表示されれば成功です。<BR>
+気づいた人もいるかと思いますが、スピンコントロールがまだ未完成ですね。次はスピンコントロールの実装です。スピンコントロールの実装といってもそんなに大げさなことはしませんのでご安心を。<BR><BR>
+スピンコントロールは、増加または減少のキーがあるやつ<IMG SRC="fig7_4.gif">ですね。CSpinButtonCtrlクラスが存在するのですが、ここでは別にクラスを作るほどでもないのでもう少し簡単な方法で実装していきます。具体的な動作はこんな感じです。
+<OL>
+<LI>　スピンコントロールの上下ボタンが押される(UDN_DELTAPOSメッセージが送られる)
+<LI>　UDN_DELTAPOSにバインドした関数が実行される(UDN_DELTAPOSをキャッチする)
+<LI>　「上」を押されていたら上記関数内部でCDlgSetFontクラスのメンバm_nFontSizeの値を1増やし、また「下」を押されていたら上記関数内部でCDlgSetFontクラスのメンバm_nFontSizeの値を1減らす。
+<LI>m_nFontSizeの値wをIDC_FONT_EDT_SIZEのエディットボックスに反映させる。
+</OL>
+とやっていけばうまくいきそうです。では早速作業です。
+<DL>
+<DT><FONT COLOR="red">1.クラスウィザードを起動(以下を選択しておく)</FONT>
+<DD>クラス:<B>CDlgSetFont</B>
+<DD>ID:<B>IDC_FONT_SPINSIZE</B>
+<DD>メッセージ:<B>UDN_DELTAPOS</B>
+<DD>UDN_DELTAPOSはスピンコントロールが押された時に送られるメッセージです
+<DT><FONT COLOR="red">2.関数の追加</FONT>
+<DT><FONT COLOR="red">3.以下をコーディングする。</FONT>
+<DD>
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<PRE><FONT COLOR="green">//フォント サイズ スピンコントロール</FONT>
+void CDlgSetFont::OnFontSpinSize(NMHDR* pNMHDR, LRESULT* pResult) 
+{
+	NM_UPDOWN* pNMUpDown = (NM_UPDOWN*)pNMHDR;
+
+	<FONT COLOR="green">// Flag</FONT>
+	if(!m_bSize){return;}
+
+	<FONT COLOR="green">// Up</FONT>
+	if(pNMUpDown->iDelta != 1){
+		if(m_nFontSize != 7){
+			m_nFontSize++;
+			UpdateData(false);
+		}
+		else AfxMessageBox("フォントサイズは1〜7で指定してください");
+	}
+	<FONT COLOR="green">// Down</FONT>
+	else{
+		if(m_nFontSize != 1){
+			m_nFontSize--;
+			UpdateData(false);
+		}
+		else AfxMessageBox("フォントサイズは1〜7で指定してください");
+	}		
+	*pResult = 0;
+}
+</PRE>
+</TD></TR>
+</TABLE>
+</DL>
+では、いつもの通り解説していきます。
+<DL>
+<DT><FONT COLOR="red">NM_UPDOWN* pNMUpDown = (NM_UPDOWN*)pNMHDR;</FONT>
+<DD>これはおまじないだと思って構いません。アップダウンの情報を得るために必要な変数を定義したと思ってくれればいいと思います。
+<DT><FONT COLOR="red">if(!m_bSize){return;}</FONT>
+<DD>フラグ、"サイズ"のチェックボックスがチェックされていない場合はreturn;が実行されるようになります。チェックされているときのみだけ、これ以降のコードを実行するために書かれています。
+<DT><FONT COLOR="red"><PRE>if(pNMUpDown->iDelta != 1){
+		if(m_nFontSize != 7){
+			m_nFontSize++;
+			UpdateData(false);
+		}
+		else AfxMessageBox("フォントサイズは1〜7で指定してください");
+}
+</PRE></FONT>
+<DD><B>pNMUpDown->iDelta</B>の値が1以外のときは、スピンコントロールの<B>上</B>キーが押されています。つまりフォントサイズをあげるときの命令に対応していますので<B>m_nFontSize++;</B>でサイズを上げ、その情報を即座にコントロールに反映させています。しかしHTMLの性質上フォントサイズは1〜7なので、現在のフォントサイズm_nFontSizeが7の時は、これ以上サイズをあげてはいけないのでelse以降を実行します。
+<DT><FONT COLOR="red"><PRE>else{
+		if(m_nFontSize != 1){
+			m_nFontSize--;
+			UpdateData(false);
+		}
+		else AfxMessageBox(IDS_ERROR_FONT);
+}
+</PRE></FONT>
+<DD>pNMUpDown->iDeltaの値が1のときは、スピンコントロールの<B>下</B>キーが押されています。つまりフォントサイズをさげるときの命令に対応していますので<B>m_nFontSize++;</B>でサイズをさげ、その情報を即座にコントロールに反映させています。しかしHTMLの性質上フォントサイズは1〜7なので、現在のフォントサイズm_nFontSizeが1の時は、これ以上サイズを下げてはいけないのでelse以降を実行します。 
+<DT><FONT COLOR="red">*pResult = 0;</FONT>
+<DD>こいつもおまじないみたいなものですね(笑)
+</DL>
+さて実行してみてください。これで全てのコントロールが動作していると思います。もし動作しないようだったら、いま一度コードを確かめてみましょう。
+<BR>
+<BR>
+<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" WIDTH="100%">
+  <TR>
+    <TD WIDTH="100%" BGCOLOR="#000099">
+    <FONT COLOR="#ffffff" SIZE="+1">20.タグ生成コードを作成する</FONT></TD> 
+  </TR>
+</TABLE>
+早いものでもう２０まで来てしまいました。少しずつソフトを作ることが楽しくなっていただければいいのですが、ここからが山場ですからね〜(笑)<BR><BR>
+まずは、先ほど少し書いたCMyHtmlView::OnInsFont()関数ですが、以下のように書き直していきます。
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<PRE><FONT COLOR="green">//フォントの設定ダイアログ</FONT>
+void CMyHtmlView::OnInsFont() 
+{
+	CString strSel;		<FONT COLOR="green">//選択されている文字列</FONT>
+
+	CDlgSetFont cDlg;
+	if(cDlg.DoModal()!=IDOK){return ;}
+
+	<FONT COLOR="green">/* 現在選択されている文字列を取得 */</FONT>
+	CEdit& cEdt = GetEditCtrl();
+	cEdt.Copy();
+	strSel = GetClipBoard();
+
+	cDlg.MakeTag(strSel);		<FONT COLOR="green">//タグの生成</FONT>
+	PasteString(cDlg.strTag);	<FONT COLOR="green">//作成したタグ付文字列をペースト</FONT>
+	SetFocus();		<FONT COLOR="green">//フォーカスを設定する</FONT>
+}
+</PRE>
+</TD></TR>
+</TABLE>
+　ここで実行すると、<B>cDlg.MakeTag(strSel);</B>と<B>PasteString(cDlg.strTag);</B>でエラーが出ます。何故ならCDlgSetFontクラスにはMakeTagというメンバ関数とstrTagというメンバ変数が存在しないからです。まずこれらのメンバを追加していきます。
+<DL>
+<DT><FONT COLOR="red">1.DlgSetFont.hを開いて以下のように編集する</FONT>
+<DD>
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<PRE><FONT COLOR="green">/////////////////////////////////////////////////////////////////////////////</FONT>
+<FONT COLOR="green">// CDlgSetFont ダイアログ</FONT>
+
+class CDlgSetFont : public CDialog
+{
+<FONT COLOR="green">// コンストラクション</FONT>
+public:
+	BOOL	m_bColor;
+	BOOL	m_bFont;
+	BOOL	m_bSize;
+
+	void MakeTag(CString str);	<FONT COLOR="green">// ここを追加</FONT>
+	CString strTag;		<FONT COLOR="green">// ここを追加</FONT>
+
+	CDlgSetFont(CWnd* pParent = NULL);   <FONT COLOR="green">// 標準のコンストラクタ</FONT>
+</PRE>
+</TD></TR>
+</TABLE>
+<DT><FONT COLOR="red">2.DlgSetFont.hを開き、ファイルの最後に以下のコードを追加する</FONT>
+<DD>
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<PRE><FONT COLOR="green">// CDlgSetFont::MakeTag(CString)  タグの生成</FONT>
+void CDlgSetFont::MakeTag(CString strIns)
+{
+	CString strTagA,strTagB,cTemp;
+	strTagA = "&lt;FONT";
+	if(m_bSize){
+		cTemp.Format("%d",m_nFontSize);
+		strTagA += " SIZE=";
+		strTagA += cTemp;
+	}
+	if(m_bColor){
+		strTagA += " COLOR=\"";
+		strTagA += m_strColor;
+		strTagA += "\"";
+	}
+	if(m_bFont){
+		strTagA += " FACE=\"";
+		strTagA += m_strFont;
+		strTagA +="\"";
+	}
+	strTagA += "&gt;";
+
+	strTagB = "&lt;/FONT&gt;";
+	strTag = strTagA + strIns + strTagB;
+}
+</PRE>
+</TD></TR>
+</TABLE>
+<DT><FONT COLOR="red">3.実行する</FONT>
+<DD>実行してみます。このときフォントタグでしっかり文字列がはさめるかどうか確認してください。またチェックを入れたところだけ、オプションがしっかり書かれるかどうかも確認しておきましょう。
+</DL>
+<B>m_b***</B>は、先ほどから何回も書いている通りに、チェックボックスにチェックが入っている時にtrue,入っていない時にはfalseになるように設定してあるフラグです。<U>チェックが入っている＝<B>m_b***</B>が"真(true)"＝FONTタグオプションをつける</U>、としてプログラムを組んでいます。コードの解読はそんなに難しいものではないと思います。もっとよいコーディング方法があると思いますので、みなさんが一番いいと思うコーディングをしていただけたらうれしいです。<BR><BR>
+最後に実行例を紹介してこの章を終わりにしたいと思います。<BR>
+<CENTER><IMG SRC="fig7_5.gif" ALIGN="middle"></CENTER>
+<BR>実行した結果
+<CENTER><IMG SRC="fig7_6.gif" ALIGN="middle"></CENTER><BR><BR>
+おまけですが、HTMLは、色コード"#○○○○○○"でなくて、直接色指定できる色(純色)があり、図のようにredと書き込むこんでもうまくいきます。実行例の3行目の色指定は、直接色の名前を書いた例です。色コードも色名も文字列には代わりがないので、こんなこともできるんです。
+<CENTER><IMG SRC="fig7_7.gif"></CENTER>
+
+<BR><BR>
+<A HREF="proc8.html">[Next]</A><BR>
+<A HREF="proc6_2.html">[Previous]</A><BR>
+<A HREF="../index.html">[Home]</A><BR>
+</BODY>
+</HTML>

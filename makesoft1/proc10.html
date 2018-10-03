@@ -1,0 +1,197 @@
+<HTML>
+<HEAD>
+<TITLE>HTMLエディタ〜最終章〜</TITLE>
+<style type="text/css">
+  <!--
+		A:link { text-decoration:none;  color:#ff4500 }
+		A:visited { text-decoration:none;  color:#ff4500 }  
+		A:active { text-decoration:none;  color:#ff0000 }   
+		A:hover { color:#00008b }	
+	    -->
+</style>
+</HEAD>
+<BODY bgcolor="#FFFFFF"><DIV ALIGN=CENTER><!--#geoguide--></DIV>
+<I><FONT COLOR="red" SIZE="6">ツールバーを作成しよう</FONT></I>
+<HR>
+さて、「HTMLエディタを作ろう」と題して、盆休み連載を含めてすでに10回連載してきましたが、ついに最終章を迎えました。今回は、ツールバーの作成・実装とリリースビルドによる配布法について述べて意向と思います。
+<BR>
+<BR>
+<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" WIDTH="100%">
+  <TR>
+    <TD WIDTH="100%" BGCOLOR="#000099">
+    <FONT COLOR="#ffffff" SIZE="+1">26.既存のツールバーにボタンを追加してみる</FONT></TD> 
+  </TR>
+</TABLE>
+ツールバーを知らない方はあまりいないと思いますが、
+<IMG SRC="fig10_1.gif">
+です。まず既存のツールバー(保存やファイルを開くなどがついている、つまりこの画像のやつです)に、ボタンを追加することからはじめます。
+<DL>
+<DT><FONT COLOR="red">1.リソースタブをクリックし、ToolbarのIDR_MAINFRAMEを開く</FONT>
+<DD>図のような編集画面が出てくるはずです。
+<DD><IMG SRC="fig10_2.gif">
+<DD>※この編集画面と、上のツールバーの図は対応しています。ツールバーに入っている縦線(セパレータ)は、編集画面で見ると空欄になっていることがわかります。(例えば、ファイルとはさみのマークの間にセパレート線が入っていますが、編集画面では3mmくらいの空欄で表示されていますね)
+<DT><FONT COLOR="red">2.セパレートを作る</FONT>
+<DD>まだなにも絵がかかれていない右端の四角をクリックし、すこし右側にドラッグして離します。すると間隔があきます。これでセパレートが入ります。
+<DT><FONT COLOR="red">3.絵を描く</FONT>
+<DD>先ほど選択した四角に対して絵を書きます。ここでは、<A HREF="proc9.html">前章</A>で作成した「プレビュー機能」をツールバーに登録したいと思うので、私は虫眼鏡の図でプレビューを表現してみました。各自プレビュー機能だと連想させるような素敵な絵を作成してくださいね。ここが一番たのしいですから(笑)
+<DD><IMG SRC="fig10_3.gif">
+<DT><FONT COLOR="red">4.実行します</FONT>
+<DD>実行してみます。すると先ほどつくった虫眼鏡は「灰色表示」されていますね。つまりまだこのボタンは役に立っていません(笑)
+<DT><FONT COLOR="red">5.役に立つツールバーにする</FONT>
+<DD>虫眼鏡をダブルクリックすると、プロパティが開くはずです。ここでIDにID_TOOL_PREVIEWと書き込みます。このIDは<A HREF="proc9.html">前章</A>で作成したメニューのIDです。ID_TOOL_PREVIEWを記述すると、プロンプトが自動的に挿入されます。
+<DT><FONT COLOR="red">6.再実行してみます</FONT>
+<DD>今度は、プレビュー機能が働くでしょう。このようにメニューなどを作った場合、つまりクラスウィザードでIDにコマンドメッセージをバインドしている場合、ツールバーではそのIDを記述すれば、コマンドがバインドされている関数(ここではvoid CMyHtmlDoc::OnToolPreview()関数)が実行されるようになっているからです。
+</DL>
+
+
+<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" WIDTH="100%">
+  <TR>
+    <TD WIDTH="100%" BGCOLOR="#000099">
+    <FONT COLOR="#ffffff" SIZE="+1">27.ツールバーを新規に作成する</FONT></TD> 
+  </TR>
+</TABLE>
+ツールバーを作成するにあたって、先ほど編集したIDR_MAINFRAMEのツールバーに関する記述を探します。つまりこの記述を真似してしまえばいいわけです。(この真似っ子をすることでVCの経験が一段とUPします。要チェックですよ)<BR>
+いろいろファイルを探していくと分かってくると思いますが、ツールバーの記述はCMainFrameクラス内部(MainFrm.hとMainFrm.cpp)で行われています。ではまずツールバーの変数をヘッダファイルの記述してみましょう。
+<DL>
+<DT><FONT COLOR="red">1.MainFrm.hファイルを開く</FONT>
+<DD>ファイルビューで開くと簡単ですが、CMainFrameクラスをダブルクリックしても同じように開くことができます。
+<DT><FONT COLOR="red">2.以下の1行のみを追加</FONT>
+<DD>
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<PRE>class CMainFrame : public CFrameWnd
+{
+
+	(中略)
+
+protected:  <FONT COLOR="green">// コントロール バー用メンバ</FONT>
+	CStatusBar  m_wndStatusBar;
+	CToolBar    m_wndToolBar;
+	CToolBar	m_wndMyToolBar;	<FONT COLOR="green">// ←ここを追加</FONT>
+
+<FONT COLOR="green">// 生成されたメッセージ マップ関数</FONT>
+protected:
+</PRE>
+</TD></TR>
+</TABLE>
+</DL>
+ここで注目したいのは、メンバとしてCToolBarクラスの変数m_wndMyToolBarを作成しましたが、既存のツールバーのメンバ変数がm_wndToolBarです。ようするにMicrosoftの真似をしています(笑)。
+<DL>
+<DT><FONT COLOR="red">3.リソースでツールバーを作成する</FONT>
+<DD>ツールバーを追加し、ツールバーのIDをIDR_INS_TOOLBARとしておく。
+<DT><FONT COLOR="red">4.ツールバーにボタンを配置していく。</FONT>
+<DD>先ほど既存のツールバーに絵を描いて、IDをあり当てた操作を繰り返していきます。ここではよく使用されるであろうタグを挿入するツールバーとして、例えば改行タグなどを追加していきます。私はこんな風にしてみました。
+<DD><IMG SRC="fig10_4.gif">
+<DD>※絵を描いたら、それぞれの絵に対してプロパティを表示させ、IDを割り当てましょう。例えば、図のような改行タグであったらID_INS_BRを割り当てます。
+<DT><FONT COLOR="red">5.ツールバーを作成します。</FONT>
+<DD>今のままでは、ツールバーリソースはあってもツールバーは作成されていないので、見ることもできません。そこでMainFrm.cppのCreate関数を開き、以下の部分を追加します。
+<DD>
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<PRE>int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
+{
+
+	(中略)
+
+	<FONT COLOR="green">// TODO: ツール バーをドッキング可能にしない場合は以下の３行を削除</FONT>
+	<FONT COLOR="green">//       してください。</FONT>
+	m_wndToolBar.EnableDocking(CBRS_ALIGN_ANY);
+	EnableDocking(CBRS_ALIGN_ANY);
+	DockControlBar(&m_wndToolBar);
+
+	<FONT COLOR="green">////////ここから//////////</FONT>
+	if (!m_wndMyToolBar.CreateEx(this, TBSTYLE_FLAT, WS_CHILD | WS_VISIBLE | CBRS_TOP
+		| CBRS_GRIPPER | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC) ||
+		!m_wndMyToolBar.LoadToolBar(IDR_INS_TOOLBAR))
+	{
+		TRACE0("Failed to create toolbar\n");
+		return -1;      <FONT COLOR="green">// 作成に失敗</FONT>
+	}
+	<FONT COLOR="green">///////ここまでを追加/////</FONT>
+
+	return 0;
+}
+</PRE>
+</TD></TR>
+</TABLE>
+<DD>あれ？と思ったかたは鋭い方ですね。この関数の上への方に、今回追加したコードとほとんど同じやつがありますね。あれは既存のツールバーを作成・表示しているコードです。ここでもMicrosoftの真似をします。やっていることは、ツールバーを作成し、リソースからツールバーを読み込んでいるだけです。作成か読み込みに失敗した場合だけ、TRACE0が実行されます。
+<DT><FONT COLOR="red">6.実行する</FONT>
+<DD>さて、実行してみましょう。ツールバーが動作するでしょうか？これでなんだかソフトウェアらしくなってきたと思います。ここで少し改良を施します。現在作成したツールバーは、今のところドッキングが不可能となっています。ドッキング可能なツールバーとは、クライアント領域(編集領域)の上部だけではなくて、下にも、左右にもツールバーをドッキングすることができます。既存のツールバーはドッキング可能なツールバーです。ツールバーの端をドラッグし、クライアント領域まで引っ張ってくると、
+<DD><IMG SRC="fig10_5.gif">
+<DD>のように、ウィンドウとして分離できますが、これはまたウィンドウの端にドッキングできます。今作成したツールバーもドッキング可能にしてみたいと思います。
+<DT><FONT COLOR="red">7.ツールバをドッキング可能にする</FONT>
+<DD>MainFrm.cppのなかのCreate関数の末尾を、以下のように編集する。
+<DD>
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<PRE>int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
+{
+
+	if (!m_wndMyToolBar.CreateEx(this, TBSTYLE_FLAT, WS_CHILD | WS_VISIBLE | CBRS_TOP
+		| CBRS_GRIPPER | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC) ||
+		!m_wndMyToolBar.LoadToolBar(IDR_INS_TOOLBAR))
+	{
+		TRACE0("Failed to create toolbar\n");
+		return -1;      <FONT COLOR="green">// 作成に失敗</FONT>
+	}
+
+	<FONT COLOR="green">//////ここから////////////////</FONT>
+	m_wndMyToolBar.EnableDocking(CBRS_ALIGN_ANY);
+	DockControlBar(&m_wndMyToolBar,AFX_IDW_DOCKBAR_TOP,NULL);
+	<FONT COLOR="green">//////ここまで追加////////////</FONT>
+
+	return 0;
+}
+</PRE>
+</TD></TR>
+</TABLE>
+</DL>
+ここで2行のコードを解説しておきます。
+<DL>
+<DT><FONT COLOR="red">m_wndMyToolBar.EnableDocking(CBRS_ALIGN_ANY);</FONT>
+<DD>ツールバーをドッキング可能にします。引数は、ウィンドウのどこの辺にドッキングするかを指定します。例えば<B>CBRS_ALIGN_TOP</B>だと上部のみだけにドッキング可能にします。つまり、上部以外ではドッキングできません。<B>CBRS_ALIGN_ANY</B>は、任意の辺へのドッキングを可能にするものです。つまりどこの辺でもドッキングできる形式です。通常は<B>CBRS_ALIGN_ANY</B>を選ぶべきですが、case by caseで、辺を指定することがあるようです。
+<DT><FONT COLOR="red">DockControlBar(&m_wndMyToolBar,AFX_IDW_DOCKBAR_TOP,NULL);</FONT>
+<DD>EnableDockingは名前からも分かるように、ドッキングを可能にするだけであって、実際にドッキングする関数とは異なります。このDockControlBarは、コントロールバー(ツールバー)をドッキングする関数です。第1引数はドッキングするコントロールバー(ツールバー)であり、第2引数は、どこの辺にドッキングするかを指定します。<B>AFX_IDW_DOCKBAR_TOP</B>は、ウィンドウ上部にドッキングします。
+</DL>
+最後に実行してみます。ドッキングはうまく動作しているでしょうか？このコードも、既存のツールバーと非常に似たコードを使用しています。VCのコツはサンプルを活用することですよ。
+<BR><BR>
+<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" WIDTH="100%">
+  <TR>
+    <TD WIDTH="100%" BGCOLOR="#000099">
+    <FONT COLOR="#ffffff" SIZE="+1">28.リリースビルドをして完成です</FONT></TD> 
+  </TR>
+</TABLE>
+最後に、ソフトウェアのディストリビューションを考え、実行ファイルの最適化と軽量化のためにリリースビルドを行います。リリースビルドがうまくいかない！と質問される方が多いのですが、ここでは一番簡単な方法を伝授？します。
+<DL>
+<DT><FONT COLOR="red">1.ツールバーの部分で右クリックする</FONT>
+<DD>フローティングメニューようなものが表示されます。ここで「ビルド」にチェックします。
+<DT><FONT COLOR="red">2.コンボボックスで[Win32 Debug]から[Win32 Release]に変更する</FONT>
+<DD>これでビルドタイプが変更することができました。
+<DT><FONT COLOR="red">3.ビルドする</FONT>
+</DL>
+するとReleaseフォルダが生成され、その中に入っているexeファイルが実行ファイルです。<BR><BR>
+
+さて、これでHTMLエディタに関する連載は終了です。私の解説はあくまで基本的なことばかりで、このソフトをもっともっとよくするには、皆さんの努力とアイディアが重要だと思います。はじめての連載でしたが、結構大変でした(笑)。次は・・・お絵かきソフトでも作ろうかなぁ？
+
+<BR><BR>
+作成したHTMLEditorのソースファイル:<a href="src.lzh">src.lzh(227kByte)</a><BR>
+本サイトで紹介した内容以外には、
+<DL>
+<DT><B>テンポラリファイル削除機能</B>
+<DD>プレビューで作成された"tmp_preview.html"ファイルを削除する機能
+<DT><B>HTML基本構造タグ追加機能</B>
+<DD>HTMLウィザード(タイトルや全体文字色・背景色の設定)機能
+<DT><B>その他未完成ですが^^;ファイルドロップ機能がついております。</B>
+</DL>
+このソースは、ご自由に使用されても構いませんが、無断転載は禁止させていただきます。<BR>
+なおこのサイトを通して、作成されたソフトウェアに関しては、web上に公開しても構いませんが
+readmeファイルなどで、一言このサイトのことを記述してください。お願いいたします。
+
+
+<BR><BR>
+<A HREF="proc10.html">[Next]</A><BR>
+<A HREF="proc8.html">[Previous]</A><BR>
+<A HREF="../index.html">[Home]</A><BR>
+</BODY>
+</HTML>
+

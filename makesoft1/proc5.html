@@ -1,0 +1,120 @@
+<HTML>
+<HEAD>
+<TITLE>HTMLエディタ〜第5週〜</TITLE>
+<style type="text/css">
+  <!--
+		A:link { text-decoration:none;  color:#ff4500 }
+		A:visited { text-decoration:none;  color:#ff4500 }  
+		A:active { text-decoration:none;  color:#ff0000 }   
+		A:hover { color:#00008b }	
+	    -->
+</style>
+</HEAD>
+<BODY bgcolor="#FFFFFF"><DIV ALIGN=CENTER><!--#geoguide--></DIV>
+<I><FONT COLOR="red" SIZE="6">タグ挿入コードを作ろう</FONT></I>
+<HR>
+次はいよいよ、タグの挿入コードをコーディングしていきます。<A HREF="proc3.html">chapter3</A>で、<B>PasteString(CString)</B>と<B>MakeTag(CString,CString)</B>の二つの便利な関数を作ったと思いますが、これを利用してプログラミングを進めていこうと思います。
+<BR>
+<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" WIDTH="100%">
+  <TR>
+    <TD WIDTH="100%" BGCOLOR="#000099">
+    <FONT COLOR="#ffffff" SIZE="+1">11.挿入するタグについて</FONT></TD> 
+  </TR>
+</TABLE>
+本来は、タグをつけたい文字を選択して、ツールバーなどのボタンを押す操作<BR>
+<CENTER><IMG SRC="fig2_6.gif"><SMALL>文字列選択して、ボタンを押す</SMALL><BR>
+<IMG SRC="fig2_7.gif"><SMALL>ほらできた</SMALL></CENTER>
+のほうが、ユーザインターフェースの高いものになるのですが、ツールバーの話はまた後ほどということにして(何故なら、そのほうがツールバーの実装の時にめちゃくちゃ楽になるからなのです)、いつものようにメニュー操作でタグを挿入する方法で実装していきます。
+
+今回は２つのタグを例にして進めていきます。タグはかなり多くあるので全部説明してもあまり意味がないのです。しかしなんで２つのタグなのか？という疑問を抱かれるかもしれませんが、HTMLタグには主に２つの種類のタグが存在します。
+<DL>
+<DT><FONT COLOR="red">文字列の間に挟んで使うタグ</FONT>
+<DD>以前から紹介している、文字列を太字にするタグなど&lt;B&gt;&lt;/B&gt;
+<DT><FONT COLOR="red">特定の場所に記述するタイプ</FONT>
+<DD>文字列を改行したいところに書く改行コードなど&lt;BR&gt;
+</DL>
+
+以下の文(オブジェクト指向に関する私の見解ですが)を例にしてみます。
+<TABLE BORDER>
+<TR><TD BGCOLOR="white">
+<FONT COLOR="red">&lt;B&gt;</FONT>オブジェクト指向プログラミング<FONT COLOR="red">&lt;/B&gt;&lt;HR&gt;</FONT>
+C++やJAVAなどのプログラミングに代表されるオブジェクト指向プログラミングとは、変数を物(オブジェクト)として捉えたプログラミング手法のことである。<FONT COLOR="red">&lt;BR&gt;</FONT>オブジェクト指向を実現するために、C++やJAVAでは、<FONT COLOR="red">&lt;B&gt;</FONT>「クラス」<FONT COLOR="red">&lt;/B&gt;</FONT>という概念が存在し、変数はクラス化される。クラスは、通常の変数のようにデータを保持する機能のほか、そのクラスのみで使用できる関数(メンバ関数)を含む。構造体が、特定の関数を含んだようなものと考えてもよい。ただ大きく違うところは、クラス内部のデータ保持変数と関数の公開、非公開を決めることで、<FONT COLOR="red">&lt;FONT COLOR=blue&gt;</FONT>データを隠蔽することができる<FONT COLOR="red">&lt;/FONT&gt;</FONT>ので、ユーザの不正アクセスを防ぐことができるなど、管理が楽になりバグが発生しにくくなるという利点がある。
+</TD></TR>
+</TABLE>
+という感じでタグを挿入すると、以下のようになるのです。<BR><BR>
+<TABLE BORDER>
+<TR><TD BGCOLOR="white">
+<B>オブジェクト指向プログラミング</B><HR>
+C++やJAVAなどのプログラミングに代表されるオブジェクト指向プログラミングとは、変数を物(オブジェクト)として捉えたプログラミング手法のことである。<BR>オブジェクト指向を実現するために、C++やJAVAでは、<B>「クラス」</B>という概念が存在し、変数はクラス化される。クラスは、通常の変数のようにデータを保持する機能のほか、そのクラスのみで使用できる関数(メンバ関数)を含む。構造体が、特定の関数を含んだようなものと考えてもよい。ただ大きく違うところは、クラス内部のデータ保持変数と関数の公開、非公開を決めることで、<FONT COLOR="blue">データを隠蔽することができ</FONT>るので、ユーザの不正アクセスを防ぐことができるなど、管理が楽になりバグが発生しにくくなるという利点がある。
+</TD></TR>
+</TABLE>
+<BR>
+というわけで2種類のタグの種類がわかっていただけたところで、まずは文字を挟まない改行&lt;BR&gt;タグや水平線&lt;HR&gt;タグの挿入についてコーディングしていきます。ここではまず&lt;HR&gt;タグの挿入について説明してきます。
+
+<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" WIDTH="100%">
+  <TR>
+    <TD WIDTH="100%" BGCOLOR="#000099">
+    <FONT COLOR="#ffffff" SIZE="+1">12.水平線タグ挿入コードを作る。</FONT></TD> 
+  </TR>
+</TABLE>
+<DL>
+<DT><FONT COLOR="red">1.リソースの編集</FONT>
+<DD>IDR_MAINFRAMEを開き、以下の図のようにリソースを編集する。IDなども図を参照のこと。
+<DD><IMG SRC="fig5_1.gif">
+<DD>図の[ページ]のようにポップアップ形式にするには、ページのメニューのプロパティのポップアップをチェックすればOK。(水平線のプロパティのポップアップではありませんよ)
+<DT><FONT COLOR="red">2.メニューコマンドを駆動</FONT>
+<DD>CLASSWIZARDを起動。クラス：CMyHtmlView、ID:ID_INS_HRを選択し、COMMANDを押して関数の追加を押し、コードの編集を押す。(この図では、COMMANDの文字が太字ですが、関数を追加する前は太字にはなっていないはずです)
+<DD><IMG SRC="fig5_2.gif">
+<DT><FONT COLOR="red">3.コードを記述</FONT>
+<DD>
+<TABLE BORDER>
+<TR><TD BGCOLOR="white">
+void CMyHtmlView::OnInsHr() <BR>
+{<BR>
+	PasteString("&lt;HR&gt;");<BR>
+	SetFocus();<BR>		
+}<BR>
+</TD></TR>
+</TABLE>
+<DD><FONT COLOR="red">PasteString(CString str) : </FONT><A HREF="proc3.html">chapter3</A>で作成した、"現在カーソル位置にstrを挿入する関数"です。
+<DD><FONT COLOR="red">SetFocus() </FONT>: PasteStringによってフォーカス(カーソルが点滅していて入力できる状態)が失われてしまうと、次の入力時に不便なのでフォーカスを得て、次の入力をしやすくします。この関数の有無の違いを確かめてみるのもいいと思います。
+<DT><FONT COLOR="red">4.実行して確かめる</FONT>
+<DD>うまく挿入されない場合は、PasteString関数にも問題があると思います。コードが正しいか<A HREF="proc3.html">chapter3</A>を確認してください。
+</DL>
+
+<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" WIDTH="100%">
+  <TR>
+    <TD WIDTH="100%" BGCOLOR="#000099">
+    <FONT COLOR="#ffffff" SIZE="+1">13.太字タグ挿入コードを作る。</FONT></TD> 
+  </TR>
+</TABLE>
+次は太字タグのように、挟み込むタグの挿入を行います。これは、Chapter3で作成したMakeTag関数を使って、タグを挟んだ文字列を作成し、PasteStringで挿入するという構成をとります。以下に手順を書いていきます。
+<DL>
+<DT><FONT COLOR="red">1.リソースの編集</FONT>
+<DD>IDR_MAINFRAMEを開き、以下の図のようにリソースを編集する。IDなども図を参照のこと。
+<DD><IMG SRC="fig5_3.gif">
+<DT><FONT COLOR="red">2.メニューコマンドを駆動</FONT>
+<DD>水平線タグ挿入の要領でやればOK
+<DT><FONT COLOR="red">3.コードを記述</FONT>
+<DD>
+<TABLE BORDER>
+<TR><TD BGCOLOR="white">
+void CMyHtmlView::OnInsFontBold() <BR>
+{<BR>
+	PasteString(MakeTag("&lt;B&gt;","&lt;/B&gt;"));<BR>
+	SetFocus();<BR>
+}<BR>
+</TD></TR>
+</TABLE>
+<DT><FONT COLOR="red">4.実行して確かめる</FONT>
+<DD>うまくいかない場合はMakeTag関数に問題があるかもしれません。<A HREF="proc3.html">chapter3</A>で確認してください。
+</DL>
+あとは各自好きなようにタグを挿入するコードを作っていけばよいです。タグについてはタグ集やいろんなサイトに掲載されているので問題はないと思います。そのタグが文字列を挟むのか、挟まないのかに気をつければうまくいくでしょう。ただしリンクタグとフォントタグ、イメージタグは、MakeTagやPasteStringだけでは実現できないのでこれらは第7週と第8週で説明していきます。<BR>
+次週は、「共通関数群を作ろう」と題して、カラーダイアログ(カラーパレット)関数の効果的なコーディングや、リンクで必要な絶対パス→相対パス変換のコード、フォルダ選択ダイアログについて説明していきます。これらの関数は一旦学ぶとあとでいろんなところで使えるので重宝しますよ！
+
+<BR><BR>
+<A HREF="proc6.html">[Next]</A><BR>
+<A HREF="proc4.html">[Previous]</A><BR>
+<A HREF="../index.html">[Home]</A><BR>
+</BODY>
+</HTML>

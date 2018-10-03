@@ -1,0 +1,93 @@
+<HTML>
+<HEAD>
+<TITLE>BitmapLoader〜第5週〜</TITLE>
+<style type="text/css">
+  <!--
+		A:link { text-decoration:none;  color:#ff4500 }
+		A:visited { text-decoration:none;  color:#ff4500 }  
+		A:active { text-decoration:none;  color:#ff0000 }   
+		A:hover { color:#00008b }	
+	    -->
+</style>
+</HEAD>
+<BODY bgcolor="#FFFFFF"><DIV ALIGN=CENTER><!--#geoguide--></DIV>
+<i><font color="red" size="6">BitmapLoader〜ソフトウェアの仕上げ〜</font></i> 
+<HR>
+<p>いよいよ最終章です。最後にソフトウェアのちょっとしたことと、リリースビルドについて説明して終わりにしたいと思います。<BR>
+</p><TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" WIDTH="100%">
+  <TR>
+    <TD WIDTH="100%" BGCOLOR="#000099"> <FONT COLOR="#ffffff" SIZE="+1">12.アクセラレータキーの再設定</FONT></TD> 
+  </TR>
+</TABLE>
+<p>　アクセラレータキーをご存知でしょうか？アクセラレータキーとは「Ctrl＋*」で行われるショートカットキーのことで、エディタのUndoは「Ctrl+Z」で行われます<font size="2">(詳しくは<a href="../word/index.html" target="_blank">プログラミング辞典</a>を参照ください)</font>。今回作成したソフトウェアでも<br>
+  <font color="#FF0000">「Ctrl+O」で[ファイル]-[開く]<br>
+  「Ctrl+P」で[ファイル]-[印刷]</font><br>
+  のメニューが実行されるようになっています。でここで「Ctrl＋O」を実行し、ビットマップファイルを開いてみてください。 多分変なエラーメッセージダイアログが出力されて、強制終了が起きるでしょう。もう1回メニューリソースを開いて見ると、確かにCtrl＋Oでビットマップファイルが開くように記述してあるんですがね…。どうしてでしょう。</p>
+<table border="0" bgcolor="#FFFFFF" width="392" align="center">
+  <tr> 
+    <td width="386" valign="top" bgcolor="#000000"><font size="2" color="#FFFFFF">Fig5_1.jpg 
+      メニューリソースはこのように編集してあったはずですが・・・</font></td>
+  </tr>
+  <tr> 
+    <td width="386" valign="top"> <img src="fig5_1.jpg" width="254" height="132"></td>
+  </tr>
+</table>
+<p>　なんて、もうだいぶプログラミング経験が豊富になってきた皆さんには分かりますよね。この「Ctrl+O」は、単なるキャプションなので、ここに書いても、このメニューが動作するかはわかりません。問題はCtrl+Oが押された時にどのようなメッセージIDが起動するかです。<br>
+  　そのことが記述されているのは、リソースの中のAcceleratorです。<br>
+  　開いてみると分かりますが、IDやらキーやらタイプやらという項目の下に、十数個の内容が並んでいますが注目すべきところは、キーが「Ctrl+O」のIDがID_FILE_OPENになっていることです。私たちはビットマップファイルを開くために、新しくID_FILE_BMP_OPENというIDを作りました。したがって<b>「Ctrl＋O」が押されたときにID_FILE_BMP_OPENが起動するように変更すると共に、そしてあんまり意味の無いアクセラレータキーを削除します。</b>アクセラレータキーの編集の仕方は各自体験してみてください(簡単なので)。こんな感じに仕上げてみてください。</p>
+<table border="0" bgcolor="#FFFFFF" width="368" align="center">
+  <tr> 
+    <td width="362" valign="top" bgcolor="#000000"><font size="2" color="#FFFFFF">Fig5_2.jpg 
+      アクセラレータキーの設定</font></td>
+  </tr>
+  <tr> 
+    <td width="362" valign="top"> <img src="fig5_2.jpg" width="465" height="48"></td>
+  </tr>
+</table>
+<p>　これで実行！と言いたいところなんですが、ID_FILE_OPENからID_FILE_BMP_OPENに変えた後遺症(笑)があるんです。分かりますか？ツールバーの「開く」もまだID_FILE_OPENが割り当てられているので、これも変更しなくてはならないのです。リソースのToolBarを開き、「開く」マークをダブルクリックします。するとプロパティダイアログが開くので次のように変更します。<font size="2">(IDだけ変更すれば幅や高さやプロンプトは自動的に挿入されます)</font></p>
+<table border="0" bgcolor="#FFFFFF" width="368" align="center">
+  <tr> 
+    <td width="362" valign="top" bgcolor="#000000"><font size="2" color="#FFFFFF">Fig5_3.jpg 
+      ツールバーボタンの設定</font></td>
+  </tr>
+  <tr> 
+    <td width="362" valign="top"><img src="fig5_3.jpg" width="356" height="216"> 
+    </td>
+  </tr>
+</table>
+<p>さていよいよ実行です。アクセラレータキーが正しく動作していればOKです。</p>
+<table border="0" cellspacing="0" cellpadding="0" width="100%">
+  <tr> 
+    <td width="100%" bgcolor="#000099"> <font color="#ffffff" size="+1">13.リリースビルド</font></td>
+  </tr>
+</table>
+<p>リリースビルドとデバッグビルドが簡単に使い分けられる環境を作ってしまいましょう。VisualStdioの中のツールバー群のあたりで右クリックするとこんなメニューが出てくるはずです。</p>
+<table border="0" bgcolor="#FFFFFF" width="392" align="center">
+  <tr> 
+    <td width="386" valign="top" bgcolor="#000000"><font size="2" color="#FFFFFF">Fig5_4.jpg 
+      ツールバー右クリックメニューを開くと</font></td>
+  </tr>
+  <tr> 
+    <td width="386" valign="top"><img src="fig5_4.jpg" width="109" height="290"> 
+    </td>
+  </tr>
+</table>
+<p>このメニューの中で「ビルド」を選択します(上の例ではビルドが選択されていますが、選択されていたら何もしなくても結構です)。ビルドが選択されているときは、以下のようなツールバーが開くはずです。</p>
+<table border="0" bgcolor="#FFFFFF" width="392" align="center">
+  <tr> 
+    <td width="386" valign="top" bgcolor="#000000"><font size="2" color="#FFFFFF">Fig5_5.jpg 
+      ビルドツールバー</font></td>
+  </tr>
+  <tr> 
+    <td width="386" valign="top"><img src="fig5_5.jpg" width="490" height="30"></td>
+  </tr>
+</table>
+<p>この真ん中のWin32 Debugの部分がビルド方式です。したがってここをWin32 Releaseにするとリリースビルドできるようになります。さて皆さんもリリースビルドをしてみてください。</p>
+<p>作成したソフトウェアの<a href="src.lzh">ソースファイル</a><BR>
+  <BR>
+  [Next]<BR>
+  <A HREF="proc4.html">[Previous]</A><BR>
+  <A HREF="../index.html">[Home]</A><BR>
+</p>
+</BODY>
+</HTML>

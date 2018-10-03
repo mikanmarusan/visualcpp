@@ -1,0 +1,665 @@
+<HTML>
+<HEAD>
+  <META NAME="GENERATOR" CONTENT="Adobe PageMill 3.0J Win">
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html;CHARSET=utf-8">
+  <TITLE>FAQ＆Tips</TITLE>
+<style type="text/css">
+  <!--
+		A:link { text-decoration:none;  color:#ff4500 }
+		A:visited { text-decoration:none;  color:#ff4500 }  
+		A:active { text-decoration:none;  color:#ff0000 }   
+		A:hover { color:#00008b }	
+	    -->
+</style>
+</HEAD>
+<BODY BGCOLOR="#ddffdd" TEXT="#0080ff"><DIV ALIGN=CENTER><!--#geoguide--></DIV>
+<FONT SIZE="5"><I><B><FONT COLOR="navy">Tips＆FAQ</FONT></B></I></FONT>
+<HR>
+<FONT SIZE="-1">VC++のテクニックは意外にもこのようなTipsにあるといわれています。簡単なTipsと以前メールやBBSで書き込まれた質問の中で多かったものなどを順次UPしていきます。どんどん活用してください。But動作確認不十分なものもいくつかありますので、なんか間違いがあったり動かないなどの問題があったら連絡お願いします。</FONT><BR><BR>
+<!-- インデントリスト（始め） -->
+<DL>
+<DT><FONT COLOR="navy">Dialog関連</FONT>
+<DD><IMG SRC="../tool/folder.gif"><A HREF="#tips001">EnterキーやESCを無効にする方法</A>
+<DT><FONT COLOR="navy">Document・View関連</FONT>
+<DD><IMG SRC="../tool/folder.gif"><A HREF="#tips007">ワードラップの方法</A>
+<DD><IMG SRC="../tool/folder.gif"><A HREF="#tips016">任意の位置からViewへのポインタを取得する</A>
+<DD><IMG SRC="../tool/folder.gif"><A HREF="#tips017">任意の位置からDocumentへのポインタを取得する</A>
+<DT><FONT COLOR="navy">Window関連</FONT>
+<DD><IMG SRC="../tool/folder.gif"><A HREF="#tips003">メッセージボックスその１</A>
+<DD><IMG SRC="../tool/folder.gif"><A HREF="#tips004">メッセージボックスその２</A>
+<DD><IMG SRC="../tool/folder.gif"><A HREF="#tips009">ステータスバーに任意文字列を表示</A>
+<DD><IMG SRC="../tool/folder.gif"><A HREF="#tips010">任意の位置からメインフレームのポインタを取得</A>
+<DD><IMG SRC="../tool/folder.gif"><A HREF="#tips011">ウィンドウのサイズを変更する</A>
+<DD><IMG SRC="../tool/folder.gif"><A HREF="#tips012">実行時のウィンドウサイズとウィンドウ位置を指定する</A>
+<DD><IMG SRC="../tool/folder.gif"><A HREF="#tips013">ウィンドウのスタイルを変更する</A>
+<DD><IMG SRC="../tool/folder.gif"><A HREF="#tips014">親ウィンドウへのポインタを取得</A>
+<DT><FONT COLOR="navy">Control関連</FONT>
+<DD><IMG SRC="../tool/folder.gif"><A HREF="#tips008">IDからコントロールのポインタを取得</A>
+<DT><FONT COLOR="navy">描画関連</FONT>
+<DD><IMG SRC="../tool/folder.gif"><A HREF="#tips015">デバイスコンテキスト（DC）の取得と開放</A>
+<DD><IMG SRC="../tool/folder.gif"><A HREF="#tips018">文字列の出力（TextOut関数）</A>
+<DD><IMG SRC="../tool/folder.gif"><A HREF="#tips019">点の描画</A>
+<DD><IMG SRC="../tool/folder.gif"><A HREF="#tips020">直線の描画</A>
+<DT><FONT COLOR="navy">WindowsCommonダイアログ関連</FONT>
+<DD>ファイルコモンダイアログ
+<DD>カラーコモンダイアログ
+<DD>フォントコモンダイアログ
+<DT><FONT COLOR="navy">その他のテクニック</FONT>
+<DD><IMG SRC="../tool/folder.gif"><A HREF="#tips002">現在時刻を入手する方法</A>
+<DD><IMG SRC="../tool/folder.gif"><A HREF="#tips005">クリップボードの使い方の例</A>
+<DD><IMG SRC="../tool/folder.gif"><A HREF="#tips006">任意のURL(ファイル)を開く</A>
+</DL>
+<!-- インデントリスト（終わり） --><HR>
+<B><BIG><FONT COLOR="blue"><HR WIDTH="50%"><A NAME="tips001">EnterキーやESCを無効にする方法</A></FONT></BIG></B><BR>
+通常ダイアログベースのプログラムを作ると、EnterキーやESCを押すとプログラムが終了してしまいます。ある時は便利なのですが、Editコントロールに何か数値を入れた時、勢いあまってEnterを押してしまうとプログラムが終了して、がっかり・・・ということになります。そこでEnterキーやESCを無効にする方法が必要なのです<BR>
+<BR>
+
+
+<DL>
+<DT><FONT COLOR="red">1.PreTranslateMessageをオーバーライドします。</FONT>
+<DD>具体的に言うと、ClassWizardでメッセージPreTranslateMessageの関数を追加することです。分からない方はBBSなどで連絡くだされば具体的に教えます。
+<DT><FONT COLOR="red">2.以下のコードを書いてください。</FONT>
+<!-- センターテーブル（始め） -->
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<!-- センターテーブル（終わり） -->
+<!-- インデントリストのネスト1（始め） -->
+<DL>
+<DT><BR><FONT COLOR="black"><SMALL>BOOL&nbsp;C***Dlg::PreTranslateMessage(MSG*&nbsp;pMsg) {
+<DD><FONT COLOR="blue">if </FONT>(pMsg->wParam == 0x0D&nbsp;||&nbsp;pMsg->wParam == 0x1B) {  <FONT COLOR="green">// ENTERとESC無効にする</FONT><BR>
+<!-- インデントリストのネスト2（始め） -->
+<DL>
+<DD><FONT COLOR="blue">return</FONT>&nbsp;0;
+<DT>}
+</DL>
+<!-- インデントリストのネスト2（終わり） -->	
+
+<DD><FONT COLOR="blue">return</FONT>&nbsp;CDialog::PreTranslateMessage(pMsg);
+<DT>}</SMALL></FONT>
+</DL>
+<!-- インデントリストのネスト1（終わり） -->
+</TD></TR>
+</TABLE>
+<DT><B>解説</B>
+<DD>※「キーボードを押す」とWindowsは「○○のキーが押された」というメッセージをプログラムに渡します。そのメッセージをすぐプログラムに適用するのではなくて、前処理をしてからプログラムにメッセージを与えたい時などにこのPreTranslateMessageを使用します。<BR>
+※ところで通常キーボードから打ち込まれたメッセージはASCIIコード(アスキーコード)という特殊な文字になります。だから<U>キーボードから受け取ったメッセージが、EnterとESCのメッセージだったら何も処理をしない</U>ということをこの関数で実現してあげればいいのです。ちなみにEnterキーとESCのASCIIコードは、それぞれ0x0Dと0x1Bです。<BR>
+※この関数は戻り値が0ならばメッセージを送りません。だからこの2つのメッセージをキャプチャーしたら、「何もしちゃアカン」といえばいいのです。
+</DL>
+<!-- インデントリスト（終わり） -->
+<BR>
+<B><BIG><FONT COLOR="blue"><HR WIDTH="50%"><A NAME="tips002">現在時刻を入手する方法</A></FONT></BIG></B><BR>
+時刻に関しては、MFCでクラス化されているCTime型を使えばよいので、簡単です。ここでは現在時刻を取得し、それを整数型変数に格納しています。これを簡単に表示する方法は下に記述があります。<BR>
+<!-- センターテーブル（始め） -->
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<!-- インデントリスト（始め） -->
+<DL>
+<DT><BR><FONT COLOR="black"><SMALL>CTime&nbsp;T = CTime::GetCurrentTime();<BR>
+CString&nbsp;string;<BR>
+<FONT COLOR="blue">int</FONT>&nbsp; year,month,day,hour,minite,sec;<BR><BR>
+year&nbsp;&nbsp;= T.GetYear();<BR>
+month= T.GetMonth();<BR>
+day&nbsp;&nbsp;&nbsp;&nbsp;= T.GetDay();<BR>
+hour&nbsp;&nbsp;= T.GetHour();<BR>
+minite= T.GetMinute();<BR>
+sec&nbsp;&nbsp;&nbsp;&nbsp;= T.GetSecond();</SMALL></FONT><BR>
+</DL>
+<!-- インデントリスト（終わり） -->
+</TD></TR>
+</TABLE>
+<!-- センターテーブル（終わり） -->
+<!-- インデントリスト（始め） -->
+<DL>
+<DT><B>解説</B>
+<DD>※GetCurrentTime()は、現在時刻を入手する関数です。コードの最初のように書くのは、VC++の定石です。以下の関数は取得した現在時刻の「時間」「秒」の値を返す関数です。使用していけばすぐに分かると思います。
+</DL>
+<!-- インデントリスト（終わり） -->
+<BR>
+<B><BIG><FONT COLOR="blue"><HR WIDTH="50%"><A NAME="tips003">メッセージボックスその１</A></FONT></BIG></B><BR>
+基本的にウィンドウを作成して表示するには、Create関数など面倒くさいことですが、簡単なウィンドウなら一発で作ることができます。まずは書式が指定できませんが、<U>1行でウィンドウを作成して、文字列を表示する</U>方法です。<BR>
+<!-- センターテーブル（始め） -->
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<BR>
+<!-- インデントリスト（始め） -->
+<DL><SMALL><FONT COLOR="black">CString&nbsp;str="VisualC++";
+<DT>AfxMessageBox(str);</FONT></SMALL>
+</DL>
+<!-- インデントリスト（終わり） -->
+</TD></TR>
+</TABLE>
+<!-- センターテーブル（終わり） -->
+<SMALL><CENTER>上のように文字列をCString型に代入してからやってもいいし、</CENTER></SMALL><BR>
+<!-- センターテーブル（始め） -->
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<!-- センターテーブル（終わり） -->
+<!-- インデントリスト（始め） -->
+<DL>
+<DT><BR><SMALL><FONT COLOR="black">AfxMessageBox("VisualC++");</FONT></SMALL>
+</DL>
+<!-- インデントリスト（終わり） -->
+</TD></TR>
+</TABLE>
+<SMALL><CENTER>とやっても結果は同じになります。</CENTER></SMALL><BR><CENTER><IMG SRC="tips1.gif"></CENTER>
+<!-- インデントリスト（始め） -->
+<DL>
+<DT><B>解説</B>
+<DD>文字列を簡単なウィンドウを自動作成して表示できますが、ウィンドウのタイトルやウィンドウに表示されるアイコンは指定できません。(黄色い四角三角のびっくりマークのみになる)<BR>
+</DL>
+<!-- インデントリスト（終わり） -->
+<BR>
+<B><BIG><FONT COLOR="blue"><HR WIDTH="50%"><A NAME="tips004">メッセージボックスその２</A></FONT></BIG></B><BR>
+今度は上のやつより少しだけ、引数設定が必要ですが、ウィンドウのタイトルと表示するアイコンが指定できます。<BR>
+<!-- センターテーブル（始め） -->
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<!-- インデントリスト（始め） -->
+<DL><BR><FONT COLOR="black">MessageBox("VisualC++","Title",****);</FONT>
+</DL>
+<!-- インデントリスト（終わり） -->
+</TD></TR>
+</TABLE>
+<!-- センターテーブル（終わり） -->
+<!-- インデントリスト（始め） -->
+<DL>
+<DT><B>解説</B>
+<DD>1番目の引数は「表示する文字列」、2番目の引数は「Windowタイトル」、3番目は以下に記述するID?に対応したアイコン<BR>
+<DL>
+<DT><BR>アイコン<IMG SRC="tips2_warm.gif" ALIGN="CENTER"WIDTH="41" HEIGHT="42">
+<DD>ID：<I>MB_ICONHANDかMB_ICONSTOPかMB_ICONERROR</I>
+<DT>アイコン<IMG SRC="tips2_ques.gif" ALIGN="CENTER" WIDTH="44" HEIGHT="40">
+<DD>ID：<I>MB_ICONQUESTION</I>
+<DT>アイコン<IMG SRC="tips2_ex.gif" ALIGN="CENTER" WIDTH="41" HEIGHT="38">
+<DD>ID：<I>MB_ICONEXCLAMATIONかMB_ICONWARNING</I>
+<DT>アイコン<IMG SRC="tips2_info.gif" ALIGN="CENTER" WIDTH="48" HEIGHT="35">
+<DD>ID：<I>MB_ICONASTERISKかMB_ICONINFORMATION</I>
+</DL>
+</DL>
+<!-- インデントリスト（終わり） -->
+例えば、<I><FONT COLOR="red">MessageBox("VisualC++","Title",MB_ICONQUESTION);</FONT></I>を実行すれば、以下のようになるはずです。<BR><BR>
+<CENTER><IMG SRC="tips3.gif" WIDTH="132" HEIGHT="114"></CENTER><BR><BR>
+
+<B><BIG><FONT COLOR="blue"><HR WIDTH="50%"><A NAME="tips005">クリップボードの使い方の例--メモ帳に日付を挿入する--</A></FONT></BIG></B><BR>
+Windowsのメモ帳にある「日付の挿入」。これは、クリップボードを使って簡単に行えます。テキストエディタにこの機能を追加します<BR>
+
+<DL>
+<DT><FONT COLOR="red">1.メニューに「日付の挿入」を追加します。(<A HREF="../text/text.html">詳しい追加方法</A>)</FONT>
+<DD>・このとき、IDはID_VIEW_DATEなど適当で結構です。
+<DD>・関数を追加し、関数名もディフォルトでOK(ここではOnViewDateという関数名で話を進めます)
+<DT><FONT COLOR="red">2.以下の２つの関数を追加する</FONT>
+<DD>SetClipBoard(CString str)
+<DD>GetCurrentTime()
+<DD>&lt;追加の方法&gt;ワークスペースのClassViewをクリックして、C***Viewで右クリックしメンバ関数の追加でOK
+<DT><FONT COLOR="red">2.コードを記述</FONT>
+</DL>
+<!-- センターテーブル（始め） -->
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<DL>
+<DT><SMALL><FONT COLOR="black"><FONT COLOR="navy">void</FONT> C***View::OnViewDate() 
+<DT>{
+<DD>CString str;
+<DD>str=GetCurrentTime();	<FONT COLOR="green">//現在時刻の取得</FONT>
+<DD>SetClipBoard(str);<FONT COLOR="green">//クリックボードに書き込み</FONT>
+<DD>OnEditPaste();<FONT COLOR="green">//通常の貼り付けコマンド</FONT>	
+<DT>}
+<BR>
+<DT><FONT COLOR="navy">void</FONT> C***View::SetClipBoard(CString str)
+<DT>{
+<DD><FONT COLOR="navy">char</FONT>	*ptr;<FONT COLOR="green">//文字列を写すために使う</FONT>
+<DD>HGLOBAL	hMem;<FONT COLOR="green">	//データを授受するハンドル</FONT>
+<BR>
+<DD>hMem = GlobalAlloc(GHND, (DWORD)strlen(str)+1);//必要メモリを確保して
+<DD>ptr = (<FONT COLOR="navy">char</FONT> *)GlobalLock(hMem);<FONT COLOR="green">//ロックする
+</FONT><DD>lstrcpy(ptr, str);<FONT COLOR="green">//文字をコピー</FONT>
+<DD>::GlobalUnlock(hMem);
+<DD>::OpenClipboard(m_hWnd);<FONT COLOR="green">//アクセス開始</FONT>					
+<DD>::EmptyClipboard();<FONT COLOR="green">//CBを空にする</FONT>
+<DD>::SetClipboardData(CF_TEXT, hMem);<FONT COLOR="green">//CF_TEXT形式で文字を書きこむ</FONT>
+<DD>::CloseClipboard();<FONT COLOR="green">//アクセス終了</FONT>
+<DT>}
+<BR>
+<DT>CString C***View::GetCurrentTime()
+<DT>{
+<DD><FONT COLOR="navy">int</FONT> Year,Month,Day,Hour,Minite,Second;
+<DD>CTime t = CTime::GetCurrentTime();
+<DD>CString time;
+<DD>Year	= t.GetYear();
+<DD>Month	= t.GetMonth();
+<DD>Day		= t.GetDay();
+<DD>Hour	= t.GetHour();
+<DD>Minite	= t.GetMinute();
+<DD>Second	= t.GetSecond();
+<DD>time.Format("%d年%d月%d日%d時%d分%d秒",Year,Month,Day,Hour,Minite,Second);	
+<DD><FONT COLOR="navy">return</FONT> time;
+<DT>}
+</FONT>
+</DL>
+</TD></TR>
+</TABLE>
+<!-- センターテーブル（終わり） -->
+<BR>
+<DL>
+<DT><B>解説</B>
+<DD>GetCurrentTimeは、Tips２の現在時刻を入手するを参考にしてください。
+<DD>SetClipBoardは、現在時刻を文字列化したものを書くためのメモリ領域に格納し、クリックボードを開いて、一旦空にし、またクリップボードにその文字列を書き込む操作を行っています。
+<DD>OnViewDateは、クリップボードに書き込んだあと、それを通常の貼り付けを行って日付を挿入します。</DL><BR><BR>
+
+<B><BIG><FONT COLOR="blue"><HR WIDTH="50%"><A NAME="tips006">任意のURL(ファイル)を開く</A></FONT></BIG></B><BR>
+<!-- センターテーブル（始め） -->
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<BIG><FONT COLOR="red"><!-- タイトル --></FONT></BIG><BR>
+コード<BR>
+<FONT COLOR="black">::ShellExecute(NULL,NULL,IpFile,NULL,NULL,SW_SHOWNORMAL);</FONT>
+</TD></TR>
+</TABLE>
+<BR>
+<!-- センターテーブル（終わり） -->
+<!-- インデントリスト（始め） -->
+<DL>
+<DT><B>説明</B>
+<DD>IpFileを通常つかうことになっているexeファイルで実行します。以下のサンプルは、SDIやMDI形式のヘルプのバージョン情報のダイアログにHomePageボタンを作成し、クリックすると任意のURLを通常使うブラウザで開く方法です。
+</DL>
+<!-- インデントリスト（終わり） -->
+<BR>
+<!-- インデントリスト（始め） -->
+<DL>
+<DT><B>使用法</B>
+<DT><FONT COLOR="red">1.IDD_ABOUTBOXを以下のように編集する。</FONT>
+<DD>ボタンのIDはIDC_BUTTON1(ディフォルト)で結構です。
+<CENTER><IMG SRC="tips4.gif" WIDTH="402" HEIGHT="126"></CENTER>
+<DT><FONT COLOR="red">2.CLASSWIZARDでIDC_BUTTON1に関してメッセージBN_CLICKEDをハイライト</FONT>
+<DT><FONT COLOR="red">3.関数の追加をおす。</FONT>
+<DD>関数名はOnButton1(ディフォルト)で結構です。
+<DT><FONT COLOR="red">4.コード編集ボタンを押すか、***.cpp(***はプロジェクト名)の中のCAboutDlg::OnButton1()関数を探す。</FONT>
+<DT><FONT COLOR="red">5.以下のコードを記述する</FONT>
+</DL>
+<!-- インデントリスト（終わり） -->
+<!-- センターテーブル（始め） -->
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<BIG><FONT COLOR="red"><!-- タイトル --></FONT></BIG><BR>
+<!-- インデントリスト（始め） -->
+<FONT COLOR="black"><DL>
+<DT><SMALL><FONT COLOR="blue">void</FONT> CAboutDlg::OnButton1()
+<DT>{
+<DD>::ShellExecute(NULL,NULL,"http://www.geocities.co.jp/SiliconValley-PaloAlto/9127/",NULL,NULL,SW_SHOWNORMAL);
+<DT>}
+</DL></FONT></SMALL>
+<!-- インデントリスト（終わり） -->
+</TD></TR>
+</TABLE>
+<!-- センターテーブル（終わり） --><BR>
+
+<!-- インデントリスト（始め） -->
+<DL>
+<DT><B>解説</B>
+<DD>詳しい解説はできませんが、ONLINEHELP(英語)を参照したところ、3番目の引数にファイル名を入れれば、通常使うことになっている実行ファイルでそのファイルを開く(実行)するらしいです。このSW_SHOWNORMALが「通常使うことになっている実行ファイルを使う」です。だからCドライブのReadme.txtを開くには、同じように
+<BR><BR>
+<DD><B><FONT COLOR="navy"><SMALL>::ShellExecute(NULL,NULL,"c:\\Readme.txt",NULL,NULL,SW_SHOWNORMAL);</SMALL></FONT></B>
+<BR><BR>
+<DD>と書けばいいみたいです。
+</DL>
+<!-- インデントリスト（終わり） -->
+<!-- インデントリスト（始め） -->
+<DL>
+<DT><B>注意</B>
+<DT>ファイルの指定の際には
+<DD>"c:\Readme.txt"
+<DT>ではなくて
+<DD>"c:\\Readme.txt"
+<DT>と<B>\を2回記述</B>してください。おそらくエスケープシーケンスが正しく認識されない等の警告が出る可能性があります。<BR>
+</DL>
+<!-- インデントリスト（終わり） -->
+<B><BIG><FONT COLOR="blue"><HR WIDTH="50%"><A NAME="tips007">ワードラップを可能にする</A></FONT></BIG></B><BR>
+<DL>
+<DT><B>説明</B>
+<DD>EditViewベースのエディタを作る時に欠かせないのがワードラップ。ワードラップはCRAETESTRUCT構造体のスタイルを変更することで可能になります。
+<BR><BR>
+<DT><B>使用法</B>
+<DT><FONT COLOR="red">1.C***ViewでPreCreateWindowをオーバーライドします。</FONT>(ディフォルトでされているかも)
+<DT><FONT COLOR="red">2.以下のコードを追加</FONT>
+</DL><BR>
+<!-- センターテーブル（始め） -->
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<BIG><FONT COLOR="red"><!-- タイトル --></FONT></BIG><BR>
+<SMALL><FONT COLOR="black"><DL>
+<DT><FONT COLOR="blue">BOOL</FONT> C***View::PreCreateWindow(CREATESTRUCT& cs)
+<DT>{
+<DD><FONT COLOR="blue">BOOL</FONT> bWord = CEditView::PreCreateWindow(cs);
+<DD>cs.style &= ~(ES_AUTOHSCROLL|WS_HSCROLL);<FONT COLOR="green">// ワード ラップを使用可能にします</FONT><BR><BR>
+<DD><FONT COLOR="blue">return</FONT> bWord;
+<DT>}
+</DL></FONT></SMALL>
+</TD></TR>
+</TABLE>
+<!-- センターテーブル（終わり） --><BR>
+
+<B><BIG><FONT COLOR="blue"><HR WIDTH="50%"><A NAME="tips008">IDからコントロールのポインタを取得する</A></FONT></BIG></B><BR>
+<DL>
+<DT><B>説明</B>
+<DD>通常コントロールは、メンバ変数を割り当ててる方法と直接IDからポインタを取得する方法によって制御します。今回は後者の方です。
+<DT><B>使用法</B>
+<DD>取得するコントロールがボタンでそのIDがIDB_BUTTON1だったとすると、
+</DL>
+<BR>
+<!-- センターテーブル（始め） -->
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<BIG><FONT COLOR="red"></FONT></BIG><BR>
+<FONT COLOR="black">CButton*&nbsp;ptr = (CButton*)GetDlgItem(IDB_BUTTON1);</FONT>
+</TD></TR>
+</TABLE>
+<!-- センターテーブル（終わり） -->
+<DL>
+<DT><B>解説</B>
+<DD>GetDlgItem(<I>ID</I>)の形で取得しますが、そのコントロールのクラスでキャストしなくてはなりません。もしCEditのコントロールだったら(CEdit*)のようにキャストする必要性があります。またここで取得したポインタは一時的にしか使用できないので注意して下さい。(関数が変わったら再び取得する必要があります)
+</DL><BR>
+
+<B><BIG><FONT COLOR="blue"><HR WIDTH="50%"><A NAME="tips009">ステータスバーに任意文字列を表示</A></FONT></BIG></B><BR>
+<DL>
+<DT><B>説明</B>
+<DD>プログラムの右下にでている文字列のことをステータスといいます。プログラムが長い処理をしているときにユーザのためにメッセージを吐き出すときなどに使用できます。
+<DT><B>注意</B>
+<DD>メインフレームへのポインタを取得する必要性があります。実際ステータスバーのポインタを取得し、そのポインタに対してメッセージ出力関数SetPaneTextを適用することによって文字列を表示できるのですが、ステータスバーはウィンドウからでないとアクセスできないためです。
+</DL>
+<BR>
+<!-- センターテーブル（始め） -->
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<BIG><FONT COLOR="red">コードの例</FONT></BIG><BR><FONT COLOR="black"><PRE>
+	CFrameWnd* pWnd = (CFrameWnd*)AfxGetApp()->m_pMainWnd;<FONT COLOR="green">//メインフレームの取得</FONT>
+	CStatusBar* pStatusBar = (CStatusBar*)pWnd->GetMessageBar();<FONT COLOR="green">//バーのポインタ取得</FONT>
+	pStatusBar->SetPaneText(0, _T("この部分が表示"));</PRE></FONT>
+</TD></TR>
+</TABLE>
+<!-- センターテーブル（終わり） -->
+<DL>
+<DT><B>解説</B>
+<DD>1行目でメインフレームへのポインタを取得しています。2行目でステータスバーのポインタを取得しました。実際の文字列の取得は、SetPaneText関数で行っています。
+<DD><FONT COLOR="red">定義</FONT>：SetPaneText(int nPane,CString str);
+<DD><FONT COLOR="red">引数&nbsp;nPane</FONT>：ステータスバーの位置です。0だと一番左端です。ステータスバーを区切ることができるのですが、2つに区切った場合、右側に表示したいときはこの引数は1と書けばOKです。
+<DD><FONT COLOR="red">引数&nbsp;str</FONT>：表示したい文字列です。
+</DL><BR>
+
+<B><BIG><FONT COLOR="blue"><HR WIDTH="50%"><A NAME="tips010">任意の位置からメインフレームのポインタを取得</A></FONT></BIG></B><BR>
+<DL>
+<DT><B>説明</B>
+<DD>ウィンドウ関連の操作によく必要なこの関数。AfxGetApp関数を使ってメインフレームへのポインタを取得します。
+<DT><B>使用法</B>
+<DD>MFCの一番おおもとはAppクラスです。その下にViewやDocのクラスがあります。まずAfxGetApp関数でAppまでさかのぼって、Appのメンバであるメインフレームへのポインタを取得しています。この方法は定石です。
+</DL>
+<!-- センターテーブル（始め） -->
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<BIG><FONT COLOR="red">コードの例</FONT></BIG><BR><FONT COLOR="black"><PRE>
+	CFrameWnd* pWnd = (CFrameWnd*)AfxGetApp()->m_pMainWnd;<FONT COLOR="green">//メインフレームの取得</FONT>
+</PRE></FONT>
+</TD></TR>
+</TABLE>
+<!-- センターテーブル（終わり） --><BR>
+
+<B><BIG><FONT COLOR="blue"><HR WIDTH="50%"><A NAME="tips011">ウィンドウのサイズを変更する </A></FONT></BIG></B><BR>
+<DL>
+<DT><B>説明</B>
+<DD>ウィンドウのサイズを指定します。実はウィンドウスタイルを変更しているのと変わりません。
+<DT><B>使用法</B>
+<DD><FONT COLOR="red">1.MainFrameでPreCreateWindow関数をオーバーライド</FONT>
+<DD><FONT COLOR="red">2.以下のコードを書き加える</FONT>
+</DL>
+<!-- センターテーブル（始め） -->
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<BIG><FONT COLOR="red">コードの例</FONT></BIG><BR><FONT COLOR="black"><PRE>
+BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
+{
+	cs.cx=640;<FONT COLOR="green">//横のサイズ(ピクセル)</FONT>
+	cs.cy=480;<FONT COLOR="green">//縦のサイズ(ピクセル)</FONT>
+
+	<FONT COLOR="blue">return</FONT> CFrameWnd::PreCreateWindow(cs);
+}
+</PRE></FONT>
+</TD></TR>
+</TABLE>
+<!-- センターテーブル（終わり） -->
+<DL>
+<DT><B>解説</B>
+<DD>このCREATESTRUCT構造体がウィンドウのスタイルを決める構造体です。引数がこの構造体型のcsですから、cs.**の形でスタイル変更可能です。ウィンドウサイズの構造体変数はcx,cyであるため上のコードのようになります。
+<DT><B>注意</B>
+<DD>この方法はあくまでウィンドウサイズを決める物であって、クライアント領域のサイズを決めているのではありません。
+</DL><BR>
+
+<B><BIG><FONT COLOR="blue"><HR WIDTH="50%"><A NAME="tips012">実行時のウィンドウサイズとウィンドウ位置を指定する</A></FONT></BIG></B><BR>
+<DL>
+<DT><B>説明</B>
+<DD>VCでは、プログラムを実行すると適当なウィンドウサイズで適当な位置に表示してしまいます。そのサイズとウィンドウ位置を指定する関数です。
+<DT><B>使用法</B>
+<DD>この手の操作はAppのなかのInitInstance()という場所で行います。このInitInstanceはプログラムが開始するときに実行される関数です。
+<DD><FONT COLOR="red">1.AppでInitInstance関数をオーバーライド</FONT>(たいていの場合はディフォルトでされているはずです)
+<DD><FONT COLOR="red">2.以下のコードを記述</FONT>
+</DL>
+<!-- センターテーブル（始め） -->
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<BIG><FONT COLOR="red">コードの例</FONT></BIG><BR><FONT COLOR="black"><PRE>
+	m_pMainWnd->MoveWindow(nXs,nYs,nXsize,nYsize,<FONT COLOR="blue">true</FONT>);
+</PRE></FONT>
+</TD></TR>
+</TABLE>
+<!-- センターテーブル（終わり） -->
+<DL>
+<DT><B>引数</B>
+<DD><FONT COLOR="red">nXs</FONT>：ウィンドウ開始位置のX座標
+<DD><FONT COLOR="red">nYs</FONT>：ウィンドウ開始位置のY座標
+<DD><FONT COLOR="red">nXsize</FONT>：ウィンドウのX方向サイズ(ピクセル)
+<DD><FONT COLOR="red">nYsize</FONT>：ウィンドウのY方向サイズ(ピクセル)
+<DD>引数は全て整数です。整数値でない場合は整数型にキャストしなければなりません。
+</DL><BR>
+
+<B><BIG><FONT COLOR="blue"><HR WIDTH="50%"><A NAME="tips013">ウィンドウのスタイルを変更する</A></FONT></BIG></B><BR>
+<DL>
+<DT><B>説明</B>
+<DD>ウィンドウサイズの変更等ウィンドウのスタイルを変更する方法です。cs.styleに関してはフラグの組合わせです。フラグの詳細についてはMSDNを参照して下さい。
+<DT><B>使用法</B>
+<DD><FONT COLOR="red">1.MainFrameのPreCreateWindow関数をオーバーロード</FONT>
+<DD><FONT COLOR="red">2.以下の各用法にしたがってコードを記述</FONT>
+</DL>
+<!-- センターテーブル（始め） -->
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<BIG><FONT COLOR="red">コードの例</FONT></BIG><BR><FONT COLOR="black"><PRE>
+BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs){
+	<FONT COLOR="green">/*ここに用途別のコードを記述*/</FONT>
+	<FONT COLOR="blue">return</FONT> CFrameWnd::PreCreateWindow(cs);
+}
+</PRE></FONT>
+</TD></TR>
+</TABLE>
+<!-- センターテーブル（終わり） -->
+<DL>
+<DT><FONT COLOR="red">(a)ウィンドウサイズの変更</FONT>
+<DD>cs.cx=**;//ウィンドウの横サイズ
+<DD>cs.cy=**;//ウィンドウの縦サイズ
+<DT><FONT COLOR="red">(b)ウィンドウの位置の変更</FONT>
+<DD>cx.x=**;//ウィンドウの位置のX座標
+<DD>cy.y=**;//ウィンドウの位置のY座標
+<DT><FONT COLOR="red">(c)ウィンドウの最大化ボタンを消す（最大化を無効にする）</FONT>
+<DD>cs.style = WS_SYSMENU | WS_MINIMIZEBOX;
+<DD><FONT COLOR="red"></FONT>
+<DT><FONT COLOR="red">(d)現在のウィンドウスタイルに新たなフラグを組み込みたいとき</FONT>
+<DD>cs.style&nbsp; <FONT COLOR="red">|=</FONT>&nbsp;WS_HSCROLL;//水平方向にスクロールを追加（垂直スクロールはWS_VSCROLL) 
+<DD>普通に代入してしまうと、先ほどまで設定されていたスタイルが全部無効になってしまうのでわざと"|="を使ってOR結合しているのです。
+</DL><BR>
+
+<B><BIG><FONT COLOR="blue"><HR WIDTH="50%"><A NAME="tips014">親ウィンドウのポインタを取得する</A></FONT></BIG></B><BR>
+<DL>
+<DT><B>説明</B>
+<DD>子ウィンドウまたは子ダイアログで親ウィンドウを呼ぶときに使用します。意外にいろんなところで使うので要チェックです。
+<DT><B>使用法</B>
+<DD>GetParent関数を使用します。子のウィンドウクラスのなかでこの関数を呼ぶのですが、親のウィンドウクラスでキャストして使用しなければいけません。
+</DL>
+<!-- センターテーブル（始め） -->
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<BIG><FONT COLOR="red">親ダイアログを取得するときのコード例</FONT></BIG><BR><FONT COLOR="black"><PRE>
+	C×××Dlg* pWnd = (C×××Dlg*)GetParent();
+</PRE></FONT>
+</TD></TR>
+</TABLE>
+<!-- センターテーブル（終わり） --><BR>
+<DL><B>解説</B>
+<DT>親ウィンドウのクラスでキャストするところがミソです。これをやらないとこの後ポインタとして使えません。ポインタを無事に取得すればpWnd->××の形でメンバにアクセスできます。
+<DD>
+</DL><BR>
+
+<B><BIG><FONT COLOR="blue"><HR WIDTH="50%"><A NAME="tips015">デバイスコンテキストの取得と解放</A></FONT></BIG></B><BR>
+<DL>
+<DT><B>説明</B>
+<DD>デバイスコンテキストを取得できないと、ウィンドウに線や色を描画することができません。ここではデバイスコンテキストのポインタを取得し、最後に解放する方法を解説します。
+<DT><B>注意</B>
+<DD>取得したDCは必ず解放しなくてはなりません。取得と解放はセットで１つのTipsだと思ってください。
+
+</DL>
+<BR>
+<!-- センターテーブル（始め） -->
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<BIG><FONT COLOR="red">コードの例</FONT></BIG><BR><FONT COLOR="black"><PRE>
+CDC*	pDC = GetDC();<FONT COLOR="green">//DCの取得</FONT>
+<FONT COLOR="green">//	描画処理
+//	　　例　　pDC->SetPixel(100,100,RGB(0,0,0));	//座標(100,100)に黒い点を描画</FONT>
+ReleaseDC(pDC);<FONT COLOR="green">//DCの解放</FONT></PRE>
+</TABLE>
+<!-- センターテーブル（終わり） -->
+<DL>
+<DT><B>解説</B>
+<DD>CWndクラスのGetDCを使用してDCを取得し、ReleaseDCを用いて解放します。OnDraw関数などDCが取得できていないところではこの関数を用いて描画することができますが、再描画は自動的にされませんので各自再描画させるように努力しなくてはなりません。
+</DL><BR>
+
+<B><BIG><FONT COLOR="blue"><HR WIDTH="50%"><A NAME="tips016">任意の位置からViewへのポインタを取得する</A></FONT></BIG></B><BR>
+<DL>
+<DT><B>説明</B>
+<DD>表示処理は基本的にViewで行いますが、別のクラス例えば自作クラスからViewクラスの関数を動かすときにはViewのポインタを取得する必要があります。こんなときこのTipsが大活躍します。
+</DL>
+<BR>
+<!-- センターテーブル（始め） -->
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<BIG><FONT COLOR="red">コードの例</FONT></BIG><BR><FONT COLOR="black">
+<FONT COLOR="green">//アプリのViewクラスがCSampleViewという名前だと仮定して、pViewにアプリのViewのポインタを格納する。</FONT><BR>
+CSampleView* pView = ((CSampleView*)(((CFrameWnd*)(AfxGetApp()->m_pMainWnd))->GetActiveView()));<BR>
+</TABLE>
+<!-- センターテーブル（終わり） -->
+<DL>
+<DT><B>解説</B>
+<DD>AfxGetApp()は、アプリケーションの固有の変数や関数にアクセスするための関数で、どこからでも呼ぶことができる便利関数？です。この関数をつかって、Windowに関する変数m_pMainWndを取得しています。ちなみにViewを取得する関数はGetActiveViewなんですが、これはCFrameWndクラスなのでm_pMainWndをCFrameWndでキャスト（強制型変換）してあげます。
+</DL><BR>
+
+<B><BIG><FONT COLOR="blue"><HR WIDTH="50%"><A NAME="tips017">任意の位置からDocumentへのポインタを取得する</A></FONT></BIG></B><BR>
+<DL>
+<DT><B>説明</B>
+<DD>Documentクラスはデータを管理するクラスです。表示専門のViewとデータ専門のDocumentを分離することによって、より効果的なプログラミングを狙ったものなんですが、何かのデータを表示するのにもデータがDocumentのメンバだったりしたらやはりDocumentクラスを呼ぶ必要があります。したがって、どこからでもDocumentにアクセスできる方法は知っておくと便利なわけです。
+</DL>
+<BR>
+<!-- センターテーブル（始め） -->
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<BIG><FONT COLOR="red">コードの例</FONT></BIG><BR><FONT COLOR="black">
+<FONT COLOR="green">//アプリのViewクラスがCSampleDocという名前だと仮定して、pDocにアプリのViewのポインタを格納する。</FONT><BR>
+CSampleDoc* pDoc = ((CSampleDoc*)(((CFrameWnd*)(AfxGetApp()->m_pMainWnd))->GetActiveDocument()));<BR>
+</TABLE>
+<!-- センターテーブル（終わり） -->
+<DL>
+<DT><B>解説</B>
+<DD>AfxGetApp()は、アプリケーションの固有の変数や関数にアクセスするための関数で、どこからでも呼ぶことができる便利関数？です。この関数をつかって、Windowに関する変数m_pMainWndを取得しています。ちなみにDocumentを取得する関数はGetActiveDocumentなんですが、これはCFrameWndクラスなのでm_pMainWndをCFrameWndでキャスト（強制型変換）してあげます。
+</DL><BR>
+
+<B><BIG><FONT COLOR="blue"><HR WIDTH="50%"><A NAME="tips018">文字列を出力</A></FONT></BIG></B><BR>
+<DL>
+<DT><B>説明</B>
+<DD>クライアント領域の任意の場所に文字列を出力する方法です。TextOut関数を使用します。
+</DL>
+<!-- センターテーブル（始め） -->
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<BIG><FONT COLOR="red">コードの例</FONT></BIG><BR><FONT COLOR="black">
+<FONT COLOR="green">//pDCがデバイスコンテキストのポインタだとして、（OnDraw以外などでDCのポインタを取得していない場合は<A HREF="#tips015">ここ</A>で取得する）</FONT><PRE>
+CString str = "VisualC++";	<FONT COLOR="green">//表示したい文字列</FONT>
+<FONT COLOR="blue">int</FONT> nX = 50;	<FONT COLOR="green">//表示したい場所のX座標</FONT>
+<FONT COLOR="blue">int</FONT> nY = 100;	<FONT COLOR="green">//表示したい場所のY座標</FONT>
+pDC->TextOut(nX,nY,str);</PRE>
+</TD></TR>
+</TABLE>
+<!-- センターテーブル（終わり） -->
+<DL>
+<DT><B>引数</B>
+<DD><FONT COLOR="red">nX</FONT>：文字列表示位置のX座標
+<DD><FONT COLOR="red">nY</FONT>：文字列表示位置のY座標
+<DD><FONT COLOR="red">str</FONT>：表示したい文字列
+<DT><B>解説</B>
+<DD>pDC->TextOut(50,100,"VisualC++");と書いても同じことができます。文字列は現在持っているディフォルトのペンで書きます。文字列のフォント、線の種類、色を変えるためには、ペンそのものを設定して、DCにそのペンを持たせてあげなくてはいけません。
+</DL><BR>
+
+<B><BIG><FONT COLOR="blue"><HR WIDTH="50%"><A NAME="tips019">点の描画</A></FONT></BIG></B><BR>
+<DL>
+<DT><B>説明</B>
+<DD>描画の基本は、点の描画です。任意の点の描画（実際はその点のピクセル（画素）に色をつける）はSetPixelを使用します。
+</DL>
+<!-- センターテーブル（始め） -->
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<BIG><FONT COLOR="red">コードの例</FONT></BIG><BR><FONT COLOR="black">
+<FONT COLOR="green">//pDCがデバイスコンテキストのポインタだとして、（OnDraw以外などでDCのポインタを取得していない場合は<A HREF="#tips015">ここ</A>で取得する）</FONT><PRE>
+COLORREF	MyColor = RGB(0,0,0);	<FONT COLOR="green">//COLORREF構造体です。黒を設定しました。</FONT>
+<FONT COLOR="blue">int</FONT> nX = 50;	<FONT COLOR="green">//表示したい場所のX座標</FONT>
+<FONT COLOR="blue">int</FONT> nY = 100;	<FONT COLOR="green">//表示したい場所のY座標</FONT>
+pDC->SetPixel(nX,nY,MyColor);</PRE></TD></TR>
+</TABLE>
+<!-- センターテーブル（終わり） -->
+<DL>
+<DT><B>引数</B>
+<DD><FONT COLOR="red">MyColor</FONT>：点の色。
+<DD><FONT COLOR="red">nXs</FONT>：点の位置のX座標
+<DD><FONT COLOR="red">nYs</FONT>：点の位置のY座標
+<DT><B>解説</B>
+<DD>pDC->SetPixel(50,100,RGB(0,0,0));と書いても同じことができます。RGB（赤、緑、青）で表現しています。数値は0〜255（多いほど強い）です。
+<DD>例：RGB(255,0,0)→<FONT COLOR="red">赤</FONT>
+<DD>例：RGB(0,255,0)→<FONT COLOR="green">緑</FONT>
+<DD>例：RGB(0,0,255)→<FONT COLOR="blue">青</FONT>
+<DD>例：RGB(255,255,255)→<FONT COLOR="white">白</FONT>
+</DL><BR>
+
+<B><BIG><FONT COLOR="blue"><HR WIDTH="50%"><A NAME="tips020">直線の描画</A></FONT></BIG></B><BR>
+<DL>
+<DT><B>説明</B>
+<DD>直線の描画には2つの関数を使用します。1つは始点を決める関数で、もう1つはその始点から終点まで直線を描画する関数です。TextOut関数と同様、線の種類、色を変えるためには、ペンそのものを設定して、DCにそのペンを持たせてあげなくてはいけません。
+
+</DL>
+<!-- センターテーブル（始め） -->
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<BIG><FONT COLOR="red">コードの例</FONT></BIG><BR><FONT COLOR="black">
+<FONT COLOR="green">//pDCがデバイスコンテキストのポインタだとして、（OnDraw以外などでDCのポインタを取得していない場合は<A HREF="#tips015">ここ</A>で取得する）</FONT><PRE>
+<FONT COLOR="blue">int</FONT> nStartX = 0;	<FONT COLOR="green">//直線の始点のX座標</FONT>
+<FONT COLOR="blue">int</FONT> nStartY = 0;	<FONT COLOR="green">//直線の始点のY座標</FONT>
+<FONT COLOR="blue">int</FONT> nEndX = 50;	<FONT COLOR="green">//直線の終点のX座標</FONT>
+<FONT COLOR="blue">int</FONT> nEndY = 100;	<FONT COLOR="green">//直線の終点のY座標</FONT>
+pDC->MoveTo(nStartX,nStartY);	<FONT COLOR="green">//始点の設定</FONT>
+pDC->LineTo(nEndX,nEndY);	<FONT COLOR="green">//直線の描画</FONT></PRE>
+</TD></TR>
+</TABLE>
+<!-- センターテーブル（終わり） -->
+<DL>
+<DT><B>引数</B>
+<DD><FONT COLOR="red">nStartX</FONT>：始点のX座標
+<DD><FONT COLOR="red">nStartY</FONT>：始点のY座標
+<DD><FONT COLOR="red">nEndX</FONT>：終点のX座標
+<DD><FONT COLOR="red">nEndY</FONT>：終点のY座標
+</DL><BR>
+
+<BR><BR><A HREF="../index.html">Back to index</A>
+</BODY>
+</HTML>

@@ -1,0 +1,335 @@
+<HTML>
+<HEAD>
+<TITLE>HTMLエディタ〜第6週〜</TITLE>
+<style type="text/css">
+  <!--
+		A:link { text-decoration:none;  color:#ff4500 }
+		A:visited { text-decoration:none;  color:#ff4500 }  
+		A:active { text-decoration:none;  color:#ff0000 }   
+		A:hover { color:#00008b }	
+	    -->
+</style>
+</HEAD>
+<BODY bgcolor="#FFFFFF"><DIV ALIGN=CENTER><!--#geoguide--></DIV>
+<I><FONT COLOR="red" SIZE="6">共通関数群を作ろう１</FONT></I>
+<HR>
+今回は、共通関数群を作ると題して、カラーダイアログ、フォルダ選択ダイアログ、そして絶対パスから相対パスを作りだすテクニックについて解説していきます。特に絶対パスから相対パスを作り出すテクニックは、次章で使いますのでここは必ず習得してくださいね。この章はかなり長いので頑張っていきましょうね！
+<BR>
+<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" WIDTH="100%">
+  <TR>
+    <TD WIDTH="100%" BGCOLOR="#000099">
+    <FONT COLOR="#ffffff" SIZE="+1">14.共通関数群とは</FONT></TD> 
+  </TR>
+</TABLE>
+共通関数群となんだか堅苦しい名前ですが、例えばCMyHtmlView.cppで使うローカルな関数(CMyHtmlViewクラスのメンバ関数ではない関数のこと)は、CMyHtmlView.cppに記述しなければなりません。しかし、その関数を他の.cppファイル内でも使いたい…となると、また同じコードで関数名を変えた書いたりと…とにかく面倒なことが生じます。そこでプロジェクト内に、これからの共通に使える関数を、別の.hと.cppファイルに記述しておき(例えばmyhtmlcom.hやmyhtmlcom.cpp)、それらの関数を使いたいファイルでmyhtmlcom.hをインクルードすれば、バグが少ないコードが記述できるという仕掛けです。<BR><BR>
+
+したがって、この共通関数群ファイルに記述されるべき関数は、インクルードさえしてしまえばどのクラスからも参照できるために、いちいち書くのが面倒くさいコードや、よく使う関数群をまとめておくと、非常に便利になります。とりあえず、プロジェクトにファイルを追加する手順を説明していきます。
+<DL>
+<DT><FONT COLOR="red">1.ヘッダーファイル(*.h)の追加(新規作成)</FONT>
+<DD>[ファイル]-[新規作成]でmyhtmlcom.hを新規に作成する。このときプロジェクトに追加がチェックされていることに注意する。
+<DT><FONT COLOR="red">2.ソースファイル(*.cpp)の追加(新規作成)</FONT>
+<DD>[ファイル]-[新規作成]でmyhtmlcom.cppを新規に作成する。このときプロジェクトに追加がチェックされていることに注意する。
+<DT><FONT COLOR=red>3.FileViewをクリック</FONT>
+<DD>さきほど新規に作成した二つのファイルが追加されていれば完了
+</DL>
+ところでmyhtmlcomの意味ですが、MyHtmlプロジェクトのコモン(common)ファイルという意味で、myhtmlcomとしておきました。このファイル名は各自ご自由ですが、インクルードするときには、各自設定した名前でインクルードするように注意してください。ここではmyhtmlcomで説明していきます。
+<BR><BR>
+では、myhtmlcom.hを開いて(真っ白なはずですが)ください。以下に示すコードを書いてください。(今回共通関数群として3つの関数と、2つのマクロを定義しておきます。)
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<FONT COLOR="green">//////////////////////////////////////////////////<BR>
+// myhtmlcom.h  MyHtml共通関数<BR>
+//////////////////////////////////////////////////</FONT><BR>
+<FONT COLOR="blue">#include</FONT> "stdafx.h"<BR>
+<BR>
+<FONT COLOR="green">//マクロ</FONT><BR>
+<FONT COLOR="blue">#define</FONT> GetMyDocument() (CMyHtmlDoc*)(((CFrameWnd*)(AfxGetApp()->m_pMainWnd))->GetActiveDocument());<BR>
+<FONT COLOR="blue">#define</FONT> GetMyView() (CMyHtmlView *)(((CFrameWnd*)(AfxGetApp()->m_pMainWnd))->GetActiveView());<BR>
+<BR>
+<FONT COLOR="green">// 関数</FONT><BR>
+<FONT COLOR="blue">bool</FONT> SelectFolder(CString&);								<FONT COLOR="green">// フォルダ選択ダイアログ゛</FONT><BR>
+CString GetRelativePath(CString,CString);	<FONT COLOR="green">// 相対パスを取得</FONT><BR>
+CString GetColorString();<FONT COLOR="green">// カラーダイアログ</FONT><BR>
+</TD></TR>
+</TABLE>
+二つのマクロは、DocumentとViewのポインタを取得するマクロです。Tipsにも載せてあるコードをマクロ化しただけですが、結構便利なのでこのまま記述しておいてください。<BR><BR>
+簡単ですが、解説をしていきます。
+<DL>
+<DT><FONT COLOR="red">#include "stdafx.h"</FONT>
+<DD>MFCを使うのでインクルードしておきます。
+<DT><FONT COLOR="red">bool SelectFolder(CString&);</FONT>
+<DD>フォルダ選択ダイアログを開き、ディレクトリ(フォルダ)の絶対パスを取得する関数です。この関数はすぐには使用しませんが、11週目以降のおまけ講座として使う可能性があります。
+<DT><FONT COLOR="red">CString GetRelativePath(CString,CString); </FONT>
+<DD>二つの絶対パスから、２つの間の相対パスを生成します。これは、コンピュータ内のファイルのリンクなどに使われます。
+<DT><FONT COLOR="red">CString GetColorString();</FONT>
+<DD>カラーダイアログを開き、RGBカラーコードを取得します。
+</DL>
+それでは1つ1つ作っていくことにします。
+<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" WIDTH="100%">
+  <TR>
+    <TD WIDTH="100%" BGCOLOR="#000099">
+    <FONT COLOR="#ffffff" SIZE="+1">15.SelectFolder関数のコーディングをする</FONT></TD> 
+  </TR>
+</TABLE>
+<IMG SRC="fig6_1.gif" ALIGN="left">みなさんも左のような画面のダイアログをどこかで1回くらいは見たことがあると思います。例えばインストール時にどのフォルダにインストールするのか？なんて時にもでてきたりしますし、私が使っている解凍ソフト(かなり有名なソフト)にもでてきたりします。このフォルダ選択ダイアログは、Windowsユーザなら全く同じ者を見ることになります。特にこれらをコモンダイアログといい、Windowsで共通に使用されているダイアログのことを指します。MFCでは以下のコモンダイアログが用意されています。
+<DL>
+<DT><FONT COLOR="red">CColorDialog</FONT>
+<DD>色の選択ダイアログ
+<DT><FONT COLOR="red">CFileDialog</FONT>
+<DD>開く・保存するファイル名の選択
+<DT><FONT COLOR="red">CFindReplaceDialog </FONT>
+<DD>ファイルやテキストにおける検索・置換の操作
+<DT><FONT COLOR="red">CFontDialog</FONT>
+<DD>フォント(フォント名・属性・サイズなど)の指定
+<DT><FONT COLOR="red">CPrintDialog</FONT>
+<DD>印刷処理用の情報の指定を行う
+</DL>
+あれ？と思った方は鋭い人です。フォルダ選択ダイアログがないんですね。つまりフォルダ選択ダイアログはMFCクラスとして用意されていないのです。フォルダ選択ダイアログはAPI(Application Programing Interface)というC言語で記述されたインターフェースで定義されています。MFCに対してSDKがあることは以前紹介したかもしれませんが、SDKはAPIを多く使ってコードを記述します。SDKプログラマーならともかくMFCプログラマーは、MFCでサポートされていない部分はAPIを使用して補うしかないのです。<BR><BR>
+まずフォルダ選択ダイアログを使用するのに以下のコードを準備として書き込んでいきます。
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<DL>
+<DT>#include "stdafx.h"
+<DT>#include "myhtmlcom.h"
+<DT>#include &lt;shlobj.h&gt;
+<DT>#include &lt;direct.h&gt;
+<DT>#include &lt;stdlib.h&gt;
+<DT>#include &lt;stdio.h&gt;
+<DT>int __stdcall BrowseCallbackProc(HWND hwnd, UINT uMsg, LPARAM lParam,  LPARAM lpData){
+<DD>	if (uMsg == BFFM_INITIALIZED){
+<DD><DL><DD>SendMessage(hwnd, BFFM_SETSELECTION, TRUE, lpData);</DL>
+<DD>	}
+<DD>return 0;
+<DT>}
+</DL>
+</TD></TR>
+</TABLE>
+なんだか見慣れない関数が出てきました…。BrowseCallbackProc(コールバックプロシージャ)というものですが、これはこれでこういうものだと思ってコードを記述したほうがいいかもしれません。MSDNの説明も結構適当で、<BR><FONT COLOR="red">BrowseCallbackProc関数は、SHBrowseForFolder関数で使用される、アプリで定められたコールバック関数を指定し、フォルダ選択ダイアログは、それにイベントについて知らせるためにこの関数を呼ぶ</FONT><BR>
+なんてよく分からないことを書いています。かみくだいて説明すれば、<BR>
+<FONT COLOR="red">SHBrowseForFolder関数を使ってダイアログを表示したとします。そこで何らかのイベントを起こしたとします。例えば、フォルダを選択するとかです。するとこの関数が呼ばれてなにかを実行し、またSHBrowseForFolder関数に帰ってくる。</FONT>
+ものだと思っても結構です。<BR><BR>
+とは言うものの、実際おこるイベントは、「ダイアログが表示される」か「選択されるフォルダが変更される」かの2つがメインですが、別に選択されるフォルダが変更される度に実行する関数は、今回必要としないので、ダイアログが表示される瞬間に実行されるコードだけを記述したのが上のコードです。初めに選択しておくフォルダを開いておくコードです。これはなくてもいいのですが、あったほうが便利でしょう。
+それでは本題のSelectFolder関数を記述していきます。さっきのコードの下に続けて書いてください。
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white"><DL>
+<DT>bool SelectFolder(CString& strDir){
+<DD><DL>
+    <DT>BROWSEINFO bInfo;
+    <DT>LPITEMIDLIST pIDList;
+    <DT>TCHAR szDisplayName[MAX_PATH];
+    <DT>char buffer[_MAX_DIR];
+
+    <DT><FONT COLOR="green">// BROWSEINFO構造体に値を設定</FONT>
+    <DT>bInfo.hwndOwner = AfxGetMainWnd()->m_hWnd; <FONT COLOR="green">// ダイアログの親ウインドウのハンドル</FONT>
+    <DT>bInfo.pidlRoot  = NULL;                    <FONT COLOR="green">// ルートフォルダをデスクトップフォルダとする</FONT>
+    <DT>bInfo.pszDisplayName = szDisplayName;      <FONT COLOR="green">// フォルダ名を受け取るバッファへのポインタ</FONT>
+    <DT>bInfo.lpszTitle = _T("フォルダの選択");    <FONT COLOR="green">// ツリービューの上部に表示される文字列</FONT>
+    <DT>bInfo.ulFlags   = BIF_RETURNONLYFSDIRS;    <FONT COLOR="green">// 表示されるフォルダの種類を示すフラグ</FONT>
+    <DT>bInfo.lpfn = BrowseCallbackProc;	   <FONT COLOR="green">// BrowseCallbackProc関数のポインタ</FONT>
+
+    <DT><FONT COLOR="green">// 現在のカレントディレクトリの取得</FONT>
+    <DT>if(_getcwd(buffer,_MAX_DIR )==NULL)
+	<DD>bInfo.lParam = NULL;
+    <DT>else
+	<DD>bInfo.lParam = (LPARAM)buffer;
+
+    <DT><FONT COLOR="green">// フォルダ選択ダイアログを表示</FONT>
+    <DT>pIDList = ::SHBrowseForFolder(&bInfo);
+
+    <DT><FONT COLOR="green">// ダイアログが閉じた後</FONT>
+    <DT>if(pIDList == NULL){return false;}	<FONT COLOR="green">//何も選択されなかった場合</FONT>
+    <DT>else{
+    <DT><FONT COLOR="green">// ItemIDListをパスに変換(パスはTCHAR型のszDisplayNameに格納)</FONT>
+    	<DD>if(!::SHGetPathFromIDList(pIDList, szDisplayName)) return false;<FONT COLOR="green">//変換に失敗</FONT>
+   
+
+        <DD>::CoTaskMemFree( pIDList );<FONT COLOR="green">// pIDListのメモリを開放</FONT>
+	<DD>strDir = (CString)szDisplayName;<FONT COLOR="green">//CString型に変更</FONT>
+	<DD>return true;
+    <DT>}
+</DL>	
+<DT>}
+</DL>
+</TD></TR>
+</TABLE>
+※このSelectFolder関数は、選択に成功した時にtrue,失敗した時にfalseを返すように設計されています。<BR>
+簡単に解説していきます。<BR>
+<DL>
+<DT><FONT COLOR="red">BROWSEINFO bInfo;</FONT>
+<DT><FONT COLOR="red">LPITEMIDLIST pIDList;</FONT>
+<DD>二つの変数宣言ですが、前者はBROWSEINFO構造体といい、フォルダ選択ダイアログの設定を行う構造体で、後者はフォルダ選択ダイアログからの戻り値となります。
+<DT><FONT COLOR="red">bInfo.hwndOwner = AfxGetMainWnd()->m_hWnd;</FONT>
+<DD>ウィンドウのハンドルが入ります。
+<DT><FONT COLOR="red">bInfo.pidlRoot = NULL;</FONT>
+<DD>ルート、すなわちフォルダ選択ダイアログのトップのフォルダを指定することができます。NULLの場合はデスクトップになるます。
+<DT><FONT COLOR="red">bInfo.pszDisplayName = szDisplayName;</FONT>
+<DD>選択されたフォルダ名を受け取るバッファへのポインタです。pIDListからフォルダ名を受け取る時に使用します。
+<DT><FONT COLOR="red">bInfo.lpszTitle = _T("フォルダの選択");</FONT>
+<DD>ダイアログの上部に書かれる文字列です。ダイアログのタイトルではありません。タイトルを変更する場合には、BrowseCallbackProc関数のSendMessage関数の直前あたりに::SetWindowText(hWnd,_T("***"));と書けばいいと思います。(動作確認はしていませんが(^^;))
+<DT><FONT COLOR="red">bInfo.ulFlags = BIF_RETURNONLYFSDIRS;</FONT>
+<DD>フォルダ選択ダイアログの仕組みを決めます。BIF_RETURNONLYFSDIRSは、フォルダ(ディレクトリ)情報だけをpIDListに返し、適切なフォルダが選択されるまではOKボタンが淡色表示されるという特徴があります。一番一般的です。
+<DT><FONT COLOR="red">bInfo.lpfn = BrowseCallbackProc;</FONT>
+<DD>待ってました！先ほど作ったBrowseCallbackProc関数へのポインタを格納します。ここをNULLで指定してもいいのですが、初期選択するディレクトリがオープンされなくなってしまうので、せっかくBrowseCallbackProcを書いたのだったら指定しておいたほうが便利です。
+<DT><FONT COLOR="red">if(_getcwd(buffer,_MAX_DIR )==NULL)</FONT>
+<DD><FONT COLOR="red">bInfo.lParam = NULL;</FONT>
+<DT><FONT COLOR="red">else</FONT>
+<DD><FONT COLOR="red">bInfo.lParam = (LPARAM)buffer;</FONT>
+<DD>_getcwdでカレントディレクトリを調べ、パスをbufferに書き込みます。bufferがNULL(カレントディレクトリが判別できない)でないときは、bInfo.lParamに書き込みます。これが最初に開いておくディレクトリ名になります。ちなみにBrowseCallbackProc関数の引数lpDataは、このbInfo.lParamのことであることからも、最初に選択され開かれるディレクトリになることがわかるでしょう。
+<DT><FONT COLOR="red">pIDList = ::SHBrowseForFolder(&bInfo);</FONT>
+<DD>フォルダ選択ダイアログを開きます。その結果をpIDListに格納します。
+<DT><FONT COLOR="red">if(pIDList == NULL){return false;}	</FONT>
+<DD>pIDListがNULLであったらフォルダが選択されていないのでfalse(失敗)を返し終了します。
+<DT><FONT COLOR="red">else{</FONT>
+<DD><FONT COLOR="red">if(!::SHGetPathFromIDList(pIDList, szDisplayName)){return false;}</FONT>
+<DD>pIDListからディレクトリ名を生成します。ディレクトリ名はszDisplayNameに書き込まれますが、生成に失敗したらfalseを返し終了します。
+<DD><FONT COLOR="red">::CoTaskMemFree(pIDList);</FONT>
+<DD>メモリをクリア(開放)します。
+<DD><FONT COLOR="red">strDir = (CString)szDisplayName;</FONT>
+<DD>TCHAR型から使いやすいCString型に変更します。
+<DD><FONT COLOR="red">return true;</FONT>
+<DD>成功の意味で、trueを返し終了します。
+<DT><FONT COLOR="red">}</FONT>
+</DL>
+この関数を使う側でtrue,falseを捕まえれば、ディレクトリ名を取得できたかどうかを判断できるはずです。では早速使用したい…のですが、まだMyHtml内部で使用するチャンスはないので、簡単なテストコードを書いておきます。これで実行できたかできないかを調べてみてください。(ViewなりDocなり適当なところでこのコードを書いて呼んであげればいいわけですが)
+<CENTER><TABLE BORDER>
+<TR><TD BGCOLOR="white">
+#define "myhtmlcom.h" ←これをかかないと×<BR>
+<BR>
+<CENTER>(中略)</CENTER>
+<DL>
+<DT>CString strPath;
+<DT>if(SelectFolder(strPath))
+<DD>AfxMessageBox(strPath);
+<DT>else
+<DD>AfxMessageBox("Not Found.");
+</DL>
+</TD></TR>
+</TABLE></CENTER>
+で、動作確認できると思います。今回作成したフォルダ選択ダイアログは、いろんな場所で使用できますから、是非習得しおくと、ソフトのバリエーションが広がるのではないでしょうか？
+<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" WIDTH="100%">
+  <TR>
+    <TD WIDTH="100%" BGCOLOR="#000099">
+    <FONT COLOR="#ffffff" SIZE="+1">16.GetRelativePathのコーディングをする</FONT></TD> 
+  </TR>
+</TABLE>
+まずは、絶対パスと相対パスの説明から入りたいと思います。絶対パスとは例えば<BR>
+<CENTER><B>C:\Program Files\Microsoft Visual Studio\MyProjects\ConsoleApp\test.cpp</B></CENTER>
+などのように1つのファイル・ディレクトリについて、その上の階層のディレクトリを全て記述したものを指します。絶対パスが分かれば、ウィンドウズの「ファイル名を指定して実行」でこの絶対パスを入力するだけでファイルを開くことができます。絶対パスは、そのファイルの位置情報といってもいいでしょう。<BR>
+HTMLでは絶対パスと相対パスの区別は非常に重要です。例えば他のwwwサイトをリンクする場合には、絶対パスによるリンクでなくてはなりません。しかし自分のPCのファイルでホームページを作るときなどは、絶対パスでリンクしてしまうと、不都合が生じます。最終的にはファイルをプロバイダなどのサーバーにアップするのですが、絶対パスリンクだと、絶対パスのファイルを読み込んでしまいうまくリンクできないのです。また、あるフォルダ内で自分のPC内でうまく絶対パスリンクされいるとします。そのフォルダ別のディレクトリに移すだけで全部リンクが不正になってしまうのです。そこで相対パスというものが重要になります。
+<IMG SRC="fig6_2.gif" ALIGN="right"><BR>
+では相対パスについて右の図で説明していきます。"相対"なわけで、二つのパスのどちらかが基準になり、その基準からの位置関係を示したものが相対パスです。<BR>
+1つ上のディレクトリを指す時には、".."を指定し、ディレクトリの区切りは"/"で行います。二つ上のディレクトリは"../../"となるわけですが、詳しくは以下の数種類の例で相対パスがどんなものかわかると思います。
+<DL>
+<DT><FONT COLOR="red">基準位置view.cppに対するmake.cppの相対パス　</FONT>
+<DD>make.cppは、view.cppのディレクトリMFCの1個上のディレクトリ階層のファイルなので、
+<DD><B>../make.cpp</B>
+<DT><FONT COLOR="red">基準位置class.cppに対するclass.hの相対パス</FONT>
+<DD>同じディレクトリ内部なのでファイル名そのものが相対パスとなり
+<DD><B>class.h</B>
+<DT><FONT COLOR="red">基準位置class.cppに対するview.cppの相対パス</FONT>
+<DD>まずC++の一つ上にあがってあとは下がっていけばいいので
+<DD><B>../visual/MFC/view.cpp</B>
+</DL>
+少しずつ分かっていただけたでしょうか？では問題です。基準位置view.cppに対するclass.cppの相対パスは?<BR>
+<CENTER>"<FONT COLOR="white">../../C++/class.cpp</FONT>"ココを探してくださいね</CENTER>
+<BR>
+で本題ですが、これをプログラムで行うにはどうしたらよいかということになります。そんな便利な関数がありそうですが、ないので(^^;)自作するほかありませんね。それがGetRelativePath関数です。まずはコードを記述する前に、簡単な概念図で、相対パスの作り方を考えていきます。<BR><BR>
+<CENTER><IMG SRC="fig6_3.gif"></CENTER>
+<DL>
+<DT><FONT COLOR="red">①二つの絶対パスを用意する</FONT>
+<DD>上の絶対パスが基準パスで、下の絶対パスが相対パスを求めたいパスになります。
+<DT><FONT COLOR="red">②基準パスのファイル名を削除する</FONT>
+<DD>基準になるのはこのファイルがあるディレクトリなのでココはなくてもいいのです。
+<DT><FONT COLOR="red">③二つの絶対パスの先頭からの共通部分を削除</FONT>
+<DD>絶対パスの絶対パスの先頭からの共通部分してしまいます。ここは相対パスには不要だからです。
+<DT><FONT COLOR="red">④残った基準パスのディレクトリ数をカウントする</FONT>
+<DD>これがディレクトリバック"../"の個数になります
+<DT><FONT COLOR="red">⑤ディレクトリバック文字列を生成する</FONT>
+<DD>④で求めた数の"../"文字列を作成します。
+<DT><FONT COLOR="red">⑥相対パスを作成する</FONT>
+<DD>④で残った(相対パスを求めたいほうの)パスを上で作成した文字列に加えればよいです。
+</DL>
+これをコード化したものが下です。やっていることは上で説明した①〜⑥なので全て細かく説明するのは割愛させていただきますが、あまり使わない関数について説明しておきます。
+
+<CENTER><TABLE BORDER>
+<TR><TD BGCOLOR="white">
+<DL>
+<FONT COLOR="green">
+<DT>// strA	基準パス<BR>
+</font><DT><FONT COLOR="green">// strB	相対パスを計算させたいパス</font><BR>
+<DT>CString GetRelativePath(CString strA,CString strB){<BR>
+<DD>CString strBasePath = strA;
+<DD>CString strPath = str B;
+<DD>CString strBackDir;	<FONT COLOR="green">// ../文字列</FONT>
+<DD>CString strDir;<FONT COLOR="green">// 相対パス</FONT>
+<DD>int nBackDir = 0;<FONT COLOR="green">// ../を記述する回数</FONT>
+<DD>int i,nNumHtml,nNumPath;<FONT COLOR="green">// Loop変数</FONT>
+<DD>char chDrv[_MAX_DRIVE];<FONT COLOR="green">// Htmlのドライブ</FONT>
+<DD>char chDir[_MAX_DIR];<FONT COLOR="green">// Htmlのディレクトリ</FONT>
+<DD>CString strTemp;<FONT COLOR="green">// CStringテンポラリファイル</FONT>
+<DD>bool bFlg = true;<FONT COLOR="green">// フラグ</FONT>
+<DD>
+<DD><FONT COLOR="green">// strBasePathからファイル名だけを取り除く②</FONT>
+<DD>_splitpath(strBasePath,chDrv,chDir,NULL,NULL);
+<DD>strBasePath = (CString)chDrv + (CString)chDir;
+<DD>
+<DD><FONT COLOR="green">// 先頭から共通なデ゛ィレクトリを削除③</FONT>
+<DD>while(bFlg){
+<DD><DL><DT>if(strHtmlPath.SpanExcluding("\\")==strPath.SpanExcluding("\\")){
+<DD>	<DD>strTemp = strHtmlPath.SpanExcluding("\\");
+<DD>	<DD>strHtmlPath.Delete(0,strTemp.GetLength()+1);
+<DD>	<DD>strPath.Delete(0,strTemp.GetLength()+1);
+<DD>	<DT>}
+<DD>	<DT>else bFlg = false;</DL>
+<DD>}
+<DD>
+<DD><FONT COLOR="green">// ../と記述する数nBackDirをカウント④</FONT>
+<DD>while(!strBasePath.IsEmpty()){	
+<DD><DL><DD>strBasePath.Delete(0,strBasePath.SpanExcluding("\\").GetLength()+1);
+	<DD>nBackDir++;</DL>
+<DD>}
+<DD>
+<DD><FONT COLOR="green">// ../文字列作成⑤</FONT>
+<DD>for(i=0;i&lt;nBackDir;i++)
+<DD><DL><DD>strBackDir += "../";</DL>
+<DD><FONT COLOR="green">//相対パス作成⑥</FONT>
+<DD>strDir = strBackDir + strPath;
+<DD>
+<DD><FONT COLOR="green">// '\'と'/'の変更</FONT>
+<DD>for(i=0;i&lt;strDir.GetLength();i++){
+<DD><DL><DD>if(strDir.GetAt(i)=='\\') strDir.SetAt(i,'/');</DL>
+<DD>}
+<DD>
+<DD><FONT COLOR="green">// 先頭が'/'の場合は削除</FONT>
+<DD>if(strDir.GetAt(0)=='/') strDir.Delete(0,1);
+<DD>
+<DD>return strDir;
+<DD>
+<DT>}
+</DL>
+※このコードにはバグが残っている可能性があります。
+</TD></TR>
+</TABLE></CENTER>
+<DL>
+<DT><FONT COLOR="red">_splitpath(const char *pchPath,char *pchDrive,char *pchDir,char *pchFname,char *pchExt)</FONT>
+<DD>パスpchPathを構成要素(ドライブ、ディレクトリパス、ファイル名、拡張子)に分解します。今回のようにファイル名と拡張子の構成要素を求める必要がない場合のように、パスを求めなくてもいい要素にはNULLを指定します。&lt;stdlib.h&gt;を必要とします。
+<DT><FONT COLOR="red">CString::SpanExcluding(CString strCharSet)</FONT>
+<DD>strCharSetで指定した文字セット内の文字が最初に出現するまで文字列を検索し、strCharSetと一致する文字が見つかるまでの文字をすべて抽出します。
+<DD>CString str = "abcdefghijk";
+<DD>CString str2 = str.SpanExcluding("e");
+<DD>とするとstr2は、"abcd"となります。詳しくはMSDNを見てください。この関数は意外によく使用します。
+<DT><FONT COLOR="red">CString::Delete(int nStart,int nCount)</FONT>
+<DD>文字列のインデックスがnStartからnCount個の文字を削除します。
+<DD>CString str = "abcdefghijk";
+<DD>str.Delete(1,2);
+<DD>をするとstrは"adefghijk"となります。これも詳しくはMSDNを見てください。また文字列を空にするにはCString::Empty()なので間違わないようにしましょう。Deleteでも文字列をクリアすることができますが、面倒くさいでしょう。
+</DL>
+コードの最後のほうで「'\'と'/'の変更」なんてことを行っていますが、環境によって、ディレクトリを区切る記号が"\"だったり"/"だったりするので全て"/"で統一するために行っています。<BR><BR>
+さてこの関数の確認ですが、とりあえずコンパイルエラーがないようにしてもらえればいいです。実行結果が正しいか正しくないかは次章以降で検討していきましょう。
+
+<BR><BR>
+<A HREF="proc6_2.html">[Next]</A><BR>
+<A HREF="proc5.html">[Previous]</A><BR>
+<A HREF="../index.html">[Home]</A><BR>
+</BODY>
+</HTML>

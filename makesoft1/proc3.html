@@ -1,0 +1,207 @@
+<HTML>
+<HEAD>
+<TITLE>HTMLエディタ〜第3週〜</TITLE>
+<style type="text/css">
+  <!--
+		A:link { text-decoration:none;  color:#ff4500 }
+		A:visited { text-decoration:none;  color:#ff4500 }  
+		A:active { text-decoration:none;  color:#ff0000 }   
+		A:hover { color:#00008b }	
+	    -->
+</style>
+</HEAD>
+<BODY bgcolor="#FFFFFF"><DIV ALIGN=CENTER><!--#geoguide--></DIV>
+<I><FONT COLOR="red" SIZE="6">クリップボードを操ろう</FONT></I>
+<HR>
+Htmlエディタでタグを操作する時は、クリップボードの概念が重要です。今回はまずタグ操作について軽く触れて、なぜクリップボードが必要かについて説明し、具体的なコードを紹介していきます。
+<BR>
+
+
+
+<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" WIDTH="100%">
+  <TR>
+    <TD WIDTH="100%" BGCOLOR="#000099">
+    <FONT COLOR="#ffffff" SIZE="+1">5．クリップボードの概念</FONT></TD> 
+  </TR>
+</TABLE>
+今回作成するHTMLエディタは、タグ挿入形式のエディタです。何か飾りを付けたい文字を、規定のタグで挟むことで実現できます。一応HTMLエディタですから、タグを挟む機能をより簡単にする必要があります。例えば、太字にしたい場合には、<BR>
+<CENTER><IMG SRC="fig2_6.gif"></CENTER>
+太字にしたい文字列を選択して、太字ボタンを押すことで、
+<CENTER><IMG SRC="fig2_7.gif"></CENTER>
+太字タグを挿入することができます。このタグに関しては、各自お調べになってください。<SMALL>(最近ではHTMLタグ集が\1500〜で販売されていますし、簡単なやつだったらネット上で公開されているかもしれません。)</SMALL><BR><BR>
+今回作成しているHTMLエディタでは、この操作を以下のコードで実現しています。(実際には他の関数も使用していますが、概念はこのような感じです。)
+<DL>
+<DT><FONT COLOR="#ff0000">選択文字列の取得</FONT>
+<DT><FONT COLOR="#ff0000">実際にタグを挟んだ形の文字列を作りBに代入する。</FONT>
+<DT><FONT COLOR="#ff0000">Bをクリップボードに書き込む</FONT>
+<DT><FONT COLOR="#ff0000">ペーストを実行</FONT>
+<DD>ペーストとはクリップボードのデータをクライアント領域に表示させることです。
+</DL>
+クリップボードを操ることで、Paste関数を使用することができるのです。では次のセクションで、実際のコードについて考えていこうと思います。
+<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" WIDTH="100%">
+  <TR>
+    <TD WIDTH="100%" BGCOLOR="#000099">
+    <FONT COLOR="#ffffff" SIZE="+1">6．クリップボード関数の作成(クリップボードへのデータ書き込み)</FONT></TD> 
+  </TR>
+</TABLE>
+まずは、そのコードから示します。多分誰が書いても似たようなコードになってしまう可能性がかなり高い関数でしょう(某雑誌にも同じような…(笑))。
+<!-- センターテーブル（始め） -->
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<BIG><FONT COLOR="red">クリップボードにデータを設定する関数</FONT></BIG><BR>
+void CMyHtmlView::SetClipBoard(CString str)<BR>
+{<BR>
+	char *ptr;<BR>
+	HGLOBAL hMem;<BR>
+	
+	hMem = GlobalAlloc(GHND, (DWORD)str.GetLength() + 1);<BR>
+	ptr = (char *)GlobalLock(hMem);<BR>
+	lstrcpy(ptr,str);<BR>
+	::GlobalUnlock(hMem); <BR>
+	::OpenClipboard(m_hWnd);<BR>
+	::EmptyClipboard();<BR>
+	::SetClipboardData(CF_TEXT, hMem);<BR>
+	::CloseClipboard();<BR>
+	GlobalFree(hMem);<BR>
+}<BR>
+</TABLE>
+<!-- センターテーブル（終わり） -->
+ここで関数の解説をします。
+<DL>
+<DT><FONT COLOR="red">HGLOBAL hMem;</FONT>
+<DD>クリップボード(以下CB)へのハンドル。ハンドルというのは、車のハンドルと同じ意味で、CBを操作するための舵(かじ)見たいなものです。ウィンドウ関連ではよくこのハンドルを使用します。
+<DT><FONT COLOR="red">char *ptr;</FONT>
+<DD>CBにデータを複写するための変数です。
+<DT><FONT COLOR="red">hMem = GlobalAlloc(GHND, (DWORD)str.GetLength() + 1);</FONT>
+<DD>設定する文字列strの長さより1だけ長いメモリをヒープ領域から確保します。GHNDというのはGlobalAllocの設定フラグであり、これは移動可能メモリ領域とし、かつメモリの中身をクリアするという意味です。1だけ長くする理由は、文字列の終わりの合図にはNULL文字(\0)という記号をつけるのが原則となっているからです。
+<DT><FONT COLOR="red">ptr = (char *)GlobalLock(hMem);</FONT>
+<DD>ヒープ領域のメモリを一旦ロック(自分以外の誰にも書き込まれないようにする？)し、メモリブロックの最初の 1 バイトへのポインタを返します。(ポインタを使用するほうが操作が楽ですし、C言語のように記述できるからでしょう。私もこのようにする理由が曖昧です^^;)
+<DT><FONT COLOR="red">lstrcpy(ptr,str);</FONT>
+<DD>strの情報を先ほどのポインタにコピーします。ポインタの中身だけを替えるだけなので、hMemなどには影響しません。
+<DT><FONT COLOR="red">::GlobalUnlock(hMem);</FONT>
+<DD>先ほどロックしておいたメモリのロックを解除します。メモリのアンロックは、ロックをかけたアプリしかできないので、これを行わないとヒープ領域をどんどん占有してしまいwindowsごと落ちるなーんてこともあるかもしれません(怖くて試せませんが^^;)。MSDNにはGlobalLockとGlobalUnlockはセットで使えと書いてありました。
+<DT><FONT COLOR="red">::OpenClipboard(m_hWnd);</FONT>
+<DD>CBをオープンします。ファイルのように開く感覚とは違いますが、このコードで他のアプリがCBの中身を変更できなくします。"::"で書かれているコードはSDK形式といってMFCとは微妙に違うのですが、MFCでもCWnd::OpenClipboard()という関数があって、それで行うことも可能ですが、ここではSDKのコードで記述してしまいます。(きれいに::が並びますし)
+<DD>m_hWndとは、アプリのウィンドウハンドルです。アプリの中でもこのウィンドウを、CBを唯一使えるオーナーにして！と立候補させていると考えてください。(政治で言うならば、第1党の党首ですね)
+<DT><FONT COLOR="red">::EmptyClipboard();</FONT>
+<DD>CBに入っているデータをクリアします。このとき先ほど、オーナーに推薦されたウィンドウにCBの所有権が与えられます！(国会での総理大臣の指名みたいなものです)。よく考えればOpenClipboardでこの関数の内容も実行してしまえばいいのに！と思いますが、MSDNでそうやりなさいって書いてあるので仕方がありません(>_<)。
+<DT><FONT COLOR="red">::SetClipboardData(CF_TEXT, hMem);</FONT>
+<DD>この関数がCBにデータを書き込んでいます。CF_TEXTとはANSI (American National Standard Institute : 米国規格協会) テキスト形式のことを指します。まぁ世界中で使えるテキスト形式にするようなものですね。データ自体は、lstrcpy(ptr,str)によってptrに書き込まれたはずなので、hMemを指定してもデータが書き込まれないのではないか…と思われるかもしれませんが、ptrはhMemの先頭メモリアドレスですから、ptrのデータは実際にはhMemに書き込まれているので大丈夫なのです。
+<DT><FONT COLOR="red">::CloseClipboard();</FONT>
+<DD>CBをクローズします。オープンしたら閉じる、これは原則ですね。
+<DT><FONT COLOR="red">GlobalFree(hMem);</FONT>
+<DD>一応ヒープ領域にメモリを確保したので、開放しておきます。
+</DL>
+詳しく解説したつもりですが(一部濁しましたが)分かっていただけたでしょうか？<BR>
+あとはこの関数をどのように書き込むか？ですが、ワークスペースでCMyHtmlViewを右クリックし、メンバ関数の追加でできます。
+<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" WIDTH="100%">
+  <TR>
+    <TD WIDTH="100%" BGCOLOR="#000099">
+    <FONT COLOR="#ffffff" SIZE="+1">7．クリップボード関数の作成(クリップボードからのデータ読み込み)</FONT></TD> 
+  </TR>
+</TABLE>
+次にクリップボードからデータを読み込む関数を追加しておきましょう。この関数も、誰が書いても似たようなものになってしまうタイプです。
+<!-- センターテーブル（始め） -->
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<BIG><FONT COLOR="red">クリップボードからデータを読み出す関数</FONT></BIG><BR>
+CString	CMyHtmlView::GetClipBoard(void){<BR>
+	HANDLE	hMem;<BR>	
+	char	*ptr;<BR>
+
+	::OpenClipboard(m_hWnd);<BR>
+	hMem = ::GetClipboardData(CF_TEXT);<BR>
+	ptr = (char *)::GlobalLock(hMem);<BR>
+	::GlobalUnlock(hMem);<BR> 
+	::CloseClipboard();<BR>
+	
+	return (CString)ptr;<BR>
+}<BR>
+</TABLE>
+<!-- センターテーブル（終わり） -->
+お決まりの解説をしていきましょう。
+<DL>
+<DT><FONT COLOR="red">HGLOBAL hMem;</FONT>
+<DD>クリップボード(以下CB)へのハンドル。ハンドルについては先ほど説明しましたね。
+<DT><FONT COLOR="red">char *ptr;</FONT>
+<DD>CBからのデータのアドレスを受ける変数です。
+<DT><FONT COLOR="red">::OpenClipboard(m_hWnd);</FONT>
+<DD>CBを開いて、m_hWnd以外のウィンドウ以外にCBを変更させることをできなくします。
+<DT><FONT COLOR="red">hMem = ::GetClipboardData(CF_TEXT);</FONT>
+<DD>CBのデータを扱うためのハンドルを取得します。
+<DT><FONT COLOR="red">ptr = (char *)::GlobalLock(hMem);</FONT>
+<DD>メモリをロックして、文字列データへのポインタを割り当てます。このデータがCBに保存されてるデータです。
+<DT><FONT COLOR="red">::GlobalUnlock(hMem);</FONT>
+<DD>お決まりですが、メモリのアンロックを行います。
+<DT><FONT COLOR="red">::CloseClipboard();</FONT>
+<DD>これまたお決まりですが、CBを閉じます。
+<DT><FONT COLOR="red">return (CString)ptr;</FONT>
+<DD>データをCString型にキャストして、関数を終了します。
+</DL>
+今回は結構乱雑になってしまいましたが、分かっていただけたでしょうか？これからいろんなソフトを作られると思いますが、そのときの参考になればいいなぁと思っております。
+<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0" WIDTH="100%">
+  <TR>
+    <TD WIDTH="100%" BGCOLOR="#000099">
+    <FONT COLOR="#ffffff" SIZE="+1">8．便利関数を作ってしまいましょう。</FONT></TD> 
+  </TR>
+</TABLE>
+クリップボードをある程度いじれる関数を2つ追加しましたが、「ボタン(ツールバー)を押してタグ挿入」を行うわけですから、各ボタンごとその動作の関数を作らなくてはなりません。しかし実際には挿入すべきタグを変えれば、関数の使いまわしができますよね。例えば&lt;B&gt;&lt;/B&gt;を挿入するのだったら
+<!-- センターテーブル（始め） -->
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<BIG><FONT COLOR="red">太字タグを挿入する関数(面倒くさい例)</FONT></BIG><BR>
+void	CMyHtmlView::OnButtonBold{<BR>
+	<FONT COLOR="green">/* (1) */</FONT><BR>
+	CString strData;<FONT COLOR="green">//選択された文字列(タグで挟まれる文字列)</FONT><BR>
+	CString strTag;<FONT COLOR="green">//タグを挟んだあとの文字列</FONT><BR>
+	CEdit& cEdt = GetEditCtrl();<FONT COLOR="green">//CEditへのポインタを取得</FONT><BR>
+	cEdt.Copy();<FONT COLOR="green">//クリップボードへ選択された文字列をコピー</FONT><BR>
+	strSel = GetClipBoard();<FONT COLOR="green">//クリップボードからデータを取得</FONT><BR>
+	strTag = "&lt;B&gt;" + strData + "&lt;/B&gt;";<BR>
+	<FONT COLOR="green">/* (2) */</FONT><BR>
+	SetClipBoard(strTag);<FONT COLOR="green">//クリップボードにタグを挟んだあとも文字列を挿入</FONT><BR>
+	OnEditPaste();<FONT COLOR="green">//クリップボードのデータを貼り付け</FONT><BR>
+}<BR>
+</TABLE>
+<!-- センターテーブル（終わり） -->
+なことをやるのではなくて、
+<!-- センターテーブル（始め） -->
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<BIG><FONT COLOR="red">太字タグを挿入する関数(スマートな例)</FONT></BIG><BR>
+void	CMyHtmlView::OnButtonBold{<BR>
+	CString strTag = MakeTag("&lt;B&gt;","&lt;/B&gt;");<FONT COLOR="green">//上の(1)の部分 </FONT><BR>
+	PasteString(strTag);<FONT COLOR="green">//上の(2)の部分 </FONT><BR>
+}<BR>
+</TABLE>
+<!-- センターテーブル（終わり） -->
+としてあげた方が賢いというわけですね。<BR>CMyHtmlViewに以下の関数を追加してみましょう。
+<!-- センターテーブル（始め） -->
+<TABLE BORDER ALIGN="CENTER">
+<TR><TD BGCOLOR="white">
+<BIG><FONT COLOR="red"></FONT></BIG><BR>
+<FONT COLOR="green">// 文字列のペースト</FONT><BR>
+void CMyHtmlView::PasteString(CString str){<BR>
+	SetClipBoard(str);<BR>
+	OnEditPaste();<BR>
+}<BR>
+<BR>
+<FONT COLOR="green">// タグの作成</FONT><BR>
+CString CMyHtmlView::MakeTag(CString strTagA,CString strTagB){<BR>
+	CString strSel,strTag;<BR>
+	CEdit& cEdt = GetEditCtrl();<BR>
+	cEdt.Copy();<BR>
+	strSel = GetClipBoard();<BR>
+	strTag = strTagA + strSel + strTagB;<BR>
+	return strTag;<BR>
+}<BR>
+</TABLE>
+<!-- センターテーブル（終わり） -->
+これらは、先ほどの面倒くさい方のコードを関数化しただけですから説明は割愛させてもらいます。今回は4つのメンバ関数を追加しましたが、これらはHTMLエディタの柱になりますので、バグがないようにしておきましょう。
+
+<BR><BR>
+<A HREF="proc4.html">[Next]</A><BR>
+<A HREF="proc2.html">[Previous]</A><BR>
+<A HREF="../index.html">[Home]</A><BR>
+</BODY>
+</HTML>
